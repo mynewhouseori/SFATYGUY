@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Safety Field App</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+          <div class="brand-row">
+          <div class="brand-mark">
+            <img src="logo01.jpeg" alt="OL Safety logo" />
+          </div>
+          <div>
+            <p class="eyebrow">SAFETY FIELD CONTROL</p>
+            <h1>מערכת בטיחות לאתרי בנייה</h1>
+          </div>
+        </div>
+
+        <div class="topbar-actions">
+          <div class="lang-switch" aria-label="Language switcher">
+            <button class="chip is-active">עבר</button>
+            <button class="chip">EN</button>
+            <button class="chip">عرب</button>
+          </div>
+
+          <div class="system-state">
+            <span class="status-dot"></span>
+            <span>Sync Ready</span>
+          </div>
+        </div>
+      </header>
+
+      <main class="phone-frame">
+        <section class="app-view is-active" data-view="home">
+          <section class="hero-card">
+          <div>
+            <p class="section-label">דשבורד יומי</p>
+            <h2>שליטה מלאה למהנדס, למנהל העבודה ולממונה הבטיחות</h2>
+            <p class="hero-copy">
+              תיעוד ביקורות, ליקויים קריטיים, טיפול מיידי והפקת דוח מקצועי מתוך
+              הטלפון.
+            </p>
+          </div>
+
+          <div class="hero-summary">
+            <div class="summary-pill summary-pill-critical">
+              <strong>03</strong>
+              <span>ליקויים קריטיים</span>
+            </div>
+            <div class="summary-pill summary-pill-warning">
+              <strong>12</strong>
+              <span>בטיפול</span>
+            </div>
+            <div class="summary-pill summary-pill-ok">
+              <strong>41</strong>
+              <span>סעיפים תקינים</span>
+            </div>
+          </div>
+          </section>
+
+          <section class="grid-two">
+          <article class="panel-card">
+            <div class="panel-head">
+              <div>
+                <p class="section-label">תפקיד פעיל</p>
+                <h3>תצוגה לפי משתמש</h3>
+              </div>
+              <span class="panel-meta">Role Based</span>
+            </div>
+
+            <div class="role-switch" id="roleSwitch">
+              <button class="role-chip is-active" data-role="engineer">מהנדס</button>
+              <button class="role-chip" data-role="manager">מנהל עבודה</button>
+              <button class="role-chip" data-role="safety">ממונה בטיחות</button>
+            </div>
+
+            <div class="role-copy" id="roleCopy">
+              למהנדס מוצגת תמונת מצב רוחבית, אתרים בסיכון, חתימות ואישור סופי של
+              דוחות.
+            </div>
+          </article>
+
+          <article class="panel-card">
+            <div class="panel-head">
+              <div>
+                <p class="section-label">סטטוס מערכת</p>
+                <h3>מנוע שטח בזמן אמת</h3>
+              </div>
+              <span class="panel-meta">Live</span>
+            </div>
+
+            <div class="system-grid">
+              <div class="mini-state">
+                <span class="state-title">Firebase</span>
+                <strong>Connected</strong>
+              </div>
+              <div class="mini-state">
+                <span class="state-title">Offline Cache</span>
+                <strong>Enabled</strong>
+              </div>
+              <div class="mini-state">
+                <span class="state-title">GPS</span>
+                <strong>Active</strong>
+              </div>
+              <div class="mini-state">
+                <span class="state-title">PDF Engine</span>
+                <strong>Ready</strong>
+              </div>
+            </div>
+          </article>
+          </section>
+
+          <section class="panel-card">
+          <div class="panel-head">
+            <div>
+              <p class="section-label">אתרים פעילים</p>
+              <h3>מעקב פרויקטים</h3>
+            </div>
+            <button class="text-button">בדיקה חדשה</button>
+          </div>
+
+          <div class="site-list">
+            <article class="site-card">
+              <div class="site-header">
+                <div>
+                  <h4>מגדלי החוף, נתניה</h4>
+                  <p>קבלן ראשי: אור בנייה</p>
+                </div>
+                <span class="site-badge danger">סיכון גבוה</span>
+              </div>
+              <div class="site-metrics">
+                <span>6 ליקויים פתוחים</span>
+                <span>2 קריטיים</span>
+                <span>עודכן לפני 12 דק'</span>
+              </div>
+            </article>
+
+            <article class="site-card">
+              <div class="site-header">
+                <div>
+                  <h4>שכונת נווה גן, פתח תקווה</h4>
+                  <p>קבלן ראשי: שקד פרויקטים</p>
+                </div>
+                <span class="site-badge warning">דורש מעקב</span>
+              </div>
+              <div class="site-metrics">
+                <span>4 ליקויים פתוחים</span>
+                <span>0 קריטיים</span>
+                <span>עודכן לפני 38 דק'</span>
+              </div>
+            </article>
+
+            <article class="site-card">
+              <div class="site-header">
+                <div>
+                  <h4>מרכז מסחרי דרום, אשדוד</h4>
+                  <p>קבלן ראשי: תשתיות 2000</p>
+                </div>
+                <span class="site-badge ok">תקין</span>
+              </div>
+              <div class="site-metrics">
+                <span>1 ליקוי פתוח</span>
+                <span>0 קריטיים</span>
+                <span>עודכן לפני שעה</span>
+              </div>
+            </article>
+          </div>
+          </section>
+
+          <section class="grid-two">
+          <article class="panel-card inspection-card">
+            <div class="panel-head">
+              <div>
+                <p class="section-label">בדיקה פעילה</p>
+                <h3>צ'קליסט בטיחות</h3>
+              </div>
+              <span class="panel-meta">Inspection</span>
+            </div>
+
+            <div class="checklist" id="checklist">
+              <div class="check-item" data-state="ok">
+                <div>
+                  <strong>ציוד מגן אישי</strong>
+                  <p>קסדה, נעלי בטיחות, אפוד, משקפי מגן</p>
+                </div>
+                <button class="state-button">תקין</button>
+              </div>
+
+              <div class="check-item" data-state="warning">
+                <div>
+                  <strong>פיגומים ועבודה בגובה</strong>
+                  <p>נדרש חיזוק במפלס 4 ובדיקת רתמות</p>
+                </div>
+                <button class="state-button">בטיפול</button>
+              </div>
+
+              <div class="check-item" data-state="danger">
+                <div>
+                  <strong>לוחות חשמל זמניים</strong>
+                  <p>נמצא כבל פתוח סמוך למעבר עובדים</p>
+                </div>
+                <button class="state-button">קריטי</button>
+              </div>
+
+              <div class="check-item" data-state="muted">
+                <div>
+                  <strong>עבודות חפירה</strong>
+                  <p>לא רלוונטי לביקור זה</p>
+                </div>
+                <button class="state-button">לא רלוונטי</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="panel-card issue-card">
+            <div class="panel-head">
+              <div>
+                <p class="section-label">ליקוי נבחר</p>
+                <h3>כרטיס טיפול</h3>
+              </div>
+              <span class="panel-meta">Action</span>
+            </div>
+
+            <div class="issue-preview">
+              <div class="issue-photo">
+                <span>PHOTO</span>
+              </div>
+              <div class="issue-body">
+                <span class="site-badge danger">קריטי</span>
+                <h4>כבל חשמל לא מוגן באזור מעבר</h4>
+                <p>
+                  מיקום: קומת קרקע, מעבר צפוני. נדרשת הפסקת עבודה מיידית עד
+                  גידור והחלפת הכבל.
+                </p>
+                <div class="issue-tags">
+                  <span>אחראי: מנהל עבודה</span>
+                  <span>יעד: מיידי</span>
+                  <span>חתימה דיגיטלית</span>
+                </div>
+              </div>
+            </div>
+          </article>
+          </section>
+
+          <section class="panel-card">
+          <div class="panel-head">
+            <div>
+              <p class="section-label">מדדי ניהול</p>
+              <h3>לוח בקרה תפעולי</h3>
+            </div>
+            <span class="panel-meta">Today</span>
+          </div>
+
+          <div class="analytics-grid">
+            <div class="analytics-card">
+              <strong>8</strong>
+              <span>בדיקות שבוצעו היום</span>
+            </div>
+            <div class="analytics-card">
+              <strong>19</strong>
+              <span>ליקויים פתוחים</span>
+            </div>
+            <div class="analytics-card">
+              <strong>5</strong>
+              <span>ממתינים לאישור מהנדס</span>
+            </div>
+            <div class="analytics-card">
+              <strong>92%</strong>
+              <span>עמידה בצ'קליסט השבועי</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="app-view" data-view="inspections">
+          <section class="panel-card">
+            <div class="panel-head">
+              <div>
+                <p class="section-label">בדיקה חדשה</p>
+                <h3>פתיחת ביקורת באתר</h3>
+              </div>
+              <span class="panel-meta">Field Form</span>
+            </div>
+
+            <div class="form-grid">
+              <label class="field">
+                <span>שם האתר</span>
+                <input type="text" value="מגדלי החוף, נתניה" />
+              </label>
+              <label class="field">
+                <span>קבלן ראשי</span>
+                <input type="text" value="אור בנייה" />
+              </label>
+              <label class="field">
+                <span>מנהל עבודה</span>
+                <input type="text" value="איתן לוי" />
+              </label>
+              <label class="field">
+                <span>בודק</span>
+                <input type="text" value="דניאל כהן" />
+              </label>
+              <label class="field">
+                <span>תאריך ביקורת</span>
+                <input type="text" value="17.04.2026" />
+              </label>
+              <label class="field">
+                <span>סוג ביקורת</span>
+                <select>
+                  <option>יומית</option>
+                  <option>שבועית</option>
+                  <option>חודשית</option>
+                </select>
+              </label>
+            </div>
+          </section>
+
+          <section class="grid-two">
+            <article class="panel-card">
+              <div class="panel-head">
+                <div>
+                  <p class="section-label">קטגוריות</p>
+                  <h3>סעיפי בדיקה</h3>
+                </div>
+                <button class="text-button">הוסף סעיף</button>
+              </div>
+
+              <div class="stack-list">
+                <div class="stack-row">
+                  <strong>ציוד מגן אישי</strong>
+                  <span class="site-badge ok">4/4 תקין</span>
+                </div>
+                <div class="stack-row">
+                  <strong>עבודה בגובה</strong>
+                  <span class="site-badge warning">2 ליקויים</span>
+                </div>
+                <div class="stack-row">
+                  <strong>פיגומים</strong>
+                  <span class="site-badge warning">1 ליקוי</span>
+                </div>
+                <div class="stack-row">
+                  <strong>חשמל זמני</strong>
+                  <span class="site-badge danger">קריטי</span>
+                </div>
+                <div class="stack-row">
+                  <strong>סדר וניקיון</strong>
+                  <span class="site-badge ok">תקין</span>
+                </div>
+              </div>
+            </article>
+
+            <article class="panel-card">
+              <div class="panel-head">
+                <div>
+                  <p class="section-label">תיעוד</p>
+                  <h3>מדיה וחתימות</h3>
+                </div>
+                <span class="panel-meta">Ready</span>
+              </div>
+
+              <div class="media-grid">
+                <div class="media-box">צילום ליקוי</div>
+                <div class="media-box">הערה קולית</div>
+                <div class="media-box">GPS</div>
+                <div class="media-box">חתימה</div>
+              </div>
+            </article>
+          </section>
+        </section>
+
+        <section class="app-view" data-view="issues">
+          <section class="panel-card">
+            <div class="panel-head">
+              <div>
+                <p class="section-label">מרכז ליקויים</p>
+                <h3>ליקויים פתוחים לפי חומרה</h3>
+              </div>
+              <span class="panel-meta">19 Open</span>
+            </div>
+
+            <div class="issue-list">
+              <article class="issue-row">
+                <div>
+                  <span class="site-badge danger">קריטי</span>
+                  <h4>כבל חשמל לא מוגן</h4>
+                  <p>מגדלי החוף, קומת קרקע, מעבר צפוני</p>
+                </div>
+                <div class="issue-side">
+                  <span>אחראי: איתן לוי</span>
+                  <span>יעד: מיידי</span>
+                </div>
+              </article>
+
+              <article class="issue-row">
+                <div>
+                  <span class="site-badge warning">בטיפול</span>
+                  <h4>מעקה חסר בקצה קומה 4</h4>
+                  <p>מגדלי החוף, חזית מערבית</p>
+                </div>
+                <div class="issue-side">
+                  <span>אחראי: קבלן פיגומים</span>
+                  <span>יעד: היום 15:00</span>
+                </div>
+              </article>
+
+              <article class="issue-row">
+                <div>
+                  <span class="site-badge warning">בטיפול</span>
+                  <h4>פסולת בניין במעבר עובדים</h4>
+                  <p>נווה גן, כניסה דרומית</p>
+                </div>
+                <div class="issue-side">
+                  <span>אחראי: צוות לוגיסטיקה</span>
+                  <span>יעד: היום</span>
+                </div>
+              </article>
+            </div>
+          </section>
+        </section>
+
+        <section class="app-view" data-view="reports">
+          <section class="grid-two">
+            <article class="panel-card">
+              <div class="panel-head">
+                <div>
+                  <p class="section-label">דוח סופי</p>
+                  <h3>תצוגת PDF ממותגת</h3>
+                </div>
+                <button class="text-button">הפק PDF</button>
+              </div>
+
+              <div class="report-sheet">
+                <div class="report-sheet-head">
+                  <strong>דוח בטיחות יומי</strong>
+                  <span>17.04.2026</span>
+                </div>
+                <div class="report-line"><span>אתר</span><strong>מגדלי החוף, נתניה</strong></div>
+                <div class="report-line"><span>בודק</span><strong>דניאל כהן</strong></div>
+                <div class="report-line"><span>סטטוס כללי</span><strong>טעון טיפול מיידי</strong></div>
+                <div class="report-line"><span>ליקויים קריטיים</span><strong>1</strong></div>
+                <div class="report-line"><span>ליקויים פתוחים</span><strong>6</strong></div>
+                <div class="report-note">
+                  עבודה באזור מעבר צפוני הופסקה עד החלפת כבל והצבת גידור תקני.
+                </div>
+              </div>
+            </article>
+
+            <article class="panel-card">
+              <div class="panel-head">
+                <div>
+                  <p class="section-label">היסטוריה</p>
+                  <h3>דוחות אחרונים</h3>
+                </div>
+                <span class="panel-meta">Archive</span>
+              </div>
+
+              <div class="stack-list">
+                <div class="stack-row">
+                  <strong>מגדלי החוף - יומית</strong>
+                  <span>17.04.2026</span>
+                </div>
+                <div class="stack-row">
+                  <strong>נווה גן - שבועית</strong>
+                  <span>16.04.2026</span>
+                </div>
+                <div class="stack-row">
+                  <strong>מרכז מסחרי דרום - יומית</strong>
+                  <span>16.04.2026</span>
+                </div>
+              </div>
+            </article>
+          </section>
+        </section>
+
+        <section class="app-view" data-view="more">
+          <section class="grid-two">
+            <article class="panel-card">
+              <div class="panel-head">
+                <div>
+                  <p class="section-label">הגדרות</p>
+                  <h3>תצורת מערכת</h3>
+                </div>
+                <span class="panel-meta">Admin</span>
+              </div>
+
+              <div class="stack-list">
+                <div class="stack-row">
+                  <strong>מיתוג חברה</strong>
+                  <span>לוגו + צבעים</span>
+                </div>
+                <div class="stack-row">
+                  <strong>ניהול משתמשים</strong>
+                  <span>3 תפקידים</span>
+                </div>
+                <div class="stack-row">
+                  <strong>שפות</strong>
+                  <span>עברית / EN / عرب</span>
+                </div>
+                <div class="stack-row">
+                  <strong>סנכרון</strong>
+                  <span>אוטומטי</span>
+                </div>
+              </div>
+            </article>
+
+            <article class="panel-card">
+              <div class="panel-head">
+                <div>
+                  <p class="section-label">הטמעה</p>
+                  <h3>שלבים להמשך</h3>
+                </div>
+                <span class="panel-meta">Roadmap</span>
+              </div>
+
+              <div class="stack-list">
+                <div class="stack-row">
+                  <strong>1. חיבור למסד נתונים</strong>
+                  <span>Firebase / Supabase</span>
+                </div>
+                <div class="stack-row">
+                  <strong>2. התחברות משתמשים</strong>
+                  <span>תפקידים והרשאות</span>
+                </div>
+                <div class="stack-row">
+                  <strong>3. העלאת תמונות וחתימות</strong>
+                  <span>Storage</span>
+                </div>
+                <div class="stack-row">
+                  <strong>4. הפקת PDF אמיתי</strong>
+                  <span>מותאם לקוח</span>
+                </div>
+              </div>
+            </article>
+          </section>
+        </section>
+
+        <nav class="bottom-nav">
+          <button class="nav-item is-active" data-view-target="home">בית</button>
+          <button class="nav-item" data-view-target="inspections">בדיקות</button>
+          <button class="nav-item" data-view-target="issues">ליקויים</button>
+          <button class="nav-item" data-view-target="reports">דוחות</button>
+          <button class="nav-item" data-view-target="more">עוד</button>
+        </nav>
+      </main>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
