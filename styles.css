@@ -254,7 +254,6 @@ input {
 }
 
 .personnel-summary,
-.worker-grid,
 .two-col-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
@@ -334,15 +333,45 @@ input {
   display: grid;
 }
 
+.worker-grid {
+  display: grid;
+  gap: 2px;
+  padding-top: 12px;
+}
+
+.worker-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.worker-line:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.worker-line span {
+  color: var(--text-soft);
+  font-size: 0.92rem;
+}
+
+.worker-line strong {
+  font-size: 0.98rem;
+  text-align: left;
+}
+
 .worker-tags {
   grid-template-columns: 1fr;
 }
 
 .worker-tags span {
-  padding: 10px 12px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--text);
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-soft);
   font-size: 0.92rem;
 }
 
@@ -350,6 +379,7 @@ input {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+  padding-top: 6px;
 }
 
 .status-chip {
@@ -465,7 +495,6 @@ input {
 
   .personnel-toolbar,
   .personnel-summary,
-  .worker-grid,
   .two-col-grid,
   .worker-head,
   .modal-head {
@@ -474,5 +503,13 @@ input {
 
   .worker-head-meta {
     justify-items: start;
+  }
+
+  .worker-line {
+    align-items: flex-start;
+  }
+
+  .worker-line strong {
+    text-align: right;
   }
 }
