@@ -23,24 +23,24 @@
       <section class="screen-panel">
         <div class="screen-overlay"></div>
 
-        <section class="screen-view is-active" id="loginView">
+        <section class="screen-view is-active" id="loginView" data-view="login">
           <div class="screen-card login-card">
             <p class="screen-eyebrow">SAFETY FIELD APP</p>
             <h1>אפליקציית בטיחות למנהל עבודה</h1>
             <p class="screen-copy">
-              כניסה מהירה לדיווחי שטח, ליקויים, כוח אדם ומסמכים ישירות מהנייד.
+              ניהול יומן יומי, כוח אדם, בטיחות, עיכובים ומסמכים מתוך הנייד.
             </p>
             <button class="primary-button" id="enterButton" type="button">כניסה</button>
           </div>
         </section>
 
-        <section class="screen-view" id="detailsView">
+        <section class="screen-view" id="detailsView" data-view="details">
           <form class="screen-card details-card" id="detailsForm">
             <div class="details-head">
               <p class="screen-eyebrow">פרטים כלליים</p>
               <h2>פתיחת יום עבודה</h2>
               <p class="screen-copy">
-                מלא פעם אחת את פרטי ברירת המחדל. התאריך ייבחר מחדש בכל כניסה.
+                מילוי מהיר של פרטי הדוח הבסיסיים. כל השדות כאן נשמרים כברירת מחדל.
               </p>
             </div>
 
@@ -49,7 +49,6 @@
                 <span>תאריך</span>
                 <input id="workDate" name="workDate" type="date" required />
               </label>
-
               <label class="field is-inline">
                 <span>שם מנהל העבודה</span>
                 <input
@@ -61,7 +60,6 @@
                   required
                 />
               </label>
-
               <label class="field is-inline">
                 <span>שם האתר</span>
                 <input
@@ -73,7 +71,6 @@
                   required
                 />
               </label>
-
               <label class="field is-inline">
                 <span>שם הקבלן הראשי</span>
                 <input
@@ -91,49 +88,140 @@
               הפרטים יישמרו כברירת מחדל למכשיר הזה. את התאריך תבחר מחדש בכל פעם.
             </p>
 
-            <button class="primary-button" id="continueButton" type="submit">המשך</button>
+            <button class="primary-button" id="continueButton" type="submit">המשך ליומן</button>
           </form>
         </section>
 
-        <section class="screen-view" id="personnelView">
-          <section class="screen-card personnel-card">
-            <div class="details-head">
-              <p class="screen-eyebrow">כוח אדם</p>
-              <h2>יומן העובדים להיום</h2>
-              <p class="screen-copy">
-                חיפוש מהיר, הוספת עובד מתוך המאגר או יצירת עובד חדש, כולל שעות עבודה
-                ומסמכים רלוונטיים.
-              </p>
+        <section class="screen-view" id="dashboardView" data-view="dashboard">
+          <section class="screen-card full-card">
+            <div class="toolbar">
+              <div>
+                <p class="screen-eyebrow">יומן יומי</p>
+                <h2>מרכז הדוח</h2>
+              </div>
+              <span class="status-chip ok">טיוטה</span>
+            </div>
+
+            <div class="hero-summary-grid">
+              <div class="summary-box">
+                <span>פרויקט</span>
+                <strong id="summarySite">מגדלי החוף</strong>
+              </div>
+              <div class="summary-box">
+                <span>מנהל עבודה</span>
+                <strong id="summaryManager">איתן לוי</strong>
+              </div>
+              <div class="summary-box">
+                <span>עובדים</span>
+                <strong>12</strong>
+              </div>
+              <div class="summary-box">
+                <span>ליקויים פתוחים</span>
+                <strong>3</strong>
+              </div>
+            </div>
+
+            <div class="module-list">
+              <button class="module-card" type="button" data-nav-target="reportMetaView">
+                <strong>1. פרטי דוח ואתר</strong>
+                <span>תאריך, סטטוס דוח, פרטי פרויקט, נוכחות הנהלה</span>
+              </button>
+              <button class="module-card" type="button" data-nav-target="personnelView">
+                <strong>2. כוח אדם וקבלני משנה</strong>
+                <span>נוכחות עובדים, קבלני משנה, מסמכים ושעות</span>
+              </button>
+              <button class="module-card" type="button" data-nav-target="worksView">
+                <strong>3. עבודות וכמויות</strong>
+                <span>מה תוכנן, מה בוצע, כמויות ואזורים</span>
+              </button>
+              <button class="module-card" type="button" data-nav-target="equipmentView">
+                <strong>4. ציוד וחומרים</strong>
+                <span>ציוד פעיל, תקינות, משלוחים, חוסרים ותעודות</span>
+              </button>
+              <button class="module-card" type="button" data-nav-target="safetyView">
+                <strong>5. בטיחות</strong>
+                <span>תדריך, ליקויים, אירועים, פעולות מתקנות</span>
+              </button>
+              <button class="module-card" type="button" data-nav-target="qualityView">
+                <strong>6. איכות ובקרה</strong>
+                <span>בדיקות, התאמות, NCR, אישורי המשך</span>
+              </button>
+              <button class="module-card" type="button" data-nav-target="visitsView">
+                <strong>7. ביקורים, עיכובים וחריגים</strong>
+                <span>מבקרים, עיכובים, מזג אוויר, החלטות בשטח</span>
+              </button>
+              <button class="module-card" type="button" data-nav-target="mediaView">
+                <strong>8. תמונות, מסמכים וחתימות</strong>
+                <span>קבצים, מדיה, תיוגים וחתימות דיגיטליות</span>
+              </button>
+              <button class="module-card" type="button" data-nav-target="summaryView">
+                <strong>9. סיכום יומי</strong>
+                <span>חישובים אוטומטיים, משימות להמשך ו־PDF</span>
+              </button>
+            </div>
+          </section>
+        </section>
+
+        <section class="screen-view" id="reportMetaView" data-view="reportMetaView">
+          <section class="screen-card full-card">
+            <div class="toolbar">
+              <button class="ghost-button" type="button" data-nav-target="dashboardView">חזרה</button>
+              <div>
+                <p class="screen-eyebrow">מסך 1</p>
+                <h2>פרטי דוח ואתר</h2>
+              </div>
+            </div>
+
+            <div class="field-grid">
+              <label class="field is-inline"><span>מספר דוח</span><input type="text" value="2026-0417-015" /></label>
+              <label class="field is-inline"><span>יום בשבוע</span><input type="text" value="שישי" /></label>
+              <label class="field is-inline"><span>שעת פתיחה</span><input type="text" value="06:35" /></label>
+              <label class="field is-inline"><span>שעת סגירה</span><input type="text" value="17:20" /></label>
+              <label class="field is-inline"><span>סטטוס דוח</span><input type="text" value="טיוטה" /></label>
+              <label class="field is-inline"><span>שם הפרויקט</span><input type="text" value="מגדלי החוף" /></label>
+              <label class="field is-inline"><span>כתובת מלאה</span><input type="text" value="שדרות החוף 18, נתניה" /></label>
+              <label class="field is-inline"><span>קוד פרויקט</span><input type="text" value="NTA-204" /></label>
+              <label class="field is-inline"><span>יזם</span><input type="text" value="חוף יזמות בעמ" /></label>
+              <label class="field is-inline"><span>שלב פרויקט</span><input type="text" value="שלד" /></label>
+              <label class="field is-inline"><span>מנהל עבודה נוכח</span><input type="text" value="כן" /></label>
+              <label class="field is-inline"><span>שעות נוכחות</span><input type="text" value="06:30-17:20" /></label>
+              <label class="field is-inline"><span>מחליף מוסמך</span><input type="text" value="לא נדרש" /></label>
+              <label class="field is-inline"><span>מהנדס אתר נוכח</span><input type="text" value="לא" /></label>
+              <label class="field is-inline"><span>מנהל פרויקט</span><input type="text" value="ביקר 09:30" /></label>
+              <label class="field is-inline"><span>ממונה בטיחות</span><input type="text" value="ביקר 11:00" /></label>
+            </div>
+          </section>
+        </section>
+
+        <section class="screen-view" id="personnelView" data-view="personnelView">
+          <section class="screen-card full-card">
+            <div class="toolbar">
+              <button class="ghost-button" type="button" data-nav-target="dashboardView">חזרה</button>
+              <div>
+                <p class="screen-eyebrow">מסך 2</p>
+                <h2>כוח אדם וקבלני משנה</h2>
+              </div>
             </div>
 
             <div class="personnel-toolbar">
               <label class="field field-search is-inline">
                 <span>חיפוש עובד</span>
-                <input
-                  id="workerSearch"
-                  name="workerSearch"
-                  type="text"
-                  placeholder="שם, תעודה מזהה או קבלן משנה"
-                />
+                <input id="workerSearch" name="workerSearch" type="text" placeholder="שם, תעודה מזהה או קבלן משנה" />
               </label>
-              <button class="primary-button add-worker-button" id="openWorkerModal" type="button">
-                + הוסף עובד
-              </button>
+              <button class="primary-button add-worker-button" id="openWorkerModal" type="button">+ הוסף עובד</button>
             </div>
 
             <div class="personnel-summary">
-              <div class="summary-box">
-                <span>נרשמו היום</span>
-                <strong>12</strong>
-              </div>
-              <div class="summary-box">
-                <span>חסרי מסמכים</span>
-                <strong>2</strong>
-              </div>
-              <div class="summary-box">
-                <span>פגי תוקף</span>
-                <strong>1</strong>
-              </div>
+              <div class="summary-box"><span>סה"כ עובדים</span><strong>12</strong></div>
+              <div class="summary-box"><span>קבלני משנה</span><strong>4</strong></div>
+              <div class="summary-box"><span>חדשים היום</span><strong>2</strong></div>
+              <div class="summary-box"><span>חסרי מסמכים</span><strong>2</strong></div>
+            </div>
+
+            <div class="section-note-list">
+              <div class="note-line"><span>חלוקה לפי מקצוע</span><strong>טפסנים 4, ברזלנים 3, מפעילים 2, חשמלאים 1, אחרים 2</strong></div>
+              <div class="note-line"><span>קבלני משנה פעילים</span><strong>אור פלדה, אלפא ביצוע, ציוד דרום, פיגום פלוס</strong></div>
+              <div class="note-line"><span>הערת כשירות</span><strong>2 עובדים חדשים, אחד ממתין לאישור גובה</strong></div>
             </div>
 
             <div class="worker-list">
@@ -198,37 +286,203 @@
                   </div>
                 </div>
               </article>
+            </div>
+          </section>
+        </section>
 
-              <article class="worker-card">
-                <button class="worker-head" type="button" data-worker-toggle>
-                  <div>
-                    <h3>מוחמד סאלח</h3>
-                    <p>מפעיל ציוד • ציוד דרום</p>
-                  </div>
-                  <div class="worker-head-meta">
-                    <span>06:45 - 17:00</span>
-                    <span class="status-chip danger">פג תוקף</span>
-                  </div>
-                </button>
-                <div class="worker-body">
-                  <div class="worker-grid">
-                    <div class="worker-line"><span>שעת התחלה</span><strong>06:45</strong></div>
-                    <div class="worker-line"><span>שעת סיום</span><strong>17:00</strong></div>
-                    <div class="worker-line"><span>סה"כ שעות</span><strong>10.25</strong></div>
-                    <div class="worker-line"><span>אזור עבודה</span><strong>חצר מנופים</strong></div>
-                  </div>
-                  <div class="worker-tags">
-                    <span>תדריך: בוצע</span>
-                    <span>סוג עבודה: ציוד מכני</span>
-                    <span>הערה: נדרש חידוש רישיון</span>
-                  </div>
-                  <div class="doc-row">
-                    <span class="status-chip ok">ת"ז</span>
-                    <span class="status-chip danger">רישיון מפעיל פג תוקף</span>
-                    <span class="status-chip ok">רישיון נהיגה</span>
-                  </div>
-                </div>
-              </article>
+        <section class="screen-view" id="worksView" data-view="worksView">
+          <section class="screen-card full-card">
+            <div class="toolbar">
+              <button class="ghost-button" type="button" data-nav-target="dashboardView">חזרה</button>
+              <div>
+                <p class="screen-eyebrow">מסך 3</p>
+                <h2>עבודות וכמויות</h2>
+              </div>
+            </div>
+
+            <div class="section-note-list">
+              <div class="note-line"><span>מה תוכנן</span><strong>יציקת קורות קומה 4, ברזל קירות, הכנת פתחים לחשמל</strong></div>
+              <div class="note-line"><span>מה בוצע בפועל</span><strong>בוצעה יציקה חלקית, הושלם ברזל, פתחים הוכנו מלא</strong></div>
+              <div class="note-line"><span>אחוז ביצוע יומי</span><strong>82%</strong></div>
+              <div class="note-line"><span>אזורים שלא עבדו בהם</span><strong>חזית צפונית, חסר טפסנות</strong></div>
+            </div>
+
+            <div class="compact-list">
+              <div class="compact-row"><span>בטון</span><strong>42 קוב</strong></div>
+              <div class="compact-row"><span>ברזל</span><strong>5.2 טון</strong></div>
+              <div class="compact-row"><span>בלוקים</span><strong>לא בוצע</strong></div>
+              <div class="compact-row"><span>חפירה / מילוי</span><strong>18 מ"ק מילוי</strong></div>
+              <div class="compact-row"><span>עבודה בגובה</span><strong>כן</strong></div>
+              <div class="compact-row"><span>הרמה</span><strong>כן, 4 מחזורים</strong></div>
+              <div class="compact-row"><span>ריתוך</span><strong>כן, אזור מערבי</strong></div>
+              <div class="compact-row"><span>חשמל חי</span><strong>לא</strong></div>
+            </div>
+          </section>
+        </section>
+
+        <section class="screen-view" id="equipmentView" data-view="equipmentView">
+          <section class="screen-card full-card">
+            <div class="toolbar">
+              <button class="ghost-button" type="button" data-nav-target="dashboardView">חזרה</button>
+              <div>
+                <p class="screen-eyebrow">מסך 4</p>
+                <h2>ציוד וחומרים</h2>
+              </div>
+            </div>
+
+            <div class="compact-list">
+              <div class="compact-row"><span>ציוד כבד פעיל</span><strong>עגורן, מלגזה, גנרטור</strong></div>
+              <div class="compact-row"><span>מספרי ציוד</span><strong>CR-15, FL-09, GN-03</strong></div>
+              <div class="compact-row"><span>מפעילים אחראים</span><strong>מוחמד סאלח, שלומי דדון</strong></div>
+              <div class="compact-row"><span>סטטוס תקינות</span><strong>עגורן תקין, מלגזה תקינה, גנרטור עם תקלה קלה</strong></div>
+              <div class="compact-row"><span>בדיקות בתוקף</span><strong>עגורן כן, מלגזה כן, אביזרי הרמה כן, גנרטור לבדיקה</strong></div>
+              <div class="compact-row"><span>פיגומים בשימוש</span><strong>קומות 3-4, צד מערבי</strong></div>
+              <div class="compact-row"><span>שילוט וגידור</span><strong>תקין חלקי, נוספו שלטי גישה</strong></div>
+              <div class="compact-row"><span>חומרים שסופקו</span><strong>בטון, ברזל, צנרת חשמל</strong></div>
+              <div class="compact-row"><span>ספקים</span><strong>רדימיקס, ברזל הצפון, כבליקס</strong></div>
+              <div class="compact-row"><span>חוסרים</span><strong>לוחות טפסנות לחזית צפונית</strong></div>
+              <div class="compact-row"><span>תעודות משלוח</span><strong>3 צורפו</strong></div>
+            </div>
+          </section>
+        </section>
+
+        <section class="screen-view" id="safetyView" data-view="safetyView">
+          <section class="screen-card full-card">
+            <div class="toolbar">
+              <button class="ghost-button" type="button" data-nav-target="dashboardView">חזרה</button>
+              <div>
+                <p class="screen-eyebrow">מסך 5</p>
+                <h2>בטיחות</h2>
+              </div>
+            </div>
+
+            <div class="section-note-list">
+              <div class="note-line"><span>תדריך בוקר</span><strong>בוצע בשעה 06:50, השתתפו כל ראשי הצוותים</strong></div>
+              <div class="note-line"><span>נושא תדריך</span><strong>עבודה בגובה, פתחים פתוחים, הרמה בחצר</strong></div>
+              <div class="note-line"><span>סיכונים עיקריים</span><strong>קצה פתוח קומה 4, עומסי הרמה, מעבר חשמל זמני</strong></div>
+            </div>
+
+            <div class="compact-list">
+              <div class="compact-row"><span>קסדות / נעליים / אפודים</span><strong>נבדק, תקין</strong></div>
+              <div class="compact-row"><span>רתמות ומשקפי מגן</span><strong>נבדק, הושלמו 2 רתמות</strong></div>
+              <div class="compact-row"><span>פיגומים</span><strong>נבדקו, דרוש חיזוק מקומי</strong></div>
+              <div class="compact-row"><span>פתחים וקצוות</span><strong>ליקוי אחד פתוח</strong></div>
+              <div class="compact-row"><span>לוחות חשמל</span><strong>נבדק, מעבר צפוני טופל</strong></div>
+              <div class="compact-row"><span>סדר וניקיון</span><strong>דורש תגבור באזור כניסה</strong></div>
+              <div class="compact-row"><span>ליקויי בטיחות</span><strong>3</strong></div>
+              <div class="compact-row"><span>אחראי לסגירה</span><strong>מנהל עבודה + קבלן פיגומים</strong></div>
+              <div class="compact-row"><span>אירוע בטיחות</span><strong>כמעט תאונה בהרמה, ללא נפגעים</strong></div>
+              <div class="compact-row"><span>דיווח חיצוני</span><strong>לא נדרש</strong></div>
+            </div>
+          </section>
+        </section>
+
+        <section class="screen-view" id="qualityView" data-view="qualityView">
+          <section class="screen-card full-card">
+            <div class="toolbar">
+              <button class="ghost-button" type="button" data-nav-target="dashboardView">חזרה</button>
+              <div>
+                <p class="screen-eyebrow">מסך 6</p>
+                <h2>איכות ובקרה</h2>
+              </div>
+            </div>
+
+            <div class="compact-list">
+              <div class="compact-row"><span>בדיקות איכות היום</span><strong>בדיקת ברזל לפני יציקה, בדיקת פתחים</strong></div>
+              <div class="compact-row"><span>לפני יציקה / אחרי יציקה</span><strong>לפני יציקה בוצע, אחרי יציקה ממתין</strong></div>
+              <div class="compact-row"><span>התאמה לתוכניות</span><strong>תקין למעט תיקון מקומי באזור מערבי</strong></div>
+              <div class="compact-row"><span>התאמה למפרטים</span><strong>אושר על ידי מפקח</strong></div>
+              <div class="compact-row"><span>ליקויים שהתגלו</span><strong>2 ליקויים</strong></div>
+              <div class="compact-row"><span>NCR / אי התאמה</span><strong>לא נפתח NCR</strong></div>
+              <div class="compact-row"><span>בדיקות מעבדה</span><strong>נלקחו קוביות בטון</strong></div>
+              <div class="compact-row"><span>אישורי יועצים</span><strong>יועץ קונסטרוקציה אישר להמשך</strong></div>
+              <div class="compact-row"><span>עבודות שנפסלו</span><strong>לא היו</strong></div>
+            </div>
+          </section>
+        </section>
+
+        <section class="screen-view" id="visitsView" data-view="visitsView">
+          <section class="screen-card full-card">
+            <div class="toolbar">
+              <button class="ghost-button" type="button" data-nav-target="dashboardView">חזרה</button>
+              <div>
+                <p class="screen-eyebrow">מסך 7</p>
+                <h2>ביקורים, עיכובים וחריגים</h2>
+              </div>
+            </div>
+
+            <div class="compact-list">
+              <div class="compact-row"><span>מבקרים באתר</span><strong>מנהל פרויקט, מפקח, ממונה בטיחות</strong></div>
+              <div class="compact-row"><span>ממצאים עיקריים</span><strong>שיפור גידור, חיזוק מעקה, אישור יציקה</strong></div>
+              <div class="compact-row"><span>האם היה עיכוב</span><strong>כן</strong></div>
+              <div class="compact-row"><span>סוג עיכוב</span><strong>מחסור בטפסנות + המתנת משאבה</strong></div>
+              <div class="compact-row"><span>משך העיכוב</span><strong>1:35 שעות</strong></div>
+              <div class="compact-row"><span>אזור מושפע</span><strong>חזית צפונית</strong></div>
+              <div class="compact-row"><span>השפעה על לוח זמנים</span><strong>דחיית יציקה משנית למחר</strong></div>
+              <div class="compact-row"><span>מזג אוויר</span><strong>שמש, רוח קלה, 28 מעלות</strong></div>
+              <div class="compact-row"><span>תנאי אתר</span><strong>יבש, גישה תקינה, ראות טובה</strong></div>
+              <div class="compact-row"><span>החלטות שהתקבלו</span><strong>תוספת צוות טפסנות מחר 07:00</strong></div>
+            </div>
+          </section>
+        </section>
+
+        <section class="screen-view" id="mediaView" data-view="mediaView">
+          <section class="screen-card full-card">
+            <div class="toolbar">
+              <button class="ghost-button" type="button" data-nav-target="dashboardView">חזרה</button>
+              <div>
+                <p class="screen-eyebrow">מסך 8</p>
+                <h2>תמונות, מסמכים וחתימות</h2>
+              </div>
+            </div>
+
+            <div class="compact-list">
+              <div class="compact-row"><span>תמונות יומיות</span><strong>14</strong></div>
+              <div class="compact-row"><span>סרטונים</span><strong>2</strong></div>
+              <div class="compact-row"><span>מסמכים מצורפים</span><strong>6</strong></div>
+              <div class="compact-row"><span>תוכניות רלוונטיות</span><strong>קומה 4, פרטי קורות</strong></div>
+              <div class="compact-row"><span>תיוגים</span><strong>בטיחות, איכות, ביצוע, חריג</strong></div>
+              <div class="compact-row"><span>חתימת מנהל עבודה</span><strong>מוכן לחתימה</strong></div>
+              <div class="compact-row"><span>חתימת מפקח</span><strong>לא נדרש היום</strong></div>
+              <div class="compact-row"><span>חותמת זמן</span><strong>17:20</strong></div>
+            </div>
+
+            <div class="action-grid">
+              <button class="ghost-button" type="button">צלם תמונה</button>
+              <button class="ghost-button" type="button">צרף מסמך</button>
+              <button class="ghost-button" type="button">חתום דיגיטלית</button>
+            </div>
+          </section>
+        </section>
+
+        <section class="screen-view" id="summaryView" data-view="summaryView">
+          <section class="screen-card full-card">
+            <div class="toolbar">
+              <button class="ghost-button" type="button" data-nav-target="dashboardView">חזרה</button>
+              <div>
+                <p class="screen-eyebrow">מסך 9</p>
+                <h2>סיכום יומי אוטומטי</h2>
+              </div>
+            </div>
+
+            <div class="hero-summary-grid">
+              <div class="summary-box"><span>סך עובדים באתר</span><strong>12</strong></div>
+              <div class="summary-box"><span>שעות עיכוב</span><strong>1:35</strong></div>
+              <div class="summary-box"><span>ליקויים פתוחים</span><strong>3</strong></div>
+              <div class="summary-box"><span>משימות למחר</span><strong>5</strong></div>
+            </div>
+
+            <div class="section-note-list">
+              <div class="note-line"><span>התראות</span><strong>אין חתימה, עובד אחד ללא אישור גובה, גנרטור לבדיקה</strong></div>
+              <div class="note-line"><span>משימות להמשך</span><strong>סגירת מעקה, חיזוק פיגום, השלמת טפסנות צפונית</strong></div>
+              <div class="note-line"><span>אחראים</span><strong>מנהל עבודה, קבלן פיגומים, מנהל לוגיסטיקה</strong></div>
+              <div class="note-line"><span>PDF חתום</span><strong>מוכן להפקה</strong></div>
+            </div>
+
+            <div class="action-grid">
+              <button class="primary-button action-fill" type="button">הפק PDF יומי</button>
+              <button class="ghost-button" type="button">שלח למפקח</button>
+              <button class="ghost-button" type="button">שמור כטיוטה</button>
             </div>
           </section>
         </section>
@@ -254,31 +508,13 @@
         </div>
 
         <div class="field-grid">
-          <label class="field is-inline">
-            <span>שם מלא</span>
-            <input type="text" placeholder="עבור עובד חדש" />
-          </label>
-          <label class="field is-inline">
-            <span>ת"ז</span>
-            <input type="text" placeholder="מספר מזהה" />
-          </label>
-          <label class="field is-inline">
-            <span>טלפון</span>
-            <input type="text" placeholder="050-0000000" />
-          </label>
-          <label class="field is-inline">
-            <span>חברה / קבלן משנה</span>
-            <input type="text" placeholder="שם חברה" />
-          </label>
+          <label class="field is-inline"><span>שם מלא</span><input type="text" placeholder="עבור עובד חדש" /></label>
+          <label class="field is-inline"><span>ת"ז</span><input type="text" placeholder="מספר מזהה" /></label>
+          <label class="field is-inline"><span>טלפון</span><input type="text" placeholder="050-0000000" /></label>
+          <label class="field is-inline"><span>חברה / קבלן משנה</span><input type="text" placeholder="שם חברה" /></label>
           <div class="two-col-grid">
-            <label class="field is-inline">
-              <span>שעת התחלה</span>
-              <input type="text" value="07:00" />
-            </label>
-            <label class="field is-inline">
-              <span>שעת סיום</span>
-              <input type="text" value="16:00" />
-            </label>
+            <label class="field is-inline"><span>שעת התחלה</span><input type="text" value="07:00" /></label>
+            <label class="field is-inline"><span>שעת סיום</span><input type="text" value="16:00" /></label>
           </div>
         </div>
 
