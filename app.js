@@ -1,11 +1,95 @@
+const STORAGE_KEY = "safety-field-general-defaults";
+
 const enterButton = document.getElementById("enterButton");
+const continueButton = document.getElementById("continueButton");
+const detailsForm = document.getElementById("detailsForm");
+const loginView = document.getElementById("loginView");
+const detailsView = document.getElementById("detailsView");
+const formNote = document.getElementById("formNote");
 
-if (enterButton) {
-  enterButton.addEventListener("click", () => {
-    enterButton.classList.add("is-pressed");
+const fields = {
+  workDate: document.getElementById("workDate"),
+  managerName: document.getElementById("managerName"),
+  siteName: document.getElementById("siteName"),
+  contractorName: document.getElementById("contractorName"),
+};
 
-    window.setTimeout(() => {
-      enterButton.classList.remove("is-pressed");
-    }, 180);
-  });
+function animateButton(button) {
+  button.classList.add("is-pressed");
+
+  window.setTimeout(() => {
+    button.classList.remove("is-pressed");
+  }, 180);
 }
+
+function getTodayValue() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+function loadDefaults() {
+  try {
+    const stored = window.localStorage.getItem(STORAGE_KEY);
+    return stored ? JSON.parse(stored) : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveDefaults() {
+  const defaults = {
+    managerName: fields.managerName.value.trim(),
+    siteName: fields.siteName.value.trim(),
+    contractorName: fields.contractorName.value.trim(),
+  };
+
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(defaults));
+}
+
+function populateForm() {
+  const defaults = loadDefaults();
+
+  fields.managerName.value = defaults.managerName ?? "";
+  fields.siteName.value = defaults.siteName ?? "";
+  fields.contractorName.value = defaults.contractorName ?? "";
+  fields.workDate.value = getTodayValue();
+}
+
+function showDetailsView() {
+  loginView.classList.remove("is-active");
+  detailsView.classList.add("is-active");
+  fields.workDate.focus();
+}
+
+function resetErrorState() {
+  formNote.classList.remove("is-error");
+  formNote.textContent = "הפרטים יישמרו כברירת מחדל למכשיר הזה. את התאריך תבחר מחדש בכל פעם.";
+}
+
+enterButton.addEventListener("click", () => {
+  animateButton(enterButton);
+  populateForm();
+
+  window.setTimeout(() => {
+    showDetailsView();
+  }, 160);
+});
+
+detailsForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  resetErrorState();
+
+  if (!detailsForm.reportValidity()) {
+    formNote.classList.add("is-error");
+    formNote.textContent = "יש למלא את כל שדות החובה לפני שממשיכים.";
+    return;
+  }
+
+  animateButton(continueButton);
+  saveDefaults();
+  formNote.textContent = "הפרטים נשמרו כברירת מחדל. אפשר להמשיך לשלב הבא.";
+});

@@ -13,23 +13,87 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <main class="login-screen">
-      <header class="login-header">
+    <main class="app-shell">
+      <header class="app-header">
         <a class="brand-mark" href="#" aria-label="דף הבית של האפליקציה">
           <img src="logo01.jpeg" alt="לוגו OL Safety" />
         </a>
       </header>
 
-      <section class="login-hero">
-        <div class="login-overlay"></div>
-        <div class="login-card">
-          <p class="login-eyebrow">SAFETY FIELD APP</p>
-          <h1>אפליקציית בטיחות למנהל העבודה</h1>
-          <p>
-            כניסה מהירה לדיווחי שטח, ליקויים ודוחות ישירות מהנייד.
-          </p>
-          <button class="enter-button" id="enterButton" type="button">כניסה</button>
-        </div>
+      <section class="screen-panel">
+        <div class="screen-overlay"></div>
+
+        <section class="screen-view is-active" id="loginView">
+          <div class="screen-card login-card">
+            <p class="screen-eyebrow">SAFETY FIELD APP</p>
+            <h1>אפליקציית בטיחות למנהל העבודה</h1>
+            <p class="screen-copy">
+              כניסה מהירה לדיווחי שטח, ליקויים ודוחות ישירות מהנייד.
+            </p>
+            <button class="primary-button" id="enterButton" type="button">כניסה</button>
+          </div>
+        </section>
+
+        <section class="screen-view" id="detailsView">
+          <form class="screen-card details-card" id="detailsForm">
+            <div class="details-head">
+              <p class="screen-eyebrow">פרטים כלליים</p>
+              <h2>פתיחת יום עבודה</h2>
+              <p class="screen-copy">
+                מלא פעם אחת את פרטי ברירת המחדל. התאריך ייבחר מחדש בכל כניסה.
+              </p>
+            </div>
+
+            <div class="field-grid">
+              <label class="field">
+                <span>תאריך</span>
+                <input id="workDate" name="workDate" type="date" required />
+              </label>
+
+              <label class="field">
+                <span>שם מנהל העבודה</span>
+                <input
+                  id="managerName"
+                  name="managerName"
+                  type="text"
+                  placeholder="הקלד שם מנהל העבודה"
+                  autocomplete="name"
+                  required
+                />
+              </label>
+
+              <label class="field">
+                <span>שם האתר</span>
+                <input
+                  id="siteName"
+                  name="siteName"
+                  type="text"
+                  placeholder="הקלד את שם האתר"
+                  autocomplete="organization"
+                  required
+                />
+              </label>
+
+              <label class="field">
+                <span>שם הקבלן הראשי</span>
+                <input
+                  id="contractorName"
+                  name="contractorName"
+                  type="text"
+                  placeholder="הקלד את שם הקבלן הראשי"
+                  autocomplete="organization"
+                  required
+                />
+              </label>
+            </div>
+
+            <p class="form-note" id="formNote">
+              הפרטים יישמרו כברירת מחדל למכשיר הזה. את התאריך תבחר מחדש בכל פעם.
+            </p>
+
+            <button class="primary-button" id="continueButton" type="submit">המשך</button>
+          </form>
+        </section>
       </section>
     </main>
 
