@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>כניסה לאפליקציית בטיחות</title>
+    <title>אפליקציית בטיחות למנהל עבודה</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -26,9 +26,9 @@
         <section class="screen-view is-active" id="loginView">
           <div class="screen-card login-card">
             <p class="screen-eyebrow">SAFETY FIELD APP</p>
-            <h1>אפליקציית בטיחות למנהל העבודה</h1>
+            <h1>אפליקציית בטיחות למנהל עבודה</h1>
             <p class="screen-copy">
-              כניסה מהירה לדיווחי שטח, ליקויים ודוחות ישירות מהנייד.
+              כניסה מהירה לדיווחי שטח, ליקויים, כוח אדם ומסמכים ישירות מהנייד.
             </p>
             <button class="primary-button" id="enterButton" type="button">כניסה</button>
           </div>
@@ -94,8 +94,244 @@
             <button class="primary-button" id="continueButton" type="submit">המשך</button>
           </form>
         </section>
+
+        <section class="screen-view" id="personnelView">
+          <section class="screen-card personnel-card">
+            <div class="details-head">
+              <p class="screen-eyebrow">כוח אדם</p>
+              <h2>יומן העובדים להיום</h2>
+              <p class="screen-copy">
+                חיפוש מהיר, הוספת עובד מתוך המאגר או יצירת עובד חדש, כולל שעות עבודה
+                ומסמכים רלוונטיים.
+              </p>
+            </div>
+
+            <div class="personnel-toolbar">
+              <label class="field field-search">
+                <span>חיפוש עובד</span>
+                <input
+                  id="workerSearch"
+                  name="workerSearch"
+                  type="text"
+                  placeholder="שם, תעודה מזהה או קבלן משנה"
+                />
+              </label>
+              <button class="primary-button add-worker-button" id="openWorkerModal" type="button">
+                + הוסף עובד
+              </button>
+            </div>
+
+            <div class="personnel-summary">
+              <div class="summary-box">
+                <span>נרשמו היום</span>
+                <strong>12</strong>
+              </div>
+              <div class="summary-box">
+                <span>חסרי מסמכים</span>
+                <strong>2</strong>
+              </div>
+              <div class="summary-box">
+                <span>פגי תוקף</span>
+                <strong>1</strong>
+              </div>
+            </div>
+
+            <div class="worker-list">
+              <article class="worker-card">
+                <button class="worker-head" type="button" data-worker-toggle>
+                  <div>
+                    <h3>יוסי כהן</h3>
+                    <p>ברזלן • אור פלדה</p>
+                  </div>
+                  <div class="worker-head-meta">
+                    <span>07:00 - 16:30</span>
+                    <span class="status-chip ok">תקין</span>
+                  </div>
+                </button>
+                <div class="worker-body">
+                  <div class="worker-grid">
+                    <div class="summary-box">
+                      <span>התחלה</span>
+                      <strong>07:00</strong>
+                    </div>
+                    <div class="summary-box">
+                      <span>סיום</span>
+                      <strong>16:30</strong>
+                    </div>
+                    <div class="summary-box">
+                      <span>שעות</span>
+                      <strong>9.5</strong>
+                    </div>
+                    <div class="summary-box">
+                      <span>אזור</span>
+                      <strong>קומה 4</strong>
+                    </div>
+                  </div>
+                  <div class="worker-tags">
+                    <span>תדריך: בוצע</span>
+                    <span>סוג עבודה: ברזל</span>
+                    <span>הערה: צוות מלא</span>
+                  </div>
+                  <div class="doc-row">
+                    <span class="status-chip ok">ת"ז</span>
+                    <span class="status-chip ok">עבודה בגובה</span>
+                    <span class="status-chip ok">רישיון נהיגה</span>
+                  </div>
+                </div>
+              </article>
+
+              <article class="worker-card">
+                <button class="worker-head" type="button" data-worker-toggle>
+                  <div>
+                    <h3>אמיר לוי</h3>
+                    <p>טפסן • אלפא ביצוע</p>
+                  </div>
+                  <div class="worker-head-meta">
+                    <span>07:30 - 15:00</span>
+                    <span class="status-chip warning">חסר מסמך</span>
+                  </div>
+                </button>
+                <div class="worker-body">
+                  <div class="worker-grid">
+                    <div class="summary-box">
+                      <span>התחלה</span>
+                      <strong>07:30</strong>
+                    </div>
+                    <div class="summary-box">
+                      <span>סיום</span>
+                      <strong>15:00</strong>
+                    </div>
+                    <div class="summary-box">
+                      <span>שעות</span>
+                      <strong>7.5</strong>
+                    </div>
+                    <div class="summary-box">
+                      <span>אזור</span>
+                      <strong>חזית מערבית</strong>
+                    </div>
+                  </div>
+                  <div class="worker-tags">
+                    <span>תדריך: בוצע</span>
+                    <span>סוג עבודה: טפסנות</span>
+                    <span>הערה: ממתין לאישור גובה</span>
+                  </div>
+                  <div class="doc-row">
+                    <span class="status-chip ok">ת"ז</span>
+                    <span class="status-chip warning">אישור גובה חסר</span>
+                    <span class="status-chip muted">רישיון לא נדרש</span>
+                  </div>
+                </div>
+              </article>
+
+              <article class="worker-card">
+                <button class="worker-head" type="button" data-worker-toggle>
+                  <div>
+                    <h3>מוחמד סאלח</h3>
+                    <p>מפעיל ציוד • ציוד דרום</p>
+                  </div>
+                  <div class="worker-head-meta">
+                    <span>06:45 - 17:00</span>
+                    <span class="status-chip danger">פג תוקף</span>
+                  </div>
+                </button>
+                <div class="worker-body">
+                  <div class="worker-grid">
+                    <div class="summary-box">
+                      <span>התחלה</span>
+                      <strong>06:45</strong>
+                    </div>
+                    <div class="summary-box">
+                      <span>סיום</span>
+                      <strong>17:00</strong>
+                    </div>
+                    <div class="summary-box">
+                      <span>שעות</span>
+                      <strong>10.25</strong>
+                    </div>
+                    <div class="summary-box">
+                      <span>אזור</span>
+                      <strong>חצר מנופים</strong>
+                    </div>
+                  </div>
+                  <div class="worker-tags">
+                    <span>תדריך: בוצע</span>
+                    <span>סוג עבודה: ציוד מכני</span>
+                    <span>הערה: נדרש חידוש רישיון</span>
+                  </div>
+                  <div class="doc-row">
+                    <span class="status-chip ok">ת"ז</span>
+                    <span class="status-chip danger">רישיון מפעיל פג תוקף</span>
+                    <span class="status-chip ok">רישיון נהיגה</span>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </section>
+        </section>
       </section>
     </main>
+
+    <div class="modal-backdrop" id="workerModal">
+      <section class="screen-card modal-card">
+        <div class="details-head modal-head">
+          <div>
+            <p class="screen-eyebrow">הוספת עובד</p>
+            <h2>מהמאגר או עובד חדש</h2>
+          </div>
+          <button class="ghost-button" id="closeWorkerModal" type="button">סגור</button>
+        </div>
+
+        <div class="modal-section">
+          <p class="screen-copy">בחירה מהירה מהמאגר</p>
+          <div class="quick-pick-list">
+            <button class="quick-pick" type="button">שלומי דדון • אלפא ביצוע</button>
+            <button class="quick-pick" type="button">ראמי חטיב • ציוד דרום</button>
+          </div>
+        </div>
+
+        <div class="field-grid">
+          <label class="field">
+            <span>שם מלא</span>
+            <input type="text" placeholder="עבור עובד חדש" />
+          </label>
+          <label class="field">
+            <span>ת"ז</span>
+            <input type="text" placeholder="מספר מזהה" />
+          </label>
+          <label class="field">
+            <span>טלפון</span>
+            <input type="text" placeholder="050-0000000" />
+          </label>
+          <label class="field">
+            <span>חברה / קבלן משנה</span>
+            <input type="text" placeholder="שם חברה" />
+          </label>
+          <div class="two-col-grid">
+            <label class="field">
+              <span>שעת התחלה</span>
+              <input type="text" value="07:00" />
+            </label>
+            <label class="field">
+              <span>שעת סיום</span>
+              <input type="text" value="16:00" />
+            </label>
+          </div>
+        </div>
+
+        <div class="modal-section">
+          <p class="screen-copy">מסמכים ואישורים</p>
+          <div class="doc-row">
+            <span class="status-chip ok">ת"ז</span>
+            <span class="status-chip warning">עבודה בגובה</span>
+            <span class="status-chip muted">רישיון נהיגה</span>
+          </div>
+          <div class="two-col-grid media-actions">
+            <button class="ghost-button" type="button">צלם מסמך</button>
+            <button class="ghost-button" type="button">העלה מהגלריה</button>
+          </div>
+        </div>
+      </section>
+    </div>
 
     <script src="app.js"></script>
   </body>

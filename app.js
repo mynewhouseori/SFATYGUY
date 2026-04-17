@@ -5,7 +5,11 @@ const continueButton = document.getElementById("continueButton");
 const detailsForm = document.getElementById("detailsForm");
 const loginView = document.getElementById("loginView");
 const detailsView = document.getElementById("detailsView");
+const personnelView = document.getElementById("personnelView");
 const formNote = document.getElementById("formNote");
+const workerModal = document.getElementById("workerModal");
+const openWorkerModal = document.getElementById("openWorkerModal");
+const closeWorkerModal = document.getElementById("closeWorkerModal");
 
 const fields = {
   workDate: document.getElementById("workDate"),
@@ -65,9 +69,15 @@ function showDetailsView() {
   fields.workDate.focus();
 }
 
+function showPersonnelView() {
+  detailsView.classList.remove("is-active");
+  personnelView.classList.add("is-active");
+}
+
 function resetErrorState() {
   formNote.classList.remove("is-error");
-  formNote.textContent = "הפרטים יישמרו כברירת מחדל למכשיר הזה. את התאריך תבחר מחדש בכל פעם.";
+  formNote.textContent =
+    "הפרטים יישמרו כברירת מחדל למכשיר הזה. את התאריך תבחר מחדש בכל פעם.";
 }
 
 enterButton.addEventListener("click", () => {
@@ -92,4 +102,28 @@ detailsForm.addEventListener("submit", (event) => {
   animateButton(continueButton);
   saveDefaults();
   formNote.textContent = "הפרטים נשמרו כברירת מחדל. אפשר להמשיך לשלב הבא.";
+
+  window.setTimeout(() => {
+    showPersonnelView();
+  }, 160);
+});
+
+document.querySelectorAll("[data-worker-toggle]").forEach((button) => {
+  button.addEventListener("click", () => {
+    button.closest(".worker-card")?.classList.toggle("is-open");
+  });
+});
+
+openWorkerModal?.addEventListener("click", () => {
+  workerModal?.classList.add("is-open");
+});
+
+closeWorkerModal?.addEventListener("click", () => {
+  workerModal?.classList.remove("is-open");
+});
+
+workerModal?.addEventListener("click", (event) => {
+  if (event.target === workerModal) {
+    workerModal.classList.remove("is-open");
+  }
 });
