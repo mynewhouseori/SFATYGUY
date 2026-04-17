@@ -116,14 +116,17 @@ document.querySelectorAll("[data-worker-toggle]").forEach((button) => {
 
 openWorkerModal?.addEventListener("click", () => {
   workerModal?.classList.add("is-open");
+  document.body.style.overflow = "hidden";
 });
 
 closeWorkerModal?.addEventListener("click", () => {
   workerModal?.classList.remove("is-open");
+  document.body.style.overflow = "";
 });
 
 workerModal?.addEventListener("click", (event) => {
   if (event.target === workerModal) {
     workerModal.classList.remove("is-open");
+    document.body.style.overflow = "";
   }
 });
