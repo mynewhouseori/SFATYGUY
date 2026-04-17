@@ -183,6 +183,16 @@ input {
   font-weight: 500;
 }
 
+.field.is-inline {
+  grid-template-columns: 110px 1fr;
+  align-items: center;
+  gap: 10px;
+}
+
+.field.is-inline span {
+  margin: 0;
+}
+
 .field input {
   width: 100%;
   border: 1px solid rgba(255, 255, 255, 0.16);
@@ -340,11 +350,11 @@ input {
 }
 
 .worker-line {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 110px 1fr;
   align-items: center;
-  gap: 12px;
-  padding: 10px 0;
+  gap: 10px;
+  padding: 8px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
@@ -360,7 +370,7 @@ input {
 
 .worker-line strong {
   font-size: 0.98rem;
-  text-align: left;
+  text-align: right;
 }
 
 .worker-tags {
@@ -506,10 +516,16 @@ input {
   }
 
   .worker-line {
+    grid-template-columns: 92px 1fr;
     align-items: flex-start;
   }
 
   .worker-line strong {
     text-align: right;
+  }
+
+  .field.is-inline {
+    grid-template-columns: 92px 1fr;
+    align-items: center;
   }
 }
