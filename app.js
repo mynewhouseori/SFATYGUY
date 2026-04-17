@@ -1,31 +1,3 @@
-const roleCopy = {
-  engineer:
-    "למהנדס מוצגת תמונת מצב רוחבית, אתרים בסיכון, חתימות ואישור סופי של דוחות.",
-  manager:
-    "למנהל העבודה מוצגים ליקויים פתוחים, אחראים לביצוע, מועדי יעד וטיפול מיידי בשטח.",
-  safety:
-    "לממונה הבטיחות מוצג צ'קליסט מלא, תיעוד תמונות, חומרת ליקוי וסגירת אירוע לאחר תיקון.",
-};
-
-const roleSwitch = document.getElementById("roleSwitch");
-const roleCopyNode = document.getElementById("roleCopy");
-
-roleSwitch?.addEventListener("click", (event) => {
-  const button = event.target.closest("[data-role]");
-
-  if (!button) {
-    return;
-  }
-
-  const nextRole = button.dataset.role;
-
-  roleSwitch.querySelectorAll(".role-chip").forEach((chip) => {
-    chip.classList.toggle("is-active", chip === button);
-  });
-
-  roleCopyNode.textContent = roleCopy[nextRole];
-});
-
 const stateCycle = {
   ok: { next: "warning", label: "בטיפול" },
   warning: { next: "danger", label: "קריטי" },

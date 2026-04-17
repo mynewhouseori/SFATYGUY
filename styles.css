@@ -97,15 +97,13 @@ button {
   gap: 12px;
 }
 
-.lang-switch,
-.role-switch {
+.lang-switch {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
 }
 
 .chip,
-.role-chip,
 .text-button,
 .nav-item,
 .state-button {
@@ -119,7 +117,6 @@ button {
 }
 
 .chip.is-active,
-.role-chip.is-active,
 .nav-item.is-active,
 .text-button:hover {
   background: var(--brand);
