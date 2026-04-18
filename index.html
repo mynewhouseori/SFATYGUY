@@ -37,9 +37,18 @@
 
         <section class="screen-view" id="detailsView" data-view="details">
           <form class="screen-card details-card" id="detailsForm">
+            <div class="toolbar">
+              <div class="toolbar-actions">
+                <button class="ghost-button" type="button" data-nav-target="loginView">עמוד פתיחה</button>
+              </div>
+              <div>
+                <p class="screen-eyebrow">ניווט</p>
+                <h2>פתיחת יום עבודה</h2>
+              </div>
+            </div>
+
             <div class="details-head">
               <p class="screen-eyebrow">פרטים כלליים</p>
-              <h2>פתיחת יום עבודה</h2>
               <p class="screen-copy">
                 מילוי מהיר של פרטי הדוח הבסיסיים. כל השדות כאן נשמרים כברירת מחדל.
               </p>
@@ -96,10 +105,16 @@
         <section class="screen-view" id="dashboardView" data-view="dashboard">
           <section class="screen-card full-card">
             <div class="toolbar">
+              <div class="toolbar-actions">
+                <button class="ghost-button" type="button" data-nav-target="detailsView">פתיחת יום עבודה</button>
+              </div>
               <div>
                 <p class="screen-eyebrow">יומן יומי</p>
                 <h2>מרכז הדוח</h2>
               </div>
+            </div>
+
+            <div class="dashboard-topline">
               <span class="status-chip ok">טיוטה</span>
             </div>
 

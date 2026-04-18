@@ -175,6 +175,12 @@ input {
   flex-wrap: wrap;
 }
 
+.dashboard-topline {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 16px;
+}
+
 .field-grid,
 .personnel-toolbar,
 .personnel-summary,
