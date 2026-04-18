@@ -460,8 +460,8 @@ input {
 }
 
 .status-chip.ok {
-  background: rgba(72, 191, 122, 0.16);
-  color: #c8ffd5;
+  background: rgba(180, 239, 198, 0.28);
+  color: #e6ffe9;
 }
 
 .status-chip.warning {
