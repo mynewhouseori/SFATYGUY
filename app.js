@@ -14,6 +14,7 @@ const fields = {
   siteName: document.getElementById("siteName"),
   contractorName: document.getElementById("contractorName"),
 };
+const reportNumberField = document.getElementById("reportNumber");
 
 const views = Array.from(document.querySelectorAll(".screen-view"));
 const navButtons = Array.from(document.querySelectorAll("[data-nav-target]"));
@@ -29,6 +30,15 @@ function getTodayValue() {
   const month = String(now.getMonth() + 1).padStart(2, "0");
   const day = String(now.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
+}
+
+function formatReportNumber(dateValue) {
+  if (!dateValue) {
+    return "00000000-001";
+  }
+
+  const [year, month, day] = dateValue.split("-");
+  return `${day}${month}${year}-001`;
 }
 
 function loadDefaults() {
@@ -52,10 +62,15 @@ function saveDefaults() {
 
 function populateForm() {
   const defaults = loadDefaults();
+  const todayValue = getTodayValue();
   fields.managerName.value = defaults.managerName ?? "";
   fields.siteName.value = defaults.siteName ?? "";
   fields.contractorName.value = defaults.contractorName ?? "";
-  fields.workDate.value = getTodayValue();
+  fields.workDate.value = todayValue;
+
+  if (reportNumberField) {
+    reportNumberField.value = formatReportNumber(todayValue);
+  }
 }
 
 function navigateTo(viewId) {
@@ -91,6 +106,12 @@ detailsForm.addEventListener("submit", (event) => {
   formNote.textContent = "הפרטים נשמרו. אפשר להמשיך למילוי היומן.";
 
   window.setTimeout(() => navigateTo("dashboardView"), 180);
+});
+
+fields.workDate?.addEventListener("change", () => {
+  if (reportNumberField) {
+    reportNumberField.value = formatReportNumber(fields.workDate.value);
+  }
 });
 
 navButtons.forEach((button) => {
