@@ -225,6 +225,16 @@ input {
   backdrop-filter: blur(6px);
 }
 
+.field-display strong {
+  display: block;
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 18px;
+  padding: 14px 16px;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.05);
+}
+
 .field input::placeholder {
   color: rgba(248, 244, 235, 0.44);
 }

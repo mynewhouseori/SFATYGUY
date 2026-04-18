@@ -15,6 +15,7 @@ const fields = {
   contractorName: document.getElementById("contractorName"),
 };
 const reportNumberField = document.getElementById("reportNumber");
+const reportWeekdayField = document.getElementById("reportWeekday");
 
 const views = Array.from(document.querySelectorAll(".screen-view"));
 const navButtons = Array.from(document.querySelectorAll("[data-nav-target]"));
@@ -39,6 +40,16 @@ function formatReportNumber(dateValue) {
 
   const [year, month, day] = dateValue.split("-");
   return `${day}${month}${year}-001`;
+}
+
+function formatWeekday(dateValue) {
+  if (!dateValue) {
+    return "";
+  }
+
+  const [year, month, day] = dateValue.split("-").map(Number);
+  const date = new Date(year, month - 1, day);
+  return new Intl.DateTimeFormat("he-IL", { weekday: "long" }).format(date);
 }
 
 function loadDefaults() {
@@ -70,6 +81,9 @@ function populateForm() {
 
   if (reportNumberField) {
     reportNumberField.value = formatReportNumber(todayValue);
+  }
+  if (reportWeekdayField) {
+    reportWeekdayField.textContent = formatWeekday(todayValue);
   }
 }
 
@@ -111,6 +125,9 @@ detailsForm.addEventListener("submit", (event) => {
 fields.workDate?.addEventListener("change", () => {
   if (reportNumberField) {
     reportNumberField.value = formatReportNumber(fields.workDate.value);
+  }
+  if (reportWeekdayField) {
+    reportWeekdayField.textContent = formatWeekday(fields.workDate.value);
   }
 });
 
