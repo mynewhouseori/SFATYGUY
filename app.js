@@ -15,9 +15,6 @@ const fields = {
   contractorName: document.getElementById("contractorName"),
 };
 
-const summaryManager = document.getElementById("summaryManager");
-const summarySite = document.getElementById("summarySite");
-
 const views = Array.from(document.querySelectorAll(".screen-view"));
 const navButtons = Array.from(document.querySelectorAll("[data-nav-target]"));
 
@@ -67,11 +64,6 @@ function navigateTo(viewId) {
   });
 }
 
-function updateDashboardSummary() {
-  summaryManager.textContent = fields.managerName.value.trim() || "מנהל עבודה";
-  summarySite.textContent = fields.siteName.value.trim() || "אתר פעיל";
-}
-
 function resetErrorState() {
   formNote.classList.remove("is-error");
   formNote.textContent =
@@ -96,7 +88,6 @@ detailsForm.addEventListener("submit", (event) => {
 
   animateButton(continueButton);
   saveDefaults();
-  updateDashboardSummary();
   formNote.textContent = "הפרטים נשמרו. אפשר להמשיך למילוי היומן.";
 
   window.setTimeout(() => navigateTo("dashboardView"), 180);
