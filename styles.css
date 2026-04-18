@@ -169,6 +169,12 @@ input {
   margin-bottom: 18px;
 }
 
+.toolbar-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 .field-grid,
 .personnel-toolbar,
 .personnel-summary,
@@ -525,6 +531,10 @@ input {
   .action-grid,
   .worker-head {
     grid-template-columns: 1fr;
+  }
+
+  .toolbar-actions {
+    justify-content: flex-start;
   }
 
   .field.is-inline,
