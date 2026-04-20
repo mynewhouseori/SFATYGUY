@@ -149,6 +149,16 @@ document.querySelectorAll("[data-worker-toggle]").forEach((button) => {
   });
 });
 
+document.querySelectorAll(".choice-group").forEach((group) => {
+  group.querySelectorAll(".choice-chip").forEach((button) => {
+    button.addEventListener("click", () => {
+      group.querySelectorAll(".choice-chip").forEach((chip) => {
+        chip.classList.toggle("is-selected", chip === button);
+      });
+    });
+  });
+});
+
 openWorkerModal?.addEventListener("click", () => {
   workerModal?.classList.add("is-open");
   document.body.style.overflow = "hidden";
