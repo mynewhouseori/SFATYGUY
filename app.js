@@ -7,6 +7,9 @@ const formNote = document.getElementById("formNote");
 const workerModal = document.getElementById("workerModal");
 const openWorkerModal = document.getElementById("openWorkerModal");
 const closeWorkerModal = document.getElementById("closeWorkerModal");
+const reportStatusSelect = document.getElementById("reportStatusSelect");
+const reportStatusTrigger = document.getElementById("reportStatusTrigger");
+const reportStatusMenu = document.getElementById("reportStatusMenu");
 
 const fields = {
   workDate: document.getElementById("workDate"),
@@ -160,5 +163,29 @@ workerModal?.addEventListener("click", (event) => {
   if (event.target === workerModal) {
     workerModal.classList.remove("is-open");
     document.body.style.overflow = "";
+  }
+});
+
+reportStatusTrigger?.addEventListener("click", () => {
+  const isOpen = reportStatusSelect?.classList.toggle("is-open");
+  reportStatusTrigger.setAttribute("aria-expanded", isOpen ? "true" : "false");
+});
+
+reportStatusMenu?.querySelectorAll("[data-value]").forEach((button) => {
+  button.addEventListener("click", () => {
+    const value = button.getAttribute("data-value") ?? "";
+    reportStatusTrigger.textContent = value;
+    reportStatusMenu.querySelectorAll(".custom-select-option").forEach((option) => {
+      option.classList.toggle("is-selected", option === button);
+    });
+    reportStatusSelect?.classList.remove("is-open");
+    reportStatusTrigger.setAttribute("aria-expanded", "false");
+  });
+});
+
+document.addEventListener("click", (event) => {
+  if (!reportStatusSelect?.contains(event.target)) {
+    reportStatusSelect?.classList.remove("is-open");
+    reportStatusTrigger?.setAttribute("aria-expanded", "false");
   }
 });

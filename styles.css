@@ -30,8 +30,7 @@ body {
 
 a,
 button,
-input,
-select {
+input {
   font: inherit;
 }
 
@@ -232,8 +231,7 @@ select {
   gap: 10px;
 }
 
-.field input,
-.field select {
+.field input {
   width: 100%;
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 18px;
@@ -258,12 +256,13 @@ select {
 }
 
 .field input:focus-visible,
-.field select:focus-visible,
 .primary-button:focus-visible,
 .ghost-button:focus-visible,
 .worker-head:focus-visible,
 .quick-pick:focus-visible,
-.module-card:focus-visible {
+.module-card:focus-visible,
+.custom-select-trigger:focus-visible,
+.custom-select-option:focus-visible {
   outline: 2px solid rgba(255, 255, 255, 0.68);
   outline-offset: 3px;
 }
@@ -272,25 +271,56 @@ select {
   border-color: rgba(255, 178, 156, 0.8);
 }
 
-.field select {
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  background-image:
-    linear-gradient(45deg, transparent 50%, rgba(248, 244, 235, 0.9) 50%),
-    linear-gradient(135deg, rgba(248, 244, 235, 0.9) 50%, transparent 50%);
-  background-position:
-    calc(100% - 20px) calc(50% - 3px),
-    calc(100% - 14px) calc(50% - 3px);
-  background-size: 6px 6px, 6px 6px;
-  background-repeat: no-repeat;
-  padding-left: 16px;
-  padding-right: 16px;
+.custom-select {
+  position: relative;
 }
 
-.field select option {
-  color: #102026;
-  background: #f6f1e8;
+.custom-select-trigger {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 18px;
+  padding: 14px 16px;
+  color: var(--text);
+  background:
+    linear-gradient(45deg, transparent 50%, rgba(248, 244, 235, 0.9) 50%) calc(100% - 20px) calc(50% - 3px) / 6px 6px no-repeat,
+    linear-gradient(135deg, rgba(248, 244, 235, 0.9) 50%, transparent 50%) calc(100% - 14px) calc(50% - 3px) / 6px 6px no-repeat,
+    rgba(255, 255, 255, 0.08);
+  text-align: right;
+  backdrop-filter: blur(6px);
+}
+
+.custom-select-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  left: 0;
+  display: none;
+  z-index: 20;
+  padding: 8px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(16, 32, 38, 0.96);
+  box-shadow: var(--shadow);
+}
+
+.custom-select.is-open .custom-select-menu {
+  display: grid;
+  gap: 6px;
+}
+
+.custom-select-option {
+  width: 100%;
+  padding: 12px 14px;
+  border: 0;
+  border-radius: 14px;
+  color: var(--text);
+  background: transparent;
+  text-align: right;
+}
+
+.custom-select-option:hover,
+.custom-select-option.is-selected {
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .form-note {

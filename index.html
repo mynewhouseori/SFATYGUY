@@ -181,12 +181,17 @@
               <label class="field is-inline"><span>שעת סגירה</span><input type="text" value="17:20" /></label>
               <label class="field is-inline">
                 <span>סטטוס דוח</span>
-                <select id="reportStatus">
-                  <option selected>פתוח</option>
-                  <option>מוכן לחתימה</option>
-                  <option>חתום</option>
-                  <option>סגור</option>
-                </select>
+                <div class="custom-select" id="reportStatusSelect">
+                  <button class="custom-select-trigger" id="reportStatusTrigger" type="button" aria-expanded="false">
+                    פתוח
+                  </button>
+                  <div class="custom-select-menu" id="reportStatusMenu">
+                    <button class="custom-select-option is-selected" type="button" data-value="פתוח">פתוח</button>
+                    <button class="custom-select-option" type="button" data-value="מוכן לחתימה">מוכן לחתימה</button>
+                    <button class="custom-select-option" type="button" data-value="חתום">חתום</button>
+                    <button class="custom-select-option" type="button" data-value="סגור">סגור</button>
+                  </div>
+                </div>
               </label>
             </div>
 
