@@ -274,6 +274,23 @@ select {
 
 .field select {
   appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, rgba(248, 244, 235, 0.9) 50%),
+    linear-gradient(135deg, rgba(248, 244, 235, 0.9) 50%, transparent 50%);
+  background-position:
+    calc(100% - 20px) calc(50% - 3px),
+    calc(100% - 14px) calc(50% - 3px);
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.field select option {
+  color: #102026;
+  background: #f6f1e8;
 }
 
 .form-note {
