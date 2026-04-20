@@ -30,7 +30,8 @@ body {
 
 a,
 button,
-input {
+input,
+select {
   font: inherit;
 }
 
@@ -215,7 +216,8 @@ input {
   gap: 10px;
 }
 
-.field input {
+.field input,
+.field select {
   width: 100%;
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 18px;
@@ -240,6 +242,7 @@ input {
 }
 
 .field input:focus-visible,
+.field select:focus-visible,
 .primary-button:focus-visible,
 .ghost-button:focus-visible,
 .worker-head:focus-visible,
@@ -251,6 +254,10 @@ input {
 
 .field input:user-invalid {
   border-color: rgba(255, 178, 156, 0.8);
+}
+
+.field select {
+  appearance: none;
 }
 
 .form-note {
