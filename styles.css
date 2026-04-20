@@ -300,18 +300,38 @@ input {
 }
 
 .custom-select-trigger {
+  position: relative;
   width: 100%;
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 18px;
   padding: 14px 16px;
   color: var(--text);
-  background:
-    linear-gradient(45deg, transparent 50%, rgba(248, 244, 235, 0.9) 50%) 18px calc(50% - 3px) / 6px 6px no-repeat,
-    linear-gradient(135deg, rgba(248, 244, 235, 0.9) 50%, transparent 50%) 24px calc(50% - 3px) / 6px 6px no-repeat,
-    rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.08);
   text-align: right;
   backdrop-filter: blur(6px);
   padding-left: 34px;
+}
+
+.custom-select-trigger::before,
+.custom-select-trigger::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 7px;
+  height: 2px;
+  background: rgba(248, 244, 235, 0.9);
+  border-radius: 999px;
+  left: 16px;
+  transform-origin: center;
+}
+
+.custom-select-trigger::before {
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.custom-select-trigger::after {
+  left: 20px;
+  transform: translateY(-50%) rotate(-45deg);
 }
 
 .custom-select-menu {
