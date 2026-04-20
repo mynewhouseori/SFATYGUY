@@ -306,11 +306,12 @@ input {
   padding: 14px 16px;
   color: var(--text);
   background:
-    linear-gradient(45deg, transparent 50%, rgba(248, 244, 235, 0.9) 50%) calc(100% - 20px) calc(50% - 3px) / 6px 6px no-repeat,
-    linear-gradient(135deg, rgba(248, 244, 235, 0.9) 50%, transparent 50%) calc(100% - 14px) calc(50% - 3px) / 6px 6px no-repeat,
+    linear-gradient(45deg, transparent 50%, rgba(248, 244, 235, 0.9) 50%) 18px calc(50% - 3px) / 6px 6px no-repeat,
+    linear-gradient(135deg, rgba(248, 244, 235, 0.9) 50%, transparent 50%) 24px calc(50% - 3px) / 6px 6px no-repeat,
     rgba(255, 255, 255, 0.08);
   text-align: right;
   backdrop-filter: blur(6px);
+  padding-left: 34px;
 }
 
 .custom-select-menu {
