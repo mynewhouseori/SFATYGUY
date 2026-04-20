@@ -173,6 +173,27 @@ input {
   gap: 10px;
 }
 
+.choice-group {
+  display: inline-flex;
+  gap: 8px;
+  justify-content: flex-start;
+}
+
+.choice-chip {
+  min-width: 64px;
+  padding: 10px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.choice-chip.is-selected {
+  background: rgba(209, 138, 58, 0.22);
+  border-color: rgba(209, 138, 58, 0.55);
+  color: #fff2e4;
+}
+
 .toolbar {
   display: grid;
   grid-template-columns: auto 1fr;
