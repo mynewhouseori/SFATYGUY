@@ -162,6 +162,22 @@ select {
   margin-bottom: 18px;
 }
 
+.subsection-card {
+  margin-top: 18px;
+  padding: 16px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.subsection-head {
+  margin-bottom: 10px;
+}
+
+.compact-fields {
+  gap: 10px;
+}
+
 .toolbar {
   display: grid;
   grid-template-columns: auto 1fr;
