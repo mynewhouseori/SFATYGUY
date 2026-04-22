@@ -109,13 +109,28 @@ function populateForm() {
   fields.managerName.value = defaults.managerName ?? "";
   fields.siteName.value = defaults.siteName ?? "";
   fields.contractorName.value = defaults.contractorName ?? "";
-  fields.workDate.value = todayValue;
+  setWorkDateValue(fields.workDate.value || todayValue);
+}
+
+function setWorkDateValue(dateValue) {
+  if (!fields.workDate) {
+    return;
+  }
+
+  fields.workDate.value = dateValue;
+  updateReportDateDisplays();
+}
+
+function updateReportDateDisplays() {
+  if (!fields.workDate) {
+    return;
+  }
 
   if (reportNumberField) {
-    reportNumberField.textContent = formatReportNumber(todayValue);
+    reportNumberField.textContent = formatReportNumber(fields.workDate.value);
   }
   if (reportWeekdayField) {
-    reportWeekdayField.textContent = formatWeekday(todayValue);
+    reportWeekdayField.textContent = formatWeekday(fields.workDate.value);
   }
 }
 
@@ -155,22 +170,20 @@ detailsForm.addEventListener("submit", (event) => {
 });
 
 fields.workDate?.addEventListener("change", () => {
-  if (reportNumberField) {
-    reportNumberField.textContent = formatReportNumber(fields.workDate.value);
-  }
-  if (reportWeekdayField) {
-    reportWeekdayField.textContent = formatWeekday(fields.workDate.value);
-  }
+  updateReportDateDisplays();
 });
 
 fields.workDate?.addEventListener("input", () => {
-  if (reportNumberField) {
-    reportNumberField.textContent = formatReportNumber(fields.workDate.value);
-  }
-  if (reportWeekdayField) {
-    reportWeekdayField.textContent = formatWeekday(fields.workDate.value);
+  updateReportDateDisplays();
+});
+
+fields.workDate?.addEventListener("click", () => {
+  if (typeof fields.workDate.showPicker === "function") {
+    fields.workDate.showPicker();
   }
 });
+
+setWorkDateValue(getTodayValue());
 
 navButtons.forEach((button) => {
   button.addEventListener("click", () => {
