@@ -14,6 +14,7 @@ const workerSearch = document.getElementById("workerSearch");
 const workerSuggestions = document.getElementById("workerSuggestions");
 const selectedWorkerPanel = document.getElementById("selectedWorkerPanel");
 const workerList = document.querySelector(".worker-list");
+const workDateDisplay = document.getElementById("workDateDisplay");
 
 const workerDatabase = [
   { name: "יוסי כהן", id: "123456789", role: "ברזלן", contractor: "אור פלדה", status: "כבר ביומן היום" },
@@ -132,6 +133,9 @@ function updateReportDateDisplays() {
   if (reportWeekdayField) {
     reportWeekdayField.textContent = formatWeekday(fields.workDate.value);
   }
+  if (workDateDisplay) {
+    workDateDisplay.textContent = normalizeDateValue(fields.workDate.value) || "DDMMYYYY";
+  }
 }
 
 function navigateTo(viewId) {
@@ -181,6 +185,17 @@ fields.workDate?.addEventListener("click", () => {
   if (typeof fields.workDate.showPicker === "function") {
     fields.workDate.showPicker();
   }
+});
+
+workDateDisplay?.addEventListener("click", () => {
+  fields.workDate?.focus();
+
+  if (typeof fields.workDate?.showPicker === "function") {
+    fields.workDate.showPicker();
+    return;
+  }
+
+  fields.workDate?.click();
 });
 
 setWorkDateValue(getTodayValue());

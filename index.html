@@ -57,13 +57,17 @@
             <div class="field-grid">
               <label class="field is-inline">
                 <span>תאריך</span>
-                <input
-                  id="workDate"
-                  name="workDate"
-                  class="date-input"
-                  type="date"
-                  required
-                />
+                <div class="date-picker-wrap">
+                  <button class="date-display-button" id="workDateDisplay" type="button">DDMMYYYY</button>
+                  <input
+                    id="workDate"
+                    name="workDate"
+                    class="date-input"
+                    type="date"
+                    required
+                    aria-label="בחירת תאריך"
+                  />
+                </div>
               </label>
               <label class="field is-inline">
                 <span>שם מנהל העבודה</span>
