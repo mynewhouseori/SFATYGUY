@@ -189,8 +189,20 @@
                 <span>יום בשבוע</span>
                 <strong id="reportWeekday">שישי</strong>
               </div>
-              <label class="field is-inline"><span>שעת פתיחה</span><input type="time" value="06:35" /></label>
-              <label class="field is-inline"><span>שעת סגירה</span><input type="time" value="17:20" /></label>
+              <label class="field is-inline">
+                <span>שעת פתיחה</span>
+                <div class="custom-time" data-time-picker>
+                  <button class="custom-time-trigger" type="button" aria-expanded="false">06:35</button>
+                  <div class="custom-time-menu"></div>
+                </div>
+              </label>
+              <label class="field is-inline">
+                <span>שעת סגירה</span>
+                <div class="custom-time" data-time-picker>
+                  <button class="custom-time-trigger" type="button" aria-expanded="false">17:20</button>
+                  <div class="custom-time-menu"></div>
+                </div>
+              </label>
               <label class="field is-inline">
                 <span>סטטוס דוח</span>
                 <div class="custom-select" id="reportStatusSelect">

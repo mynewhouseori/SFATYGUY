@@ -12,6 +12,7 @@ const reportStatusTrigger = document.getElementById("reportStatusTrigger");
 const reportStatusMenu = document.getElementById("reportStatusMenu");
 const workerSearch = document.getElementById("workerSearch");
 const workerSuggestions = document.getElementById("workerSuggestions");
+const timePickers = Array.from(document.querySelectorAll("[data-time-picker]"));
 
 const workerDatabase = [
   { name: "יוסי כהן", id: "123456789", role: "ברזלן", contractor: "אור פלדה", status: "כבר ביומן היום" },
@@ -233,6 +234,13 @@ document.addEventListener("click", (event) => {
   if (!workerSuggestions?.contains(event.target) && event.target !== workerSearch) {
     workerSuggestions?.classList.remove("is-open");
   }
+
+  timePickers.forEach((picker) => {
+    if (!picker.contains(event.target)) {
+      picker.classList.remove("is-open");
+      picker.querySelector(".custom-time-trigger")?.setAttribute("aria-expanded", "false");
+    }
+  });
 });
 
 function renderWorkerSuggestions(query) {
@@ -290,4 +298,47 @@ function renderWorkerSuggestions(query) {
 
 workerSearch?.addEventListener("input", (event) => {
   renderWorkerSuggestions(event.target.value);
+});
+
+function buildTimeOptions() {
+  const options = [];
+
+  for (let hour = 0; hour < 24; hour += 1) {
+    for (const minute of [0, 15, 30, 45]) {
+      options.push(`${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`);
+    }
+  }
+
+  return options;
+}
+
+const timeOptions = buildTimeOptions();
+
+timePickers.forEach((picker) => {
+  const trigger = picker.querySelector(".custom-time-trigger");
+  const menu = picker.querySelector(".custom-time-menu");
+
+  if (!trigger || !menu) {
+    return;
+  }
+
+  menu.innerHTML = timeOptions
+    .map((time) => `<button class="custom-time-option" type="button" data-time="${time}">${time}</button>`)
+    .join("");
+
+  trigger.addEventListener("click", () => {
+    const isOpen = picker.classList.toggle("is-open");
+    trigger.setAttribute("aria-expanded", isOpen ? "true" : "false");
+  });
+
+  menu.querySelectorAll("[data-time]").forEach((button) => {
+    button.addEventListener("click", () => {
+      trigger.textContent = button.getAttribute("data-time") ?? "";
+      menu.querySelectorAll(".custom-time-option").forEach((option) => {
+        option.classList.toggle("is-selected", option === button);
+      });
+      picker.classList.remove("is-open");
+      trigger.setAttribute("aria-expanded", "false");
+    });
+  });
 });
