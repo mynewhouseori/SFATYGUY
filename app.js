@@ -355,15 +355,20 @@ function renderSelectedWorker(worker) {
           <input class="time-input" type="time" value="16:30" />
         </label>
         <label class="mini-field">
-          <span>מסמכים</span>
-          <select>
-            <option>תקין</option>
-            <option>חסר אישור עבודה בגובה</option>
-            <option>חסר רישיון נהיגה</option>
-            <option>נדרש צילום מסמך</option>
+          <span>סטטוס מסמכים</span>
+          <select data-worker-doc-status>
+            <option value="תקין">תקין</option>
+            <option value="חסר מסמך">חסר מסמך</option>
+            <option value="נדרש צילום">נדרש צילום</option>
+            <option value="לא רלוונטי">לא רלוונטי</option>
           </select>
         </label>
       </div>
+      <div class="doc-status-note" data-doc-status-note>
+        <span class="status-chip ok">מסמכים תקינים</span>
+        <strong>אפשר להוסיף את העובד ליומן היום.</strong>
+      </div>
+      <input class="sr-only" type="file" accept="image/*,.pdf" capture="environment" data-worker-doc-file />
       <div class="selected-worker-actions">
         <button class="ghost-button" type="button" data-scan-worker-doc>סרוק/צלם מסמך</button>
         <button class="primary-button" type="button" data-add-worker-today>הוסף ליומן היום</button>
@@ -371,22 +376,64 @@ function renderSelectedWorker(worker) {
     </article>
   `;
 
+  const docStatus = selectedWorkerPanel.querySelector("[data-worker-doc-status]");
+  const docNote = selectedWorkerPanel.querySelector("[data-doc-status-note]");
+  const docFile = selectedWorkerPanel.querySelector("[data-worker-doc-file]");
+
+  docStatus?.addEventListener("change", () => {
+    updateSelectedWorkerDocNote(docStatus.value, docNote);
+  });
+
+  docFile?.addEventListener("change", () => {
+    const fileName = docFile.files?.[0]?.name;
+
+    if (fileName) {
+      docStatus.value = "תקין";
+      docNote.innerHTML = `
+        <span class="status-chip ok">מסמך צורף</span>
+        <strong>${fileName}</strong>
+      `;
+    }
+  });
+
   selectedWorkerPanel.querySelector("[data-scan-worker-doc]")?.addEventListener("click", () => {
-    selectedWorkerPanel.querySelector(".mini-label").textContent = "מסמך יסרק בשלב הבא";
+    docFile?.click();
   });
 
   selectedWorkerPanel.querySelector("[data-add-worker-today]")?.addEventListener("click", () => {
-    addWorkerToToday(worker);
+    addWorkerToToday(worker, docStatus?.value ?? "תקין", docFile?.files?.[0]?.name ?? "");
     selectedWorkerPanel.classList.remove("is-open");
     selectedWorkerPanel.innerHTML = "";
     workerSearch.value = "";
   });
 }
 
-function addWorkerToToday(worker) {
+function updateSelectedWorkerDocNote(status, noteElement) {
+  if (!noteElement) {
+    return;
+  }
+
+  const states = {
+    "תקין": ["ok", "מסמכים תקינים", "אפשר להוסיף את העובד ליומן היום."],
+    "חסר מסמך": ["warning", "חסר מסמך", "יש לצלם/לצרף מסמך או לסמן לטיפול."],
+    "נדרש צילום": ["warning", "נדרש צילום", "לחץ על סרוק/צלם מסמך לפני ההוספה."],
+    "לא רלוונטי": ["muted", "לא רלוונטי", "אין מסמך נדרש לעבודה הזו היום."],
+  };
+  const [className, label, text] = states[status] ?? states["תקין"];
+
+  noteElement.innerHTML = `
+    <span class="status-chip ${className}">${label}</span>
+    <strong>${text}</strong>
+  `;
+}
+
+function addWorkerToToday(worker, docStatus = "תקין", docFileName = "") {
   if (!workerList) {
     return;
   }
+
+  const statusClass = docStatus === "תקין" ? "ok" : docStatus === "לא רלוונטי" ? "muted" : "warning";
+  const docText = docFileName || docStatus;
 
   const card = document.createElement("article");
   card.className = "worker-card is-open";
@@ -415,7 +462,7 @@ function addWorkerToToday(worker) {
       </div>
       <div class="doc-row">
         <span class="status-chip ok">ת"ז</span>
-        <span class="status-chip ok">מסמכים תקינים</span>
+        <span class="status-chip ${statusClass}">${docText}</span>
         <span class="status-chip muted">צילום לפי צורך</span>
       </div>
     </div>
