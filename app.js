@@ -10,6 +10,16 @@ const closeWorkerModal = document.getElementById("closeWorkerModal");
 const reportStatusSelect = document.getElementById("reportStatusSelect");
 const reportStatusTrigger = document.getElementById("reportStatusTrigger");
 const reportStatusMenu = document.getElementById("reportStatusMenu");
+const workerSearch = document.getElementById("workerSearch");
+const workerSuggestions = document.getElementById("workerSuggestions");
+
+const workerDatabase = [
+  { name: "יוסי כהן", id: "123456789", role: "ברזלן", contractor: "אור פלדה", status: "כבר ביומן היום" },
+  { name: "אמיר לוי", id: "234567891", role: "טפסן", contractor: "אלפא ביצוע", status: "כבר ביומן היום" },
+  { name: "מוחמד סאלח", id: "345678912", role: "מפעיל ציוד", contractor: "ציוד דרום", status: "במאגר" },
+  { name: "שלומי דדון", id: "456789123", role: "רתך", contractor: "אלפא ביצוע", status: "במאגר" },
+  { name: "ראמי חטיב", id: "567891234", role: "מפעיל ציוד", contractor: "ציוד דרום", status: "במאגר" },
+];
 
 const fields = {
   workDate: document.getElementById("workDate"),
@@ -198,4 +208,65 @@ document.addEventListener("click", (event) => {
     reportStatusSelect?.classList.remove("is-open");
     reportStatusTrigger?.setAttribute("aria-expanded", "false");
   }
+
+  if (!workerSuggestions?.contains(event.target) && event.target !== workerSearch) {
+    workerSuggestions?.classList.remove("is-open");
+  }
+});
+
+function renderWorkerSuggestions(query) {
+  if (!workerSuggestions) {
+    return;
+  }
+
+  const normalizedQuery = query.trim().toLowerCase();
+
+  if (!normalizedQuery) {
+    workerSuggestions.classList.remove("is-open");
+    workerSuggestions.innerHTML = "";
+    return;
+  }
+
+  const matches = workerDatabase.filter((worker) => {
+    const haystack = `${worker.name} ${worker.id} ${worker.role} ${worker.contractor}`.toLowerCase();
+    return haystack.includes(normalizedQuery);
+  });
+
+  workerSuggestions.classList.add("is-open");
+
+  if (matches.length === 0) {
+    workerSuggestions.innerHTML = `
+      <div class="suggestion-empty">
+        <span>לא נמצא עובד מתאים</span>
+        <button class="ghost-button" type="button" id="openWorkerModalFromSearch">+ הוסף עובד חדש</button>
+      </div>
+    `;
+    document.getElementById("openWorkerModalFromSearch")?.addEventListener("click", () => {
+      workerModal?.classList.add("is-open");
+      document.body.style.overflow = "hidden";
+    });
+    return;
+  }
+
+  workerSuggestions.innerHTML = matches
+    .map(
+      (worker) => `
+        <button class="suggestion-item" type="button" data-worker-name="${worker.name}">
+          <strong>${worker.name}</strong>
+          <span>${worker.role} • ${worker.contractor} • ${worker.status}</span>
+        </button>
+      `
+    )
+    .join("");
+
+  workerSuggestions.querySelectorAll(".suggestion-item").forEach((button) => {
+    button.addEventListener("click", () => {
+      workerSearch.value = button.getAttribute("data-worker-name") ?? "";
+      workerSuggestions.classList.remove("is-open");
+    });
+  });
+}
+
+workerSearch?.addEventListener("input", (event) => {
+  renderWorkerSuggestions(event.target.value);
 });
