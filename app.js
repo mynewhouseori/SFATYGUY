@@ -44,7 +44,7 @@ function getTodayValue() {
   const year = now.getFullYear();
   const month = String(now.getMonth() + 1).padStart(2, "0");
   const day = String(now.getDate()).padStart(2, "0");
-  return `${day}${month}${year}`;
+  return `${year}-${month}-${day}`;
 }
 
 function formatReportNumber(dateValue) {
@@ -72,7 +72,14 @@ function formatWeekday(dateValue) {
 }
 
 function normalizeDateValue(dateValue) {
-  const digitsOnly = (dateValue ?? "").replace(/\D/g, "");
+  const value = dateValue ?? "";
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    const [year, month, day] = value.split("-");
+    return `${day}${month}${year}`;
+  }
+
+  const digitsOnly = value.replace(/\D/g, "");
   return digitsOnly.length === 8 ? digitsOnly : "";
 }
 
@@ -156,8 +163,6 @@ fields.workDate?.addEventListener("change", () => {
 });
 
 fields.workDate?.addEventListener("input", () => {
-  fields.workDate.value = fields.workDate.value.replace(/\D/g, "").slice(0, 8);
-
   if (reportNumberField) {
     reportNumberField.textContent = formatReportNumber(fields.workDate.value);
   }
