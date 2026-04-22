@@ -295,6 +295,12 @@ input {
   color: rgba(248, 244, 235, 0.44);
 }
 
+.field input.has-worker-match {
+  border-color: rgba(216, 148, 51, 0.56);
+  background: rgba(255, 255, 255, 0.14);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
 .field input:focus-visible,
 .primary-button:focus-visible,
 .ghost-button:focus-visible,

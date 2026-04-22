@@ -237,6 +237,7 @@ document.addEventListener("click", (event) => {
 
   if (!workerSuggestions?.contains(event.target) && event.target !== workerSearch) {
     workerSuggestions?.classList.remove("is-open");
+    workerSearch?.classList.remove("has-worker-match");
   }
 
 });
@@ -251,6 +252,7 @@ function renderWorkerSuggestions(query) {
   if (!normalizedQuery) {
     workerSuggestions.classList.remove("is-open");
     workerSuggestions.innerHTML = "";
+    workerSearch?.classList.remove("has-worker-match");
     return;
   }
 
@@ -259,6 +261,7 @@ function renderWorkerSuggestions(query) {
   );
 
   workerSuggestions.classList.add("is-open");
+  workerSearch?.classList.toggle("has-worker-match", matches.length > 0);
 
   if (matches.length === 0) {
     workerSuggestions.innerHTML = `
@@ -288,6 +291,7 @@ function renderWorkerSuggestions(query) {
   workerSuggestions.querySelectorAll(".suggestion-item").forEach((button) => {
     button.addEventListener("click", () => {
       workerSearch.value = button.getAttribute("data-worker-name") ?? "";
+      workerSearch.classList.remove("has-worker-match");
       workerSuggestions.classList.remove("is-open");
     });
   });
