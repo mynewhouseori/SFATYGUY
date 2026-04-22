@@ -265,6 +265,27 @@ input {
   text-align: center;
 }
 
+.time-display-button {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 18px;
+  padding: 12px 16px;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(6px);
+  direction: ltr;
+  text-align: center;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.time-display-button::before {
+  content: "◷";
+  float: left;
+  color: rgba(248, 244, 235, 0.72);
+}
+
 .date-picker-wrap {
   position: relative;
 }
@@ -842,6 +863,59 @@ input {
 
 .modal-backdrop.is-open {
   display: flex;
+}
+
+.clock-backdrop {
+  align-items: center;
+}
+
+.clock-card {
+  width: min(92vw, 390px);
+  max-height: min(86vh, 640px);
+  overflow: auto;
+}
+
+.clock-card h2 {
+  direction: ltr;
+  font-size: clamp(2.1rem, 13vw, 3.5rem);
+  color: var(--text);
+}
+
+.clock-picker-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin: 14px 0;
+}
+
+.clock-options {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 7px;
+  max-height: 210px;
+  overflow: auto;
+  padding: 8px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.minute-options {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.clock-option {
+  min-height: 40px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.07);
+  direction: ltr;
+}
+
+.clock-option.is-selected {
+  border-color: rgba(239, 176, 82, 0.88);
+  background: rgba(216, 148, 51, 0.34);
+  color: #fff7df;
 }
 
 .quick-pick {

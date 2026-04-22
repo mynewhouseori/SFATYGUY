@@ -191,11 +191,11 @@
               </div>
               <label class="field is-inline">
                 <span>שעת פתיחה</span>
-                <input class="time-input" type="time" value="06:35" />
+                <button class="time-display-button" type="button" data-clock-trigger data-time-value="06:35">06:35</button>
               </label>
               <label class="field is-inline">
                 <span>שעת סגירה</span>
-                <input class="time-input" type="time" value="17:20" />
+                <button class="time-display-button" type="button" data-clock-trigger data-time-value="17:20">17:20</button>
               </label>
               <label class="field is-inline">
                 <span>סטטוס דוח</span>
@@ -608,6 +608,31 @@
             <button class="ghost-button" type="button">העלה מהגלריה</button>
           </div>
         </div>
+      </section>
+    </div>
+
+    <div class="modal-backdrop clock-backdrop" id="clockModal">
+      <section class="screen-card modal-card clock-card">
+        <div class="details-head modal-head">
+          <div>
+            <p class="screen-eyebrow">בחירת שעה</p>
+            <h2 id="clockValue">06:35</h2>
+          </div>
+          <button class="ghost-button" id="clockCancel" type="button">ביטול</button>
+        </div>
+
+        <div class="clock-picker-grid">
+          <div>
+            <p class="mini-label">שעה</p>
+            <div class="clock-options" id="clockHours"></div>
+          </div>
+          <div>
+            <p class="mini-label">דקות</p>
+            <div class="clock-options minute-options" id="clockMinutes"></div>
+          </div>
+        </div>
+
+        <button class="primary-button action-fill" id="clockSave" type="button">שמור שעה</button>
       </section>
     </div>
 

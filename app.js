@@ -15,6 +15,16 @@ const workerSuggestions = document.getElementById("workerSuggestions");
 const selectedWorkerPanel = document.getElementById("selectedWorkerPanel");
 const workerList = document.querySelector(".worker-list");
 const workDateDisplay = document.getElementById("workDateDisplay");
+const clockModal = document.getElementById("clockModal");
+const clockValue = document.getElementById("clockValue");
+const clockHours = document.getElementById("clockHours");
+const clockMinutes = document.getElementById("clockMinutes");
+const clockSave = document.getElementById("clockSave");
+const clockCancel = document.getElementById("clockCancel");
+const clockTriggers = Array.from(document.querySelectorAll("[data-clock-trigger]"));
+let activeClockTrigger = null;
+let selectedClockHour = "06";
+let selectedClockMinute = "35";
 
 const workerDatabase = [
   { name: "יוסי כהן", id: "123456789", role: "ברזלן", contractor: "אור פלדה", status: "כבר ביומן היום" },
@@ -241,6 +251,84 @@ workerModal?.addEventListener("click", (event) => {
   if (event.target === workerModal) {
     workerModal.classList.remove("is-open");
     document.body.style.overflow = "";
+  }
+});
+
+function updateClockValue() {
+  if (clockValue) {
+    clockValue.textContent = `${selectedClockHour}:${selectedClockMinute}`;
+  }
+
+  clockHours?.querySelectorAll("[data-hour]").forEach((button) => {
+    button.classList.toggle("is-selected", button.dataset.hour === selectedClockHour);
+  });
+  clockMinutes?.querySelectorAll("[data-minute]").forEach((button) => {
+    button.classList.toggle("is-selected", button.dataset.minute === selectedClockMinute);
+  });
+}
+
+function openClockPicker(trigger) {
+  activeClockTrigger = trigger;
+  const [hour = "06", minute = "00"] = (trigger.dataset.timeValue || trigger.textContent || "06:00").split(":");
+  selectedClockHour = hour.padStart(2, "0");
+  selectedClockMinute = minute.padStart(2, "0");
+  updateClockValue();
+  clockModal?.classList.add("is-open");
+  document.body.style.overflow = "hidden";
+}
+
+function closeClockPicker() {
+  clockModal?.classList.remove("is-open");
+  document.body.style.overflow = "";
+  activeClockTrigger = null;
+}
+
+if (clockHours) {
+  clockHours.innerHTML = Array.from({ length: 24 }, (_, hour) => {
+    const value = String(hour).padStart(2, "0");
+    return `<button class="clock-option" type="button" data-hour="${value}">${value}</button>`;
+  }).join("");
+}
+
+if (clockMinutes) {
+  clockMinutes.innerHTML = ["00", "05", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55"]
+    .map((minute) => `<button class="clock-option" type="button" data-minute="${minute}">${minute}</button>`)
+    .join("");
+}
+
+clockTriggers.forEach((trigger) => {
+  trigger.addEventListener("click", () => openClockPicker(trigger));
+});
+
+clockHours?.querySelectorAll("[data-hour]").forEach((button) => {
+  button.addEventListener("click", () => {
+    selectedClockHour = button.dataset.hour ?? selectedClockHour;
+    updateClockValue();
+  });
+});
+
+clockMinutes?.querySelectorAll("[data-minute]").forEach((button) => {
+  button.addEventListener("click", () => {
+    selectedClockMinute = button.dataset.minute ?? selectedClockMinute;
+    updateClockValue();
+  });
+});
+
+clockSave?.addEventListener("click", () => {
+  if (activeClockTrigger) {
+    const value = `${selectedClockHour}:${selectedClockMinute}`;
+    activeClockTrigger.dataset.timeValue = value;
+    activeClockTrigger.textContent = value;
+  }
+
+  closeClockPicker();
+});
+
+clockCancel?.addEventListener("click", closeClockPicker);
+
+clockModal?.addEventListener("click", (event) => {
+  if (event.target === clockModal) {
+    closeClockPicker();
   }
 });
 
