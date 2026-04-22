@@ -12,6 +12,8 @@ const reportStatusTrigger = document.getElementById("reportStatusTrigger");
 const reportStatusMenu = document.getElementById("reportStatusMenu");
 const workerSearch = document.getElementById("workerSearch");
 const workerSuggestions = document.getElementById("workerSuggestions");
+const selectedWorkerPanel = document.getElementById("selectedWorkerPanel");
+const workerList = document.querySelector(".worker-list");
 
 const workerDatabase = [
   { name: "יוסי כהן", id: "123456789", role: "ברזלן", contractor: "אור פלדה", status: "כבר ביומן היום" },
@@ -179,11 +181,13 @@ navButtons.forEach((button) => {
   });
 });
 
-document.querySelectorAll("[data-worker-toggle]").forEach((button) => {
+function attachWorkerToggle(button) {
   button.addEventListener("click", () => {
     button.closest(".worker-card")?.classList.toggle("is-open");
   });
-});
+}
+
+document.querySelectorAll("[data-worker-toggle]").forEach(attachWorkerToggle);
 
 document.querySelectorAll(".choice-group").forEach((group) => {
   group.querySelectorAll(".choice-chip").forEach((button) => {
@@ -252,6 +256,10 @@ function renderWorkerSuggestions(query) {
   if (!normalizedQuery) {
     workerSuggestions.classList.remove("is-open");
     workerSuggestions.innerHTML = "";
+    if (selectedWorkerPanel) {
+      selectedWorkerPanel.classList.remove("is-open");
+      selectedWorkerPanel.innerHTML = "";
+    }
     workerSearch?.classList.remove("has-worker-match");
     return;
   }
@@ -290,9 +298,16 @@ function renderWorkerSuggestions(query) {
 
   workerSuggestions.querySelectorAll(".suggestion-item").forEach((button) => {
     button.addEventListener("click", () => {
-      workerSearch.value = button.getAttribute("data-worker-name") ?? "";
+      const workerName = button.getAttribute("data-worker-name") ?? "";
+      const selectedWorker = workerDatabase.find((worker) => worker.name === workerName);
+
+      workerSearch.value = workerName;
       workerSearch.classList.remove("has-worker-match");
       workerSuggestions.classList.remove("is-open");
+
+      if (selectedWorker) {
+        renderSelectedWorker(selectedWorker);
+      }
     });
   });
 }
@@ -300,3 +315,99 @@ function renderWorkerSuggestions(query) {
 workerSearch?.addEventListener("input", (event) => {
   renderWorkerSuggestions(event.target.value);
 });
+
+function renderSelectedWorker(worker) {
+  if (!selectedWorkerPanel) {
+    return;
+  }
+
+  selectedWorkerPanel.classList.add("is-open");
+  selectedWorkerPanel.innerHTML = `
+    <article class="selected-worker-card">
+      <div class="selected-worker-head">
+        <div>
+          <span class="mini-label">עובד נבחר מהמאגר</span>
+          <h3>${worker.name}</h3>
+          <p>${worker.role} • ${worker.contractor} • ${worker.status}</p>
+        </div>
+        <span class="status-chip ok">מאומת</span>
+      </div>
+      <div class="selected-worker-fields">
+        <label class="mini-field">
+          <span>שעת התחלה</span>
+          <input class="time-input" type="time" value="07:00" />
+        </label>
+        <label class="mini-field">
+          <span>שעת סיום</span>
+          <input class="time-input" type="time" value="16:30" />
+        </label>
+        <label class="mini-field">
+          <span>מסמכים</span>
+          <select>
+            <option>תקין</option>
+            <option>חסר אישור עבודה בגובה</option>
+            <option>חסר רישיון נהיגה</option>
+            <option>נדרש צילום מסמך</option>
+          </select>
+        </label>
+      </div>
+      <div class="selected-worker-actions">
+        <button class="ghost-button" type="button" data-scan-worker-doc>סרוק/צלם מסמך</button>
+        <button class="primary-button" type="button" data-add-worker-today>הוסף ליומן היום</button>
+      </div>
+    </article>
+  `;
+
+  selectedWorkerPanel.querySelector("[data-scan-worker-doc]")?.addEventListener("click", () => {
+    selectedWorkerPanel.querySelector(".mini-label").textContent = "מסמך יסרק בשלב הבא";
+  });
+
+  selectedWorkerPanel.querySelector("[data-add-worker-today]")?.addEventListener("click", () => {
+    addWorkerToToday(worker);
+    selectedWorkerPanel.classList.remove("is-open");
+    selectedWorkerPanel.innerHTML = "";
+    workerSearch.value = "";
+  });
+}
+
+function addWorkerToToday(worker) {
+  if (!workerList) {
+    return;
+  }
+
+  const card = document.createElement("article");
+  card.className = "worker-card is-open";
+  card.innerHTML = `
+    <button class="worker-head" type="button" data-worker-toggle>
+      <div>
+        <h3>${worker.name}</h3>
+        <p>${worker.role} • ${worker.contractor}</p>
+      </div>
+      <div class="worker-head-meta">
+        <span>07:00 - 16:30</span>
+        <span class="status-chip ok">נוסף היום</span>
+      </div>
+    </button>
+    <div class="worker-body">
+      <div class="worker-grid">
+        <div class="worker-line"><span>שעת התחלה</span><strong>07:00</strong></div>
+        <div class="worker-line"><span>שעת סיום</span><strong>16:30</strong></div>
+        <div class="worker-line"><span>סה"כ שעות</span><strong>9.5</strong></div>
+        <div class="worker-line"><span>מקור</span><strong>מאגר עובדים</strong></div>
+      </div>
+      <div class="worker-tags">
+        <span>תדריך: לביצוע/אישור</span>
+        <span>סוג עבודה: ${worker.role}</span>
+        <span>סטטוס: נוסף ליומן היום</span>
+      </div>
+      <div class="doc-row">
+        <span class="status-chip ok">ת"ז</span>
+        <span class="status-chip ok">מסמכים תקינים</span>
+        <span class="status-chip muted">צילום לפי צורך</span>
+      </div>
+    </div>
+  `;
+
+  attachWorkerToggle(card.querySelector("[data-worker-toggle]"));
+  workerList.prepend(card);
+}
