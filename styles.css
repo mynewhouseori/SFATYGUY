@@ -258,6 +258,22 @@ input {
   backdrop-filter: blur(6px);
 }
 
+.field input.time-input {
+  min-height: 48px;
+  padding: 12px 16px;
+  direction: ltr;
+  text-align: center;
+}
+
+.field input[type="time"]::-webkit-calendar-picker-indicator {
+  width: 18px;
+  height: 18px;
+  margin-inline-start: 8px;
+  cursor: pointer;
+  filter: invert(92%) sepia(8%) saturate(420%) hue-rotate(8deg);
+  opacity: 0.85;
+}
+
 .field-display strong {
   display: block;
   width: 100%;
@@ -286,9 +302,7 @@ input {
 .quick-pick:focus-visible,
 .module-card:focus-visible,
 .custom-select-trigger:focus-visible,
-.custom-select-option:focus-visible,
-.custom-time-trigger:focus-visible,
-.custom-time-option:focus-visible {
+.custom-select-option:focus-visible {
   outline: 2px solid rgba(255, 255, 255, 0.68);
   outline-offset: 3px;
 }
@@ -301,8 +315,7 @@ input {
   position: relative;
 }
 
-.custom-select-trigger,
-.custom-time-trigger {
+.custom-select-trigger {
   position: relative;
   width: 100%;
   border: 1px solid rgba(255, 255, 255, 0.16);
@@ -316,9 +329,7 @@ input {
 }
 
 .custom-select-trigger::before,
-.custom-select-trigger::after,
-.custom-time-trigger::before,
-.custom-time-trigger::after {
+.custom-select-trigger::after {
   content: "";
   position: absolute;
   top: 50%;
@@ -334,22 +345,12 @@ input {
   transform: translateY(-50%) rotate(45deg);
 }
 
-.custom-select-trigger::after,
-.custom-time-trigger::after {
+.custom-select-trigger::after {
   left: 20px;
   transform: translateY(-50%) rotate(-45deg);
 }
 
-.custom-time-trigger::before {
-  transform: translateY(-50%) rotate(45deg);
-}
-
-.custom-time {
-  position: relative;
-}
-
-.custom-select-menu,
-.custom-time-menu {
+.custom-select-menu {
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
@@ -363,24 +364,12 @@ input {
   box-shadow: var(--shadow);
 }
 
-.custom-time-menu {
-  max-height: 220px;
-  overflow: auto;
-}
-
 .custom-select.is-open .custom-select-menu {
   display: grid;
   gap: 6px;
 }
 
-.custom-time.is-open .custom-time-menu {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
-}
-
-.custom-select-option,
-.custom-time-option {
+.custom-select-option {
   width: 100%;
   padding: 12px 14px;
   border: 0;
@@ -391,9 +380,7 @@ input {
 }
 
 .custom-select-option:hover,
-.custom-select-option.is-selected,
-.custom-time-option:hover,
-.custom-time-option.is-selected {
+.custom-select-option.is-selected {
   background: rgba(255, 255, 255, 0.1);
 }
 
