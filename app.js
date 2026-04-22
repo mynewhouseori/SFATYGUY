@@ -257,8 +257,17 @@ function renderWorkerSuggestions(query) {
   }
 
   const matches = workerDatabase.filter((worker) => {
-    const haystack = `${worker.name} ${worker.id} ${worker.role} ${worker.contractor}`.toLowerCase();
-    return haystack.includes(normalizedQuery);
+    const name = worker.name.toLowerCase();
+    const id = worker.id.toLowerCase();
+    const role = worker.role.toLowerCase();
+    const contractor = worker.contractor.toLowerCase();
+
+    return (
+      name.startsWith(normalizedQuery) ||
+      id.startsWith(normalizedQuery) ||
+      role.startsWith(normalizedQuery) ||
+      contractor.startsWith(normalizedQuery)
+    );
   });
 
   workerSuggestions.classList.add("is-open");
