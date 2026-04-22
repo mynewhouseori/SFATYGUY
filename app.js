@@ -29,6 +29,11 @@ const dateMonth = document.getElementById("dateMonth");
 const dateYear = document.getElementById("dateYear");
 const dateSave = document.getElementById("dateSave");
 const dateCancel = document.getElementById("dateCancel");
+const workerDocsModal = document.getElementById("workerDocsModal");
+const workerDocsTitle = document.getElementById("workerDocsTitle");
+const workerDocsList = document.getElementById("workerDocsList");
+const workerDocsClose = document.getElementById("workerDocsClose");
+const workerDocsScan = document.getElementById("workerDocsScan");
 let activeClockTrigger = null;
 let selectedClockHour = "06";
 let selectedClockMinute = "35";
@@ -401,6 +406,78 @@ dateModal?.addEventListener("click", (event) => {
   }
 });
 
+function getWorkerDocuments(worker) {
+  const commonDocs = [
+    { name: "תעודת זהות", status: "בתוקף", expiry: "קבוע", className: "ok" },
+    { name: "הדרכת בטיחות", status: "בתוקף", expiry: "31/12/2026", className: "ok" },
+  ];
+  const roleDocs = {
+    "מפעיל ציוד": [
+      { name: "רישיון מפעיל ציוד", status: "בתוקף", expiry: "15/08/2026", className: "ok" },
+      { name: "אישור כניסה לאתר", status: "בתוקף", expiry: "30/06/2026", className: "ok" },
+    ],
+    "טפסן": [
+      { name: "אישור עבודה בגובה", status: "חסר", expiry: "נדרש צילום", className: "warning" },
+      { name: "אישור כניסה לאתר", status: "בתוקף", expiry: "30/06/2026", className: "ok" },
+    ],
+    "ברזלן": [
+      { name: "אישור עבודה בגובה", status: "בתוקף", expiry: "20/11/2026", className: "ok" },
+      { name: "אישור כניסה לאתר", status: "בתוקף", expiry: "30/06/2026", className: "ok" },
+    ],
+    "רתך": [
+      { name: "תעודת רתך", status: "בתוקף", expiry: "10/10/2026", className: "ok" },
+      { name: "אישור עבודה חמה", status: "נדרש להיום", expiry: "יומי", className: "warning" },
+    ],
+  };
+
+  return [...commonDocs, ...(roleDocs[worker.role] ?? [])];
+}
+
+function openWorkerDocs(worker) {
+  if (!workerDocsModal || !workerDocsList) {
+    return;
+  }
+
+  if (workerDocsTitle) {
+    workerDocsTitle.textContent = worker.name;
+  }
+
+  workerDocsList.innerHTML = getWorkerDocuments(worker)
+    .map(
+      (doc) => `
+        <article class="doc-card">
+          <div>
+            <strong>${doc.name}</strong>
+            <span>תוקף: ${doc.expiry}</span>
+          </div>
+          <span class="status-chip ${doc.className}">${doc.status}</span>
+        </article>
+      `
+    )
+    .join("");
+
+  workerDocsModal.classList.add("is-open");
+  document.body.style.overflow = "hidden";
+}
+
+function closeWorkerDocs() {
+  workerDocsModal?.classList.remove("is-open");
+  document.body.style.overflow = "";
+}
+
+workerDocsClose?.addEventListener("click", closeWorkerDocs);
+
+workerDocsModal?.addEventListener("click", (event) => {
+  if (event.target === workerDocsModal) {
+    closeWorkerDocs();
+  }
+});
+
+workerDocsScan?.addEventListener("click", () => {
+  closeWorkerDocs();
+  selectedWorkerPanel?.querySelector("[data-worker-doc-file]")?.click();
+});
+
 reportStatusTrigger?.addEventListener("click", () => {
   const isOpen = reportStatusSelect?.classList.toggle("is-open");
   reportStatusTrigger.setAttribute("aria-expanded", isOpen ? "true" : "false");
@@ -542,6 +619,7 @@ function renderSelectedWorker(worker) {
       </div>
       <input class="sr-only" type="file" accept="image/*,.pdf" capture="environment" data-worker-doc-file />
       <div class="selected-worker-actions">
+        <button class="ghost-button" type="button" data-worker-docs>מסמכי עובד</button>
         <button class="ghost-button" type="button" data-scan-worker-doc>סרוק/צלם מסמך</button>
         <button class="primary-button" type="button" data-add-worker-today>הוסף ליומן היום</button>
       </div>
@@ -570,6 +648,10 @@ function renderSelectedWorker(worker) {
 
   selectedWorkerPanel.querySelector("[data-scan-worker-doc]")?.addEventListener("click", () => {
     docFile?.click();
+  });
+
+  selectedWorkerPanel.querySelector("[data-worker-docs]")?.addEventListener("click", () => {
+    openWorkerDocs(worker);
   });
 
   selectedWorkerPanel.querySelector("[data-add-worker-today]")?.addEventListener("click", () => {

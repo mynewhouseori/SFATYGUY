@@ -662,7 +662,7 @@ input {
 
 .selected-worker-actions {
   display: grid;
-  grid-template-columns: 1fr 1.2fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
 }
 
@@ -887,6 +887,38 @@ input {
   text-align: center;
 }
 
+.docs-card {
+  width: min(92vw, 430px);
+}
+
+.docs-list {
+  display: grid;
+  gap: 10px;
+  margin: 12px 0 14px;
+}
+
+.doc-card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 12px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.doc-card strong,
+.doc-card span {
+  display: block;
+}
+
+.doc-card div span {
+  margin-top: 4px;
+  color: var(--text-soft);
+  font-size: 0.86rem;
+}
+
 .clock-options {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -957,6 +989,7 @@ input {
   .personnel-summary,
   .two-col-grid,
   .action-grid,
+  .selected-worker-actions,
   .worker-head {
     grid-template-columns: 1fr;
   }
