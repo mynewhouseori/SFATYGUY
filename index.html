@@ -63,9 +63,8 @@
                     id="workDate"
                     name="workDate"
                     class="date-input"
-                    type="date"
+                    type="hidden"
                     required
-                    aria-label="בחירת תאריך"
                   />
                 </div>
               </label>
@@ -633,6 +632,35 @@
         </div>
 
         <button class="primary-button action-fill" id="clockSave" type="button">שמור שעה</button>
+      </section>
+    </div>
+
+    <div class="modal-backdrop clock-backdrop" id="dateModal">
+      <section class="screen-card modal-card clock-card">
+        <div class="details-head modal-head">
+          <div>
+            <p class="screen-eyebrow">בחירת תאריך</p>
+            <h2 id="dateValue">22/04/2026</h2>
+          </div>
+          <button class="ghost-button" id="dateCancel" type="button">ביטול</button>
+        </div>
+
+        <div class="date-picker-grid">
+          <label class="mini-field">
+            <span>יום</span>
+            <select id="dateDay"></select>
+          </label>
+          <label class="mini-field">
+            <span>חודש</span>
+            <select id="dateMonth"></select>
+          </label>
+          <label class="mini-field">
+            <span>שנה</span>
+            <select id="dateYear"></select>
+          </label>
+        </div>
+
+        <button class="primary-button action-fill" id="dateSave" type="button">שמור תאריך</button>
       </section>
     </div>
 

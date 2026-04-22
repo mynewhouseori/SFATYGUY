@@ -22,6 +22,13 @@ const clockMinutes = document.getElementById("clockMinutes");
 const clockSave = document.getElementById("clockSave");
 const clockCancel = document.getElementById("clockCancel");
 const clockTriggers = Array.from(document.querySelectorAll("[data-clock-trigger]"));
+const dateModal = document.getElementById("dateModal");
+const dateValue = document.getElementById("dateValue");
+const dateDay = document.getElementById("dateDay");
+const dateMonth = document.getElementById("dateMonth");
+const dateYear = document.getElementById("dateYear");
+const dateSave = document.getElementById("dateSave");
+const dateCancel = document.getElementById("dateCancel");
 let activeClockTrigger = null;
 let selectedClockHour = "06";
 let selectedClockMinute = "35";
@@ -103,6 +110,22 @@ function formatDisplayDate(dateValue) {
   }
 
   return `${normalizedDate.slice(0, 2)}/${normalizedDate.slice(2, 4)}/${normalizedDate.slice(4, 8)}`;
+}
+
+function datePartsFromValue(dateValue) {
+  const normalizedDate = normalizeDateValue(dateValue);
+  const fallback = normalizeDateValue(getTodayValue());
+  const value = normalizedDate || fallback;
+
+  return {
+    day: value.slice(0, 2),
+    month: value.slice(2, 4),
+    year: value.slice(4, 8),
+  };
+}
+
+function toDateInputValue({ day, month, year }) {
+  return `${year}-${month}-${day}`;
 }
 
 function loadDefaults() {
@@ -191,31 +214,6 @@ detailsForm.addEventListener("submit", (event) => {
   formNote.textContent = "הפרטים נשמרו. אפשר להמשיך למילוי היומן.";
 
   window.setTimeout(() => navigateTo("dashboardView"), 180);
-});
-
-fields.workDate?.addEventListener("change", () => {
-  updateReportDateDisplays();
-});
-
-fields.workDate?.addEventListener("input", () => {
-  updateReportDateDisplays();
-});
-
-fields.workDate?.addEventListener("click", () => {
-  if (typeof fields.workDate.showPicker === "function") {
-    fields.workDate.showPicker();
-  }
-});
-
-workDateDisplay?.addEventListener("click", () => {
-  fields.workDate?.focus();
-
-  if (typeof fields.workDate?.showPicker === "function") {
-    fields.workDate.showPicker();
-    return;
-  }
-
-  fields.workDate?.click();
 });
 
 setWorkDateValue(getTodayValue());
@@ -339,6 +337,67 @@ clockCancel?.addEventListener("click", closeClockPicker);
 clockModal?.addEventListener("click", (event) => {
   if (event.target === clockModal) {
     closeClockPicker();
+  }
+});
+
+function populateDateSelect(select, values) {
+  if (!select) {
+    return;
+  }
+
+  select.innerHTML = values
+    .map((value) => `<option value="${value}">${value}</option>`)
+    .join("");
+}
+
+populateDateSelect(dateDay, Array.from({ length: 31 }, (_, index) => String(index + 1).padStart(2, "0")));
+populateDateSelect(dateMonth, Array.from({ length: 12 }, (_, index) => String(index + 1).padStart(2, "0")));
+populateDateSelect(dateYear, Array.from({ length: 7 }, (_, index) => String(new Date().getFullYear() - 1 + index)));
+
+function updateDateValuePreview() {
+  if (!dateValue || !dateDay || !dateMonth || !dateYear) {
+    return;
+  }
+
+  dateValue.textContent = `${dateDay.value}/${dateMonth.value}/${dateYear.value}`;
+}
+
+function openDatePicker() {
+  const parts = datePartsFromValue(fields.workDate?.value);
+
+  if (dateDay) dateDay.value = parts.day;
+  if (dateMonth) dateMonth.value = parts.month;
+  if (dateYear) dateYear.value = parts.year;
+  updateDateValuePreview();
+  dateModal?.classList.add("is-open");
+  document.body.style.overflow = "hidden";
+}
+
+function closeDatePicker() {
+  dateModal?.classList.remove("is-open");
+  document.body.style.overflow = "";
+}
+
+workDateDisplay?.addEventListener("click", openDatePicker);
+
+[dateDay, dateMonth, dateYear].forEach((select) => {
+  select?.addEventListener("change", updateDateValuePreview);
+});
+
+dateSave?.addEventListener("click", () => {
+  if (!dateDay || !dateMonth || !dateYear) {
+    return;
+  }
+
+  setWorkDateValue(toDateInputValue({ day: dateDay.value, month: dateMonth.value, year: dateYear.value }));
+  closeDatePicker();
+});
+
+dateCancel?.addEventListener("click", closeDatePicker);
+
+dateModal?.addEventListener("click", (event) => {
+  if (event.target === dateModal) {
+    closeDatePicker();
   }
 });
 
