@@ -95,6 +95,16 @@ function normalizeDateValue(dateValue) {
   return digitsOnly.length === 8 ? digitsOnly : "";
 }
 
+function formatDisplayDate(dateValue) {
+  const normalizedDate = normalizeDateValue(dateValue);
+
+  if (!normalizedDate) {
+    return "DD/MM/YYYY";
+  }
+
+  return `${normalizedDate.slice(0, 2)}/${normalizedDate.slice(2, 4)}/${normalizedDate.slice(4, 8)}`;
+}
+
 function loadDefaults() {
   try {
     const stored = window.localStorage.getItem(STORAGE_KEY);
@@ -144,7 +154,7 @@ function updateReportDateDisplays() {
     reportWeekdayField.textContent = formatWeekday(fields.workDate.value);
   }
   if (workDateDisplay) {
-    workDateDisplay.textContent = normalizeDateValue(fields.workDate.value) || "DDMMYYYY";
+    workDateDisplay.textContent = formatDisplayDate(fields.workDate.value);
   }
 }
 
