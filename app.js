@@ -256,19 +256,9 @@ function renderWorkerSuggestions(query) {
     return;
   }
 
-  const matches = workerDatabase.filter((worker) => {
-    const name = worker.name.toLowerCase();
-    const id = worker.id.toLowerCase();
-    const role = worker.role.toLowerCase();
-    const contractor = worker.contractor.toLowerCase();
-
-    return (
-      name.startsWith(normalizedQuery) ||
-      id.startsWith(normalizedQuery) ||
-      role.startsWith(normalizedQuery) ||
-      contractor.startsWith(normalizedQuery)
-    );
-  });
+  const matches = workerDatabase.filter((worker) =>
+    worker.name.toLowerCase().startsWith(normalizedQuery)
+  );
 
   workerSuggestions.classList.add("is-open");
 
