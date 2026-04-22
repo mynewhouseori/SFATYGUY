@@ -43,26 +43,36 @@ function getTodayValue() {
   const year = now.getFullYear();
   const month = String(now.getMonth() + 1).padStart(2, "0");
   const day = String(now.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
+  return `${day}${month}${year}`;
 }
 
 function formatReportNumber(dateValue) {
-  if (!dateValue) {
+  const normalizedDate = normalizeDateValue(dateValue);
+
+  if (!normalizedDate) {
     return "00000000-001";
   }
 
-  const [year, month, day] = dateValue.split("-");
-  return `${day}${month}${year}-001`;
+  return `${normalizedDate}-001`;
 }
 
 function formatWeekday(dateValue) {
-  if (!dateValue) {
+  const normalizedDate = normalizeDateValue(dateValue);
+
+  if (!normalizedDate) {
     return "";
   }
 
-  const [year, month, day] = dateValue.split("-").map(Number);
+  const day = Number(normalizedDate.slice(0, 2));
+  const month = Number(normalizedDate.slice(2, 4));
+  const year = Number(normalizedDate.slice(4, 8));
   const date = new Date(year, month - 1, day);
   return new Intl.DateTimeFormat("he-IL", { weekday: "long" }).format(date);
+}
+
+function normalizeDateValue(dateValue) {
+  const digitsOnly = (dateValue ?? "").replace(/\D/g, "");
+  return digitsOnly.length === 8 ? digitsOnly : "";
 }
 
 function loadDefaults() {
@@ -93,7 +103,7 @@ function populateForm() {
   fields.workDate.value = todayValue;
 
   if (reportNumberField) {
-    reportNumberField.value = formatReportNumber(todayValue);
+    reportNumberField.textContent = formatReportNumber(todayValue);
   }
   if (reportWeekdayField) {
     reportWeekdayField.textContent = formatWeekday(todayValue);
@@ -137,7 +147,18 @@ detailsForm.addEventListener("submit", (event) => {
 
 fields.workDate?.addEventListener("change", () => {
   if (reportNumberField) {
-    reportNumberField.value = formatReportNumber(fields.workDate.value);
+    reportNumberField.textContent = formatReportNumber(fields.workDate.value);
+  }
+  if (reportWeekdayField) {
+    reportWeekdayField.textContent = formatWeekday(fields.workDate.value);
+  }
+});
+
+fields.workDate?.addEventListener("input", () => {
+  fields.workDate.value = fields.workDate.value.replace(/\D/g, "").slice(0, 8);
+
+  if (reportNumberField) {
+    reportNumberField.textContent = formatReportNumber(fields.workDate.value);
   }
   if (reportWeekdayField) {
     reportWeekdayField.textContent = formatWeekday(fields.workDate.value);

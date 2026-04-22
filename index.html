@@ -57,7 +57,17 @@
             <div class="field-grid">
               <label class="field is-inline">
                 <span>תאריך</span>
-                <input id="workDate" name="workDate" type="date" required />
+                <input
+                  id="workDate"
+                  name="workDate"
+                  type="text"
+                  inputmode="numeric"
+                  maxlength="8"
+                  pattern="[0-9]{8}"
+                  placeholder="DDMMYYYY"
+                  title="יש להזין תאריך בפורמט DDMMYYYY"
+                  required
+                />
               </label>
               <label class="field is-inline">
                 <span>שם מנהל העבודה</span>
