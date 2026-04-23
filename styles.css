@@ -54,8 +54,8 @@ input {
   place-items: center;
   border-radius: 20px;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.24);
   backdrop-filter: blur(10px);
   box-shadow: var(--shadow);
 }
@@ -63,7 +63,9 @@ input {
 .brand-mark img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  padding: 8px;
+  background: #ffffff;
 }
 
 .screen-panel {
@@ -973,26 +975,59 @@ input {
 
 @media (max-width: 640px) {
   .app-shell {
-    padding: 14px;
+    position: relative;
+    min-height: 100dvh;
+    display: block;
+    padding: 0;
+  }
+
+  .app-header {
+    position: absolute;
+    top: calc(env(safe-area-inset-top, 0px) + 16px);
+    left: 16px;
+    z-index: 4;
   }
 
   .brand-mark {
-    width: 58px;
-    height: 58px;
-    border-radius: 18px;
+    width: 54px;
+    height: 54px;
+    border-radius: 16px;
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.22);
   }
 
   .screen-panel {
-    border-radius: 28px;
+    min-height: 100dvh;
+    margin-top: 0;
+    display: block;
+    padding-top: calc(env(safe-area-inset-top, 0px) + 86px);
+    border-radius: 0;
+    background:
+      radial-gradient(circle at top left, rgba(209, 138, 58, 0.12), transparent 28%),
+      linear-gradient(180deg, rgba(17, 31, 35, 0.96), rgba(9, 21, 25, 1));
   }
 
   .screen-view {
-    padding: 14px;
+    width: 100%;
+    min-height: calc(100dvh - (env(safe-area-inset-top, 0px) + 86px));
+    place-items: start stretch;
+    align-content: start;
+    padding: 0 14px 24px;
+  }
+
+  .screen-overlay {
+    background:
+      radial-gradient(circle at top left, rgba(255, 255, 255, 0.04), transparent 26%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(8, 18, 23, 0.18));
   }
 
   .screen-card {
-    padding: 26px 20px;
-    border-radius: 24px;
+    width: 100%;
+    max-width: 100%;
+    padding: 24px 20px;
+    border-radius: 26px;
+    background: linear-gradient(180deg, rgba(23, 39, 44, 0.9), rgba(16, 31, 36, 0.9));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 44px rgba(0, 0, 0, 0.22);
   }
 
   .toolbar,
@@ -1019,5 +1054,9 @@ input {
 
   .worker-head-meta {
     justify-items: start;
+  }
+
+  .dashboard-topline {
+    margin-bottom: 12px;
   }
 }
