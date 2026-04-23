@@ -133,8 +133,10 @@ input {
 
 .screen-eyebrow {
   margin: 0 0 10px;
+  display: block;
   font-size: 0.76rem;
-  letter-spacing: 0.18em;
+  line-height: 1.35;
+  letter-spacing: 0.04em;
   color: var(--text-soft);
 }
 
