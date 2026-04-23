@@ -413,7 +413,7 @@ function getWorkerDocuments(worker) {
   ];
   const roleDocs = {
     "מפעיל ציוד": [
-      { name: "רישיון מפעיל ציוד", status: "בתוקף", expiry: "15/08/2026", className: "ok" },
+      { name: "רישיון נהיגה / מפעיל ציוד", status: "בתוקף", expiry: "15/08/2026", className: "ok" },
       { name: "אישור כניסה לאתר", status: "בתוקף", expiry: "30/06/2026", className: "ok" },
     ],
     "טפסן": [
@@ -433,16 +433,24 @@ function getWorkerDocuments(worker) {
   return [...commonDocs, ...(roleDocs[worker.role] ?? [])];
 }
 
-function openWorkerDocs(worker) {
+function getSavedWorkerDocuments(worker) {
+  return getWorkerDocuments(worker).filter((doc) => doc.status !== "חסר");
+}
+
+function openWorkerDocs(worker, selectedDocName = "") {
   if (!workerDocsModal || !workerDocsList) {
     return;
   }
 
   if (workerDocsTitle) {
-    workerDocsTitle.textContent = worker.name;
+    workerDocsTitle.textContent = selectedDocName || worker.name;
   }
 
-  workerDocsList.innerHTML = getWorkerDocuments(worker)
+  const docs = selectedDocName
+    ? getWorkerDocuments(worker).filter((doc) => doc.name === selectedDocName)
+    : getWorkerDocuments(worker);
+
+  workerDocsList.innerHTML = docs
     .map(
       (doc) => `
         <article class="doc-card">
@@ -604,18 +612,14 @@ function renderSelectedWorker(worker) {
           <input class="time-input" type="time" value="16:30" />
         </label>
         <label class="mini-field">
-          <span>סטטוס מסמכים</span>
-          <select data-worker-doc-status>
-            <option value="תקין">תקין</option>
-            <option value="חסר מסמך">חסר מסמך</option>
-            <option value="נדרש צילום">נדרש צילום</option>
-            <option value="לא רלוונטי">לא רלוונטי</option>
+          <span>מסמכים שמורים</span>
+          <select data-worker-doc-select>
+            <option value="">בחר מסמך לפתיחה</option>
+            ${getSavedWorkerDocuments(worker)
+              .map((doc) => `<option value="${doc.name}">${doc.name} - ${doc.status}</option>`)
+              .join("")}
           </select>
         </label>
-      </div>
-      <div class="doc-status-note" data-doc-status-note>
-        <span class="status-chip ok">מסמכים תקינים</span>
-        <strong>אפשר להוסיף את העובד ליומן היום.</strong>
       </div>
       <input class="sr-only" type="file" accept="image/*,.pdf" capture="environment" data-worker-doc-file />
       <div class="selected-worker-actions">
@@ -626,23 +630,25 @@ function renderSelectedWorker(worker) {
     </article>
   `;
 
-  const docStatus = selectedWorkerPanel.querySelector("[data-worker-doc-status]");
-  const docNote = selectedWorkerPanel.querySelector("[data-doc-status-note]");
+  const docSelect = selectedWorkerPanel.querySelector("[data-worker-doc-select]");
   const docFile = selectedWorkerPanel.querySelector("[data-worker-doc-file]");
+  let selectedDocText = "מסמכים במאגר";
 
-  docStatus?.addEventListener("change", () => {
-    updateSelectedWorkerDocNote(docStatus.value, docNote);
+  docSelect?.addEventListener("change", () => {
+    if (!docSelect.value) {
+      selectedDocText = "מסמכים במאגר";
+      return;
+    }
+
+    selectedDocText = docSelect.value;
+    openWorkerDocs(worker, docSelect.value);
   });
 
   docFile?.addEventListener("change", () => {
     const fileName = docFile.files?.[0]?.name;
 
     if (fileName) {
-      docStatus.value = "תקין";
-      docNote.innerHTML = `
-        <span class="status-chip ok">מסמך צורף</span>
-        <strong>${fileName}</strong>
-      `;
+      selectedDocText = fileName;
     }
   });
 
@@ -655,30 +661,11 @@ function renderSelectedWorker(worker) {
   });
 
   selectedWorkerPanel.querySelector("[data-add-worker-today]")?.addEventListener("click", () => {
-    addWorkerToToday(worker, docStatus?.value ?? "תקין", docFile?.files?.[0]?.name ?? "");
+    addWorkerToToday(worker, "תקין", docFile?.files?.[0]?.name ?? selectedDocText);
     selectedWorkerPanel.classList.remove("is-open");
     selectedWorkerPanel.innerHTML = "";
     workerSearch.value = "";
   });
-}
-
-function updateSelectedWorkerDocNote(status, noteElement) {
-  if (!noteElement) {
-    return;
-  }
-
-  const states = {
-    "תקין": ["ok", "מסמכים תקינים", "אפשר להוסיף את העובד ליומן היום."],
-    "חסר מסמך": ["warning", "חסר מסמך", "יש לצלם/לצרף מסמך או לסמן לטיפול."],
-    "נדרש צילום": ["warning", "נדרש צילום", "לחץ על סרוק/צלם מסמך לפני ההוספה."],
-    "לא רלוונטי": ["muted", "לא רלוונטי", "אין מסמך נדרש לעבודה הזו היום."],
-  };
-  const [className, label, text] = states[status] ?? states["תקין"];
-
-  noteElement.innerHTML = `
-    <span class="status-chip ${className}">${label}</span>
-    <strong>${text}</strong>
-  `;
 }
 
 function addWorkerToToday(worker, docStatus = "תקין", docFileName = "") {
