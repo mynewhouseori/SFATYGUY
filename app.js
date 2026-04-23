@@ -1,4 +1,10 @@
 const STORAGE_KEY = "safety-field-general-defaults";
+const CLOUD_DOCUMENTS_KEY = "safety-field-cloud-documents";
+const CLOUD_STORAGE_CONFIG = {
+  supabaseUrl: "",
+  supabaseAnonKey: "",
+  bucket: "worker-documents",
+};
 
 const enterButton = document.getElementById("enterButton");
 const continueButton = document.getElementById("continueButton");
@@ -150,6 +156,121 @@ function saveDefaults() {
   };
 
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(defaults));
+}
+
+function getCloudConfig() {
+  return {
+    ...CLOUD_STORAGE_CONFIG,
+    ...(window.SFATYGUY_CLOUD_CONFIG ?? {}),
+  };
+}
+
+function isCloudConfigured() {
+  const config = getCloudConfig();
+  return Boolean(config.supabaseUrl && config.supabaseAnonKey && config.bucket);
+}
+
+function loadCloudDocuments() {
+  try {
+    const stored = window.localStorage.getItem(CLOUD_DOCUMENTS_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveCloudDocumentRecord(record) {
+  const records = loadCloudDocuments().filter((item) => item.id !== record.id);
+  records.unshift(record);
+  window.localStorage.setItem(CLOUD_DOCUMENTS_KEY, JSON.stringify(records.slice(0, 120)));
+}
+
+function getCloudDocumentsForWorker(worker) {
+  return loadCloudDocuments()
+    .filter((doc) => doc.workerId === worker.id)
+    .map((doc) => ({
+      name: doc.documentType,
+      status: "נשמר בענן",
+      expiry: doc.savedAtDisplay,
+      className: "ok",
+      url: doc.publicUrl,
+      cloudPath: doc.path,
+    }));
+}
+
+function sanitizePathSegment(value) {
+  return (value || "general")
+    .toString()
+    .trim()
+    .replace(/[^\p{L}\p{N}._-]+/gu, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80) || "general";
+}
+
+function getActiveSiteName() {
+  return fields.siteName?.value?.trim() || "site";
+}
+
+async function uploadWorkerDocumentToCloud(worker, file, documentType) {
+  if (!file) {
+    return { ok: false, message: "לא נבחר קובץ." };
+  }
+
+  if (!isCloudConfigured()) {
+    return {
+      ok: false,
+      message: "שמירה בענן עדיין לא מחוברת. צריך להגדיר Supabase URL ו-Anon Key.",
+    };
+  }
+
+  const config = getCloudConfig();
+  const now = new Date();
+  const safeSite = sanitizePathSegment(getActiveSiteName());
+  const safeWorker = sanitizePathSegment(`${worker.id}-${worker.name}`);
+  const safeDocType = sanitizePathSegment(documentType || "מסמך עובד");
+  const safeFileName = sanitizePathSegment(file.name || "document");
+  const objectPath = `${safeSite}/${safeWorker}/${safeDocType}/${now.getTime()}-${safeFileName}`;
+  const encodedPath = objectPath.split("/").map(encodeURIComponent).join("/");
+  const endpoint = `${config.supabaseUrl.replace(/\/$/, "")}/storage/v1/object/${config.bucket}/${encodedPath}`;
+
+  const response = await fetch(endpoint, {
+    method: "PUT",
+    headers: {
+      apikey: config.supabaseAnonKey,
+      Authorization: `Bearer ${config.supabaseAnonKey}`,
+      "Content-Type": file.type || "application/octet-stream",
+      "x-upsert": "true",
+    },
+    body: file,
+  });
+
+  if (!response.ok) {
+    const message = await response.text();
+    return { ok: false, message: message || "העלאה לענן נכשלה." };
+  }
+
+  const publicUrl = `${config.supabaseUrl.replace(/\/$/, "")}/storage/v1/object/public/${config.bucket}/${encodedPath}`;
+  const savedAtDisplay = new Intl.DateTimeFormat("he-IL", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(now);
+  const record = {
+    id: `${worker.id}-${now.getTime()}`,
+    workerId: worker.id,
+    workerName: worker.name,
+    documentType: documentType || file.name || "מסמך עובד",
+    fileName: file.name || "document",
+    path: objectPath,
+    publicUrl,
+    savedAt: now.toISOString(),
+    savedAtDisplay,
+  };
+
+  saveCloudDocumentRecord(record);
+  return { ok: true, record };
 }
 
 function populateForm() {
@@ -430,7 +551,7 @@ function getWorkerDocuments(worker) {
     ],
   };
 
-  return [...commonDocs, ...(roleDocs[worker.role] ?? [])];
+  return [...getCloudDocumentsForWorker(worker), ...commonDocs, ...(roleDocs[worker.role] ?? [])];
 }
 
 function getSavedWorkerDocuments(worker) {
@@ -458,14 +579,40 @@ function openWorkerDocs(worker, selectedDocName = "") {
             <strong>${doc.name}</strong>
             <span>תוקף: ${doc.expiry}</span>
           </div>
-          <span class="status-chip ${doc.className}">${doc.status}</span>
+          <div class="doc-card-actions">
+            <span class="status-chip ${doc.className}">${doc.status}</span>
+            ${doc.url ? `<button class="ghost-button doc-open-button" type="button" data-doc-url="${doc.url}">פתח קובץ</button>` : ""}
+          </div>
         </article>
       `
     )
     .join("");
 
+  workerDocsList.querySelectorAll("[data-doc-url]").forEach((button) => {
+    button.addEventListener("click", () => {
+      window.open(button.getAttribute("data-doc-url"), "_blank", "noopener,noreferrer");
+    });
+  });
+
   workerDocsModal.classList.add("is-open");
   document.body.style.overflow = "hidden";
+}
+
+function refreshWorkerDocumentSelect(worker, select, selectedValue = "") {
+  if (!select) {
+    return;
+  }
+
+  select.innerHTML = `
+    <option value="">בחר מסמך לפתיחה</option>
+    ${getSavedWorkerDocuments(worker)
+      .map((doc) => `<option value="${doc.name}">${doc.name} - ${doc.status}</option>`)
+      .join("")}
+  `;
+
+  if (selectedValue) {
+    select.value = selectedValue;
+  }
 }
 
 function closeWorkerDocs() {
@@ -615,9 +762,6 @@ function renderSelectedWorker(worker) {
           <span>מסמכים שמורים</span>
           <select data-worker-doc-select>
             <option value="">בחר מסמך לפתיחה</option>
-            ${getSavedWorkerDocuments(worker)
-              .map((doc) => `<option value="${doc.name}">${doc.name} - ${doc.status}</option>`)
-              .join("")}
           </select>
         </label>
       </div>
@@ -634,6 +778,8 @@ function renderSelectedWorker(worker) {
   const docFile = selectedWorkerPanel.querySelector("[data-worker-doc-file]");
   let selectedDocText = "מסמכים במאגר";
 
+  refreshWorkerDocumentSelect(worker, docSelect);
+
   docSelect?.addEventListener("change", () => {
     if (!docSelect.value) {
       selectedDocText = "מסמכים במאגר";
@@ -644,11 +790,57 @@ function renderSelectedWorker(worker) {
     openWorkerDocs(worker, docSelect.value);
   });
 
-  docFile?.addEventListener("change", () => {
+  docFile?.addEventListener("change", async () => {
     const fileName = docFile.files?.[0]?.name;
 
-    if (fileName) {
+    if (!fileName) {
+      return;
+    }
+
+    const scanButton = selectedWorkerPanel.querySelector("[data-scan-worker-doc]");
+    const originalLabel = scanButton?.textContent ?? "סרוק/צלם מסמך";
+    const documentType = docSelect?.value || "מסמך עובד";
+
+    if (scanButton) {
+      scanButton.textContent = "מעלה לענן...";
+      scanButton.disabled = true;
+    }
+
+    try {
+      const result = await uploadWorkerDocumentToCloud(worker, docFile.files[0], documentType);
+
+      if (result.ok) {
+        selectedDocText = result.record.documentType;
+        refreshWorkerDocumentSelect(worker, docSelect, result.record.documentType);
+        if (scanButton) {
+          scanButton.textContent = "נשמר בענן";
+        }
+      } else if (scanButton) {
+        selectedDocText = fileName;
+        scanButton.textContent = "ענן לא מחובר";
+        window.setTimeout(() => {
+          scanButton.textContent = originalLabel;
+        }, 2200);
+        window.alert(result.message);
+      }
+    } catch (error) {
       selectedDocText = fileName;
+      if (scanButton) {
+        scanButton.textContent = "שמירה נכשלה";
+        window.setTimeout(() => {
+          scanButton.textContent = originalLabel;
+        }, 2200);
+      }
+      window.alert("שמירת המסמך בענן נכשלה. בדוק חיבור ופרטי ענן.");
+    } finally {
+      if (scanButton) {
+        scanButton.disabled = false;
+        if (scanButton.textContent === "נשמר בענן") {
+          window.setTimeout(() => {
+            scanButton.textContent = originalLabel;
+          }, 1800);
+        }
+      }
     }
   });
 

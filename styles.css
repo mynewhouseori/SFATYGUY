@@ -919,6 +919,18 @@ input {
   font-size: 0.86rem;
 }
 
+.doc-card-actions {
+  display: grid;
+  gap: 6px;
+  justify-items: end;
+}
+
+.doc-open-button {
+  padding: 7px 10px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+}
+
 .clock-options {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
