@@ -1,6 +1,9 @@
 const STORAGE_KEY = "safety-field-general-defaults";
 const CLOUD_DOCUMENTS_KEY = "safety-field-cloud-documents";
 const CLOUD_DOCUMENTS_COLLECTION = "safety_worker_documents";
+const CLOUD_DOCUMENT_CHUNKS_COLLECTION = "safety_worker_document_chunks";
+const FIRESTORE_PAYLOAD_CHUNK_SIZE = 180000;
+const MAX_DOCUMENT_FILE_SIZE = 8 * 1024 * 1024;
 const FIREBASE_STORAGE_CONFIG = {
   apiKey: "AIzaSyCba5FEsy3WlrrkzjXFPZrKyW9nXsdZ5l4",
   authDomain: "nfc-demo-91f72.firebaseapp.com",
@@ -10,6 +13,7 @@ const FIREBASE_STORAGE_CONFIG = {
   appId: "1:1097334929129:web:73ee3cc80f0b86572d2278",
 };
 let workerDocumentRefreshToken = 0;
+const workerDocumentUrlCache = new Map();
 
 const enterButton = document.getElementById("enterButton");
 const continueButton = document.getElementById("continueButton");
@@ -216,8 +220,12 @@ function getCloudDocumentsForWorker(worker) {
       status: "נשמר בענן",
       expiry: doc.savedAtDisplay,
       className: "ok",
-      url: doc.publicUrl || doc.previewUrl,
+      url: doc.publicUrl || doc.previewUrl || (doc.storageMode === "firestore-chunked" ? "cloud:" + doc.id : ""),
       cloudPath: doc.path,
+      storageMode: doc.storageMode || "firestore",
+      chunkCount: doc.chunkCount || 0,
+      mimeType: doc.mimeType || "",
+      fileName: doc.fileName || "",
     }));
 }
 
@@ -255,10 +263,11 @@ async function fileToDataUrl(file) {
 async function prepareDocumentPayload(file) {
   const isImage = file.type.startsWith("image/");
 
+  if (file.size > MAX_DOCUMENT_FILE_SIZE) {
+    throw new Error("The selected file is too large to upload from this device.");
+  }
+
   if (!isImage) {
-    if (file.size > 700 * 1024) {
-      throw new Error("קבצי PDF/מסמכים גדולים מדי לדמו הזה. עדיף לצלם כתמונה או להקטין קובץ.");
-    }
     return fileToDataUrl(file);
   }
 
@@ -273,41 +282,140 @@ async function prepareDocumentPayload(file) {
       const context = canvas.getContext("2d");
 
       if (!context) {
-        reject(new Error("עיבוד התמונה נכשל."));
+        reject(new Error("Image processing failed."));
         return;
       }
 
       context.drawImage(image, 0, 0, canvas.width, canvas.height);
       resolve(canvas.toDataURL("image/jpeg", 0.72));
     };
-    image.onerror = () => reject(new Error("טעינת התמונה נכשלה."));
+    image.onerror = () => reject(new Error("Image loading failed."));
     image.src = sourceDataUrl;
   });
 }
 
+
+function splitIntoPayloadChunks(payload, chunkSize = FIRESTORE_PAYLOAD_CHUNK_SIZE) {
+  const chunks = [];
+
+  for (let index = 0; index < payload.length; index += chunkSize) {
+    chunks.push(payload.slice(index, index + chunkSize));
+  }
+
+  return chunks;
+}
+
+async function saveChunkedDocumentPayload(firestore, documentId, payload, mimeType) {
+  const chunks = splitIntoPayloadChunks(payload);
+
+  if (!chunks.length) {
+    throw new Error("Document payload is empty.");
+  }
+
+  for (let startIndex = 0; startIndex < chunks.length; startIndex += 200) {
+    const batch = firestore.batch();
+    const batchChunks = chunks.slice(startIndex, startIndex + 200);
+
+    batchChunks.forEach((chunk, offset) => {
+      const chunkIndex = startIndex + offset;
+      const chunkRef = firestore.collection(CLOUD_DOCUMENT_CHUNKS_COLLECTION).doc(`${documentId}_${chunkIndex}`);
+      batch.set(chunkRef, {
+        documentId,
+        index: chunkIndex,
+        payload: chunk,
+        mimeType,
+        createdAt: new Date().toISOString(),
+      });
+    });
+
+    await batch.commit();
+  }
+
+  return chunks.length;
+}
+
+async function loadChunkedDocumentPayload(firestore, documentId) {
+  const snapshot = await firestore
+    .collection(CLOUD_DOCUMENT_CHUNKS_COLLECTION)
+    .where("documentId", "==", documentId)
+    .get();
+
+  if (snapshot.empty) {
+    throw new Error("Document chunks were not found in cloud storage.");
+  }
+
+  return snapshot.docs
+    .map((doc) => doc.data())
+    .sort((a, b) => Number(a.index || 0) - Number(b.index || 0))
+    .map((item) => String(item.payload || ""))
+    .join("");
+}
+
+async function resolveWorkerDocumentUrl(doc) {
+  if (doc.url && !String(doc.url).startsWith("cloud:")) {
+    return doc.url;
+  }
+
+  if (workerDocumentUrlCache.has(doc.id)) {
+    return workerDocumentUrlCache.get(doc.id);
+  }
+
+  const firestore = getFirebaseFirestore();
+
+  if (!firestore) {
+    throw new Error("Firebase Firestore is not available.");
+  }
+
+  if (doc.storageMode === "firestore-chunked") {
+    const payload = await loadChunkedDocumentPayload(firestore, doc.id);
+    workerDocumentUrlCache.set(doc.id, payload);
+    return payload;
+  }
+
+  throw new Error("Document URL is not available.");
+}
+
+async function openWorkerDocument(doc) {
+  try {
+    const documentUrl = await resolveWorkerDocumentUrl(doc);
+    window.open(documentUrl, "_blank", "noopener,noreferrer");
+  } catch (error) {
+    window.alert(error?.message || "Opening the document failed.");
+  }
+}
 async function uploadWorkerDocumentToFirestore(worker, file, documentType, now = new Date()) {
   const firestore = getFirebaseFirestore();
 
   if (!firestore) {
     return {
       ok: false,
-      message: "Firebase Firestore לא נטען. בדוק חיבור אינטרנט וטעינת Firebase.",
+      message: "Firebase Firestore is not available. Check the network connection.",
     };
   }
 
   try {
     const previewUrl = await prepareDocumentPayload(file);
+    const docRef = firestore.collection(CLOUD_DOCUMENTS_COLLECTION).doc();
     const record = buildCloudDocumentRecord(worker, file, documentType, "", "", now);
-    record.previewUrl = previewUrl;
-    record.storageMode = "firestore";
-    const docRef = await firestore.collection(CLOUD_DOCUMENTS_COLLECTION).add(record);
     record.id = docRef.id;
+    record.mimeType = file.type || "application/octet-stream";
+
+    if (previewUrl.length > FIRESTORE_PAYLOAD_CHUNK_SIZE) {
+      record.storageMode = "firestore-chunked";
+      record.chunkCount = await saveChunkedDocumentPayload(firestore, record.id, previewUrl, record.mimeType);
+    } else {
+      record.previewUrl = previewUrl;
+      record.storageMode = "firestore";
+      record.chunkCount = 1;
+    }
+
+    await docRef.set(record);
     saveCloudDocumentRecord(record);
     return { ok: true, record };
   } catch (error) {
     return {
       ok: false,
-      message: error?.message || "שמירת המסמך ב-Firestore נכשלה.",
+      message: error?.message || "Saving the document to Firestore failed.",
     };
   }
 }
@@ -670,16 +778,21 @@ function openWorkerDocs(worker, selectedDocId = "") {
           </div>
           <div class="doc-card-actions">
             <span class="status-chip ${doc.className}">${doc.status}</span>
-            ${doc.url ? `<button class="ghost-button doc-open-button" type="button" data-doc-url="${doc.url}">פתח קובץ</button>` : ""}
+            ${doc.url ? `<button class="ghost-button doc-open-button" type="button" data-doc-id="${doc.id}">פתח קובץ</button>` : ""}
           </div>
         </article>
       `
     )
     .join("");
 
-  workerDocsList.querySelectorAll("[data-doc-url]").forEach((button) => {
+  workerDocsList.querySelectorAll("[data-doc-id]").forEach((button) => {
     button.addEventListener("click", () => {
-      window.open(button.getAttribute("data-doc-url"), "_blank", "noopener,noreferrer");
+      const documentId = button.getAttribute("data-doc-id") ?? "";
+      const selectedDocument = docs.find((item) => item.id === documentId);
+
+      if (selectedDocument) {
+        openWorkerDocument(selectedDocument);
+      }
     });
   });
 
@@ -901,7 +1014,9 @@ function renderSelectedWorker(worker) {
 
     const scanButton = selectedWorkerPanel.querySelector("[data-scan-worker-doc]");
     const originalLabel = scanButton?.textContent ?? "סרוק/צלם מסמך";
-    const documentType = docSelect?.value || "מסמך עובד";
+    const selectedOption = docSelect?.selectedOptions?.[0];
+    const selectedDocumentName = selectedOption?.textContent?.split(" - ")[0]?.trim();
+    const documentType = selectedDocumentName || "מסמך עובד";
 
     if (scanButton) {
       scanButton.textContent = "מעלה לענן...";
