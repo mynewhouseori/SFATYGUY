@@ -996,6 +996,12 @@ input {
     display: none;
   }
 
+  .screen-panel.is-login-active .app-header {
+    display: flex;
+    top: calc(env(safe-area-inset-top, 0px) + 16px);
+    left: 16px;
+  }
+
   .brand-mark {
     width: 54px;
     height: 54px;
@@ -1014,12 +1020,20 @@ input {
       linear-gradient(180deg, rgba(17, 31, 35, 0.96), rgba(9, 21, 25, 1));
   }
 
+  .screen-panel.is-login-active {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 86px);
+  }
+
   .screen-view {
     width: 100%;
     min-height: calc(100dvh - (env(safe-area-inset-top, 0px) + 16px));
     place-items: start stretch;
     align-content: start;
     padding: 0 14px 24px;
+  }
+
+  .screen-panel.is-login-active .screen-view {
+    min-height: calc(100dvh - (env(safe-area-inset-top, 0px) + 86px));
   }
 
   .screen-overlay {

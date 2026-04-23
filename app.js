@@ -49,6 +49,7 @@ const workerDocsTitle = document.getElementById("workerDocsTitle");
 const workerDocsList = document.getElementById("workerDocsList");
 const workerDocsClose = document.getElementById("workerDocsClose");
 const workerDocsScan = document.getElementById("workerDocsScan");
+const screenPanel = document.querySelector(".screen-panel");
 let activeClockTrigger = null;
 let selectedClockHour = "06";
 let selectedClockMinute = "35";
@@ -503,6 +504,7 @@ function navigateTo(viewId) {
   views.forEach((view) => {
     view.classList.toggle("is-active", view.id === viewId);
   });
+  screenPanel?.classList.toggle("is-login-active", viewId === "loginView");
 }
 
 function resetErrorState() {
