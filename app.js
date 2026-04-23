@@ -1,10 +1,15 @@
 const STORAGE_KEY = "safety-field-general-defaults";
 const CLOUD_DOCUMENTS_KEY = "safety-field-cloud-documents";
-const CLOUD_STORAGE_CONFIG = {
-  supabaseUrl: "",
-  supabaseAnonKey: "",
-  bucket: "worker-documents",
+const CLOUD_DOCUMENTS_COLLECTION = "safety_worker_documents";
+const FIREBASE_STORAGE_CONFIG = {
+  apiKey: "AIzaSyCba5FEsy3WlrrkzjXFPZrKyW9nXsdZ5l4",
+  authDomain: "nfc-demo-91f72.firebaseapp.com",
+  projectId: "nfc-demo-91f72",
+  storageBucket: "nfc-demo-91f72.firebasestorage.app",
+  messagingSenderId: "1097334929129",
+  appId: "1:1097334929129:web:73ee3cc80f0b86572d2278",
 };
+let workerDocumentRefreshToken = 0;
 
 const enterButton = document.getElementById("enterButton");
 const continueButton = document.getElementById("continueButton");
@@ -158,16 +163,23 @@ function saveDefaults() {
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(defaults));
 }
 
-function getCloudConfig() {
+function getFirebaseConfig() {
   return {
-    ...CLOUD_STORAGE_CONFIG,
-    ...(window.SFATYGUY_CLOUD_CONFIG ?? {}),
+    ...FIREBASE_STORAGE_CONFIG,
+    ...(window.SFATYGUY_FIREBASE_CONFIG ?? {}),
   };
 }
 
-function isCloudConfigured() {
-  const config = getCloudConfig();
-  return Boolean(config.supabaseUrl && config.supabaseAnonKey && config.bucket);
+function getFirebaseFirestore() {
+  if (!window.firebase?.apps) {
+    return null;
+  }
+
+  const app = window.firebase.apps.length
+    ? window.firebase.app()
+    : window.firebase.initializeApp(getFirebaseConfig());
+
+  return window.firebase.firestore(app);
 }
 
 function loadCloudDocuments() {
@@ -185,15 +197,26 @@ function saveCloudDocumentRecord(record) {
   window.localStorage.setItem(CLOUD_DOCUMENTS_KEY, JSON.stringify(records.slice(0, 120)));
 }
 
+function saveCloudDocumentRecords(recordsToMerge) {
+  const existing = loadCloudDocuments();
+  const byId = new Map(existing.map((item) => [item.id, item]));
+  recordsToMerge.forEach((item) => byId.set(item.id, item));
+  const merged = Array.from(byId.values())
+    .sort((a, b) => String(b.savedAt || "").localeCompare(String(a.savedAt || "")))
+    .slice(0, 120);
+  window.localStorage.setItem(CLOUD_DOCUMENTS_KEY, JSON.stringify(merged));
+}
+
 function getCloudDocumentsForWorker(worker) {
   return loadCloudDocuments()
     .filter((doc) => doc.workerId === worker.id)
     .map((doc) => ({
+      id: doc.id,
       name: doc.documentType,
       status: "נשמר בענן",
       expiry: doc.savedAtDisplay,
       className: "ok",
-      url: doc.publicUrl,
+      url: doc.publicUrl || doc.previewUrl,
       cloudPath: doc.path,
     }));
 }
@@ -216,40 +239,103 @@ async function uploadWorkerDocumentToCloud(worker, file, documentType) {
     return { ok: false, message: "לא נבחר קובץ." };
   }
 
-  if (!isCloudConfigured()) {
+  const now = new Date();
+  return uploadWorkerDocumentToFirestore(worker, file, documentType, now);
+}
+
+async function fileToDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(new Error("קריאת הקובץ נכשלה."));
+    reader.readAsDataURL(file);
+  });
+}
+
+async function prepareDocumentPayload(file) {
+  const isImage = file.type.startsWith("image/");
+
+  if (!isImage) {
+    if (file.size > 700 * 1024) {
+      throw new Error("קבצי PDF/מסמכים גדולים מדי לדמו הזה. עדיף לצלם כתמונה או להקטין קובץ.");
+    }
+    return fileToDataUrl(file);
+  }
+
+  const sourceDataUrl = await fileToDataUrl(file);
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => {
+      const scale = Math.min(1, 1400 / Math.max(image.width, image.height));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.max(1, Math.round(image.width * scale));
+      canvas.height = Math.max(1, Math.round(image.height * scale));
+      const context = canvas.getContext("2d");
+
+      if (!context) {
+        reject(new Error("עיבוד התמונה נכשל."));
+        return;
+      }
+
+      context.drawImage(image, 0, 0, canvas.width, canvas.height);
+      resolve(canvas.toDataURL("image/jpeg", 0.72));
+    };
+    image.onerror = () => reject(new Error("טעינת התמונה נכשלה."));
+    image.src = sourceDataUrl;
+  });
+}
+
+async function uploadWorkerDocumentToFirestore(worker, file, documentType, now = new Date()) {
+  const firestore = getFirebaseFirestore();
+
+  if (!firestore) {
     return {
       ok: false,
-      message: "שמירה בענן עדיין לא מחוברת. צריך להגדיר Supabase URL ו-Anon Key.",
+      message: "Firebase Firestore לא נטען. בדוק חיבור אינטרנט וטעינת Firebase.",
     };
   }
 
-  const config = getCloudConfig();
-  const now = new Date();
-  const safeSite = sanitizePathSegment(getActiveSiteName());
-  const safeWorker = sanitizePathSegment(`${worker.id}-${worker.name}`);
-  const safeDocType = sanitizePathSegment(documentType || "מסמך עובד");
-  const safeFileName = sanitizePathSegment(file.name || "document");
-  const objectPath = `${safeSite}/${safeWorker}/${safeDocType}/${now.getTime()}-${safeFileName}`;
-  const encodedPath = objectPath.split("/").map(encodeURIComponent).join("/");
-  const endpoint = `${config.supabaseUrl.replace(/\/$/, "")}/storage/v1/object/${config.bucket}/${encodedPath}`;
+  try {
+    const previewUrl = await prepareDocumentPayload(file);
+    const record = buildCloudDocumentRecord(worker, file, documentType, "", "", now);
+    record.previewUrl = previewUrl;
+    record.storageMode = "firestore";
+    const docRef = await firestore.collection(CLOUD_DOCUMENTS_COLLECTION).add(record);
+    record.id = docRef.id;
+    saveCloudDocumentRecord(record);
+    return { ok: true, record };
+  } catch (error) {
+    return {
+      ok: false,
+      message: error?.message || "שמירת המסמך ב-Firestore נכשלה.",
+    };
+  }
+}
 
-  const response = await fetch(endpoint, {
-    method: "PUT",
-    headers: {
-      apikey: config.supabaseAnonKey,
-      Authorization: `Bearer ${config.supabaseAnonKey}`,
-      "Content-Type": file.type || "application/octet-stream",
-      "x-upsert": "true",
-    },
-    body: file,
-  });
+async function syncWorkerDocumentsFromCloud(worker) {
+  const firestore = getFirebaseFirestore();
 
-  if (!response.ok) {
-    const message = await response.text();
-    return { ok: false, message: message || "העלאה לענן נכשלה." };
+  if (!firestore) {
+    return [];
   }
 
-  const publicUrl = `${config.supabaseUrl.replace(/\/$/, "")}/storage/v1/object/public/${config.bucket}/${encodedPath}`;
+  try {
+    const snapshot = await firestore
+      .collection(CLOUD_DOCUMENTS_COLLECTION)
+      .where("workerId", "==", worker.id)
+      .get();
+    const records = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    saveCloudDocumentRecords(records);
+    return records;
+  } catch {
+    return [];
+  }
+}
+
+function buildCloudDocumentRecord(worker, file, documentType, objectPath, publicUrl, now) {
   const savedAtDisplay = new Intl.DateTimeFormat("he-IL", {
     day: "2-digit",
     month: "2-digit",
@@ -257,7 +343,8 @@ async function uploadWorkerDocumentToCloud(worker, file, documentType) {
     hour: "2-digit",
     minute: "2-digit",
   }).format(now);
-  const record = {
+
+  return {
     id: `${worker.id}-${now.getTime()}`,
     workerId: worker.id,
     workerName: worker.name,
@@ -268,9 +355,6 @@ async function uploadWorkerDocumentToCloud(worker, file, documentType) {
     savedAt: now.toISOString(),
     savedAtDisplay,
   };
-
-  saveCloudDocumentRecord(record);
-  return { ok: true, record };
 }
 
 function populateForm() {
@@ -558,18 +642,23 @@ function getSavedWorkerDocuments(worker) {
   return getWorkerDocuments(worker).filter((doc) => doc.status !== "חסר");
 }
 
-function openWorkerDocs(worker, selectedDocName = "") {
+function openWorkerDocs(worker, selectedDocId = "") {
   if (!workerDocsModal || !workerDocsList) {
     return;
   }
 
+  const allDocs = getWorkerDocuments(worker);
+  const selectedDoc = selectedDocId
+    ? allDocs.find((doc) => doc.id === selectedDocId)
+    : null;
+
   if (workerDocsTitle) {
-    workerDocsTitle.textContent = selectedDocName || worker.name;
+    workerDocsTitle.textContent = selectedDoc
+      ? `${selectedDoc.name} - ${selectedDoc.expiry}`
+      : worker.name;
   }
 
-  const docs = selectedDocName
-    ? getWorkerDocuments(worker).filter((doc) => doc.name === selectedDocName)
-    : getWorkerDocuments(worker);
+  const docs = selectedDoc ? [selectedDoc] : allDocs;
 
   workerDocsList.innerHTML = docs
     .map(
@@ -606,13 +695,24 @@ function refreshWorkerDocumentSelect(worker, select, selectedValue = "") {
   select.innerHTML = `
     <option value="">בחר מסמך לפתיחה</option>
     ${getSavedWorkerDocuments(worker)
-      .map((doc) => `<option value="${doc.name}">${doc.name} - ${doc.status}</option>`)
+      .map((doc) => `<option value="${doc.id}">${doc.name} - ${doc.status} - ${doc.expiry}</option>`)
       .join("")}
   `;
 
   if (selectedValue) {
     select.value = selectedValue;
   }
+}
+
+async function refreshWorkerDocumentsFromCloud(worker, select, selectedValue = "") {
+  const refreshId = ++workerDocumentRefreshToken;
+  await syncWorkerDocumentsFromCloud(worker);
+
+  if (refreshId !== workerDocumentRefreshToken) {
+    return;
+  }
+
+  refreshWorkerDocumentSelect(worker, select, selectedValue);
 }
 
 function closeWorkerDocs() {
@@ -779,6 +879,7 @@ function renderSelectedWorker(worker) {
   let selectedDocText = "מסמכים במאגר";
 
   refreshWorkerDocumentSelect(worker, docSelect);
+  refreshWorkerDocumentsFromCloud(worker, docSelect);
 
   docSelect?.addEventListener("change", () => {
     if (!docSelect.value) {
@@ -786,7 +887,8 @@ function renderSelectedWorker(worker) {
       return;
     }
 
-    selectedDocText = docSelect.value;
+    const selectedOption = docSelect.selectedOptions?.[0];
+    selectedDocText = selectedOption?.textContent?.split(" - ")[0] || "מסמך עובד";
     openWorkerDocs(worker, docSelect.value);
   });
 
@@ -811,7 +913,7 @@ function renderSelectedWorker(worker) {
 
       if (result.ok) {
         selectedDocText = result.record.documentType;
-        refreshWorkerDocumentSelect(worker, docSelect, result.record.documentType);
+        refreshWorkerDocumentSelect(worker, docSelect, result.record.id);
         if (scanButton) {
           scanButton.textContent = "נשמר בענן";
         }
@@ -831,7 +933,7 @@ function renderSelectedWorker(worker) {
           scanButton.textContent = originalLabel;
         }, 2200);
       }
-      window.alert("שמירת המסמך בענן נכשלה. בדוק חיבור ופרטי ענן.");
+      window.alert("שמירת המסמך בענן נכשלה. בדוק חיבור ו-Firebase.");
     } finally {
       if (scanButton) {
         scanButton.disabled = false;

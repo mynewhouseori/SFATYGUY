@@ -28,14 +28,5 @@ This project is ready to publish as a static site on GitHub Pages.
 
 ## Cloud document storage
 
-Worker document uploads are wired for Supabase Storage. To enable real cloud uploads, set these values in `app.js`:
-
-```js
-const CLOUD_STORAGE_CONFIG = {
-  supabaseUrl: "https://YOUR_PROJECT.supabase.co",
-  supabaseAnonKey: "YOUR_SUPABASE_ANON_KEY",
-  bucket: "worker-documents",
-};
-```
-
-Create a Supabase Storage bucket named `worker-documents`. For this static prototype, uploaded document links are opened through the bucket public URL, so the bucket/policies must allow the intended access.
+Worker document uploads use the Firebase project from `NFC-DEMO01`: `nfc-demo-91f72`.
+In this static prototype, worker documents are saved in Firebase Firestore so they work from the deployed web app without Storage CORS setup.
