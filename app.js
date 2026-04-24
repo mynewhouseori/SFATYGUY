@@ -486,7 +486,7 @@ async function loadChunkedDocumentPayload(firestore, documentId) {
 }
 
 async function resolveWorkerDocumentUrl(doc) {
-  if (doc.url && !String(doc.url).startsWith("cloud:")) {
+  if (doc.url && /^(https?:|data:|blob:)/i.test(String(doc.url))) {
     return doc.url;
   }
 
@@ -500,10 +500,32 @@ async function resolveWorkerDocumentUrl(doc) {
     throw new Error("Firebase Firestore is not available.");
   }
 
+  if (doc.storageMode === "firebase-storage") {
+    const storage = getFirebaseStorage();
+
+    if (!storage || !doc.cloudPath) {
+      throw new Error("קישור המסמך בענן אינו זמין.");
+    }
+
+    const downloadUrl = await storage.ref(doc.cloudPath).getDownloadURL();
+
+    if (!downloadUrl) {
+      throw new Error("לא התקבל קישור תקין למסמך.");
+    }
+
+    workerDocumentUrlCache.set(doc.id, downloadUrl);
+    return downloadUrl;
+  }
+
   if (doc.storageMode === "firestore-chunked") {
     const payload = await loadChunkedDocumentPayload(firestore, doc.id);
     workerDocumentUrlCache.set(doc.id, payload);
     return payload;
+  }
+
+  if (doc.storageMode === "firestore" && doc.url) {
+    workerDocumentUrlCache.set(doc.id, doc.url);
+    return doc.url;
   }
 
   throw new Error("Document URL is not available.");
@@ -520,6 +542,10 @@ async function openWorkerDocument(doc) {
 
   try {
     const documentUrl = await resolveWorkerDocumentUrl(doc);
+
+    if (!documentUrl) {
+      throw new Error("לא נמצא קישור תקין למסמך.");
+    }
 
     if (previewWindow && !previewWindow.closed) {
       previewWindow.location.replace(documentUrl);
