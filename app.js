@@ -213,6 +213,70 @@ function withTimeout(promise, timeoutMs, message) {
   ]);
 }
 
+function buildWorkerDocumentViewerHtml(documentUrl, mimeType = "", fileName = "") {
+  const safeTitle = String(fileName || "מסמך עובד").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const isImage = String(mimeType).startsWith("image/");
+  const isPdf = String(mimeType).includes("pdf") || String(documentUrl).startsWith("data:application/pdf");
+  const viewerBody = isImage
+    ? `<img src="${documentUrl}" alt="${safeTitle}" style="max-width:100%;height:auto;display:block;margin:0 auto;" />`
+    : isPdf
+      ? `<iframe src="${documentUrl}" title="${safeTitle}" style="width:100%;height:100%;border:0;"></iframe>`
+      : `<iframe src="${documentUrl}" title="${safeTitle}" style="width:100%;height:100%;border:0;"></iframe>`;
+
+  return `<!doctype html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>${safeTitle}</title>
+    <style>
+      html, body { margin: 0; height: 100%; background: #0f1d22; color: #f8f4eb; font-family: Heebo, sans-serif; }
+      .viewer-shell { height: 100%; display: grid; grid-template-rows: auto 1fr; }
+      .viewer-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; background: rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.12); }
+      .viewer-name { font-size: 16px; font-weight: 700; }
+      .viewer-frame { height: 100%; padding: 0; }
+      .viewer-frame iframe { background: #ffffff; }
+      .viewer-download { color: #fff4e6; text-decoration: none; border: 1px solid rgba(209,138,58,0.45); padding: 8px 12px; border-radius: 999px; }
+      .viewer-download:hover { background: rgba(209,138,58,0.18); }
+    </style>
+  </head>
+  <body>
+    <div class="viewer-shell">
+      <div class="viewer-bar">
+        <div class="viewer-name">${safeTitle}</div>
+        <a class="viewer-download" href="${documentUrl}" target="_blank" rel="noopener noreferrer">פתח קובץ</a>
+      </div>
+      <div class="viewer-frame">${viewerBody}</div>
+    </div>
+  </body>
+</html>`;
+}
+
+async function prepareDocumentViewerSource(doc, documentUrl) {
+  if (/^data:|^blob:/i.test(String(documentUrl))) {
+    return {
+      url: documentUrl,
+      mimeType: doc.mimeType || "",
+    };
+  }
+
+  const response = await withTimeout(
+    fetch(documentUrl),
+    25000,
+    "הורדת המסמך ארכה יותר מדי זמן. נסה שוב."
+  );
+
+  if (!response.ok) {
+    throw new Error("טעינת המסמך נכשלה.");
+  }
+
+  const blob = await response.blob();
+  return {
+    url: URL.createObjectURL(blob),
+    mimeType: blob.type || doc.mimeType || "",
+  };
+}
+
 function loadCloudDocuments() {
   try {
     const stored = window.localStorage.getItem(CLOUD_DOCUMENTS_KEY);
@@ -547,18 +611,29 @@ async function openWorkerDocument(doc) {
       throw new Error("לא נמצא קישור תקין למסמך.");
     }
 
+    const viewerSource = await prepareDocumentViewerSource(doc, documentUrl);
+    const viewerHtml = buildWorkerDocumentViewerHtml(
+      viewerSource.url,
+      viewerSource.mimeType || doc.mimeType || "",
+      doc.fileName || doc.name || "מסמך עובד"
+    );
+
     if (previewWindow && !previewWindow.closed) {
-      previewWindow.location.replace(documentUrl);
+      previewWindow.document.open();
+      previewWindow.document.write(viewerHtml);
+      previewWindow.document.close();
       return;
     }
 
-    const link = document.createElement("a");
-    link.href = documentUrl;
-    link.target = "_blank";
-    link.rel = "noopener noreferrer";
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
+    const viewerTab = window.open("", "_blank");
+
+    if (!viewerTab) {
+      throw new Error("הדפדפן חסם את פתיחת המסמך.");
+    }
+
+    viewerTab.document.open();
+    viewerTab.document.write(viewerHtml);
+    viewerTab.document.close();
   } catch (error) {
     if (previewWindow && !previewWindow.closed) {
       previewWindow.close();
