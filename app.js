@@ -236,18 +236,51 @@ function buildWorkerDocumentViewerHtml(documentUrl, mimeType = "", fileName = ""
       .viewer-name { font-size: 16px; font-weight: 700; }
       .viewer-frame { height: 100%; padding: 0; }
       .viewer-frame iframe { background: #ffffff; }
-      .viewer-download { color: #fff4e6; text-decoration: none; border: 1px solid rgba(209,138,58,0.45); padding: 8px 12px; border-radius: 999px; }
-      .viewer-download:hover { background: rgba(209,138,58,0.18); }
+      .viewer-actions { display: flex; align-items: center; gap: 10px; }
+      .viewer-share { color: #fff4e6; background: transparent; border: 1px solid rgba(209,138,58,0.45); padding: 8px 12px; border-radius: 999px; font: inherit; cursor: pointer; }
+      .viewer-share:hover { background: rgba(209,138,58,0.18); }
     </style>
   </head>
   <body>
     <div class="viewer-shell">
       <div class="viewer-bar">
         <div class="viewer-name">${safeTitle}</div>
-        <a class="viewer-download" href="${documentUrl}" target="_blank" rel="noopener noreferrer">פתח קובץ</a>
+        <div class="viewer-actions">
+          <button class="viewer-share" type="button" id="viewerShare">שתף</button>
+        </div>
       </div>
       <div class="viewer-frame">${viewerBody}</div>
     </div>
+    <script>
+      const shareButton = document.getElementById("viewerShare");
+      const shareUrl = ${JSON.stringify(documentUrl)};
+      const shareTitle = ${JSON.stringify(fileName || "מסמך עובד")};
+
+      shareButton?.addEventListener("click", async () => {
+        try {
+          if (navigator.share) {
+            await navigator.share({ title: shareTitle, url: shareUrl });
+            return;
+          }
+
+          if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(shareUrl);
+            shareButton.textContent = "הקישור הועתק";
+            window.setTimeout(() => {
+              shareButton.textContent = "שתף";
+            }, 1800);
+            return;
+          }
+
+          window.open(shareUrl, "_blank", "noopener,noreferrer");
+        } catch {
+          shareButton.textContent = "שיתוף נכשל";
+          window.setTimeout(() => {
+            shareButton.textContent = "שתף";
+          }, 1800);
+        }
+      });
+    </script>
   </body>
 </html>`;
 }
