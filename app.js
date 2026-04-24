@@ -870,9 +870,9 @@ function refreshWorkerDocumentSelect(worker, select, selectedValue = "") {
   }
 
   select.innerHTML = `
-    <option value="">׳‘׳—׳¨ ׳׳¡׳׳ ׳׳₪׳×׳™׳—׳”</option>
-    ${getSavedWorkerDocuments(worker)
-      .map((doc) => `<option value="${doc.id}">${doc.name} - ${doc.status} - ${doc.expiry}</option>`)
+    <option value="">בחר מסמך</option>
+    ${getWorkerDocuments(worker)
+      .map((doc) => `<option value="${doc.id}">${doc.name}</option>`)
       .join("")}
   `;
 
@@ -993,7 +993,7 @@ function renderWorkerSuggestions(query) {
       (worker) => `
         <button class="suggestion-item" type="button" data-worker-name="${worker.name}">
           <strong>${worker.name}</strong>
-          <span>${worker.role} ג€¢ ${worker.contractor} ג€¢ ${worker.status}</span>
+          <span>${worker.role} • ${worker.contractor} • ${worker.status}</span>
         </button>
       `
     )
@@ -1031,7 +1031,7 @@ function renderSelectedWorker(worker) {
         <div>
           <span class="mini-label">\u05E2\u05D5\u05D1\u05D3 \u05E0\u05D1\u05D7\u05E8 \u05DE\u05D4\u05DE\u05D0\u05D2\u05E8</span>
           <h3>${worker.name}</h3>
-          <p>${worker.role} ג€¢ ${worker.contractor} ג€¢ ${worker.status}</p>
+          <p>${worker.role} • ${worker.contractor} • ${worker.status}</p>
         </div>
         <span class="status-chip ok">\u05DE\u05D0\u05D5\u05DE\u05EA</span>
       </div>
@@ -1047,13 +1047,12 @@ function renderSelectedWorker(worker) {
         <label class="mini-field">
           <span>\u05DE\u05E1\u05DE\u05DB\u05D9\u05DD \u05E9\u05DE\u05D5\u05E8\u05D9\u05DD</span>
           <select data-worker-doc-select>
-            <option value="">\u05D1\u05D7\u05E8 \u05DE\u05E1\u05DE\u05DA \u05DC\u05E4\u05EA\u05D9\u05D7\u05D4</option>
+            <option value="">בחר מסמך</option>
           </select>
         </label>
       </div>
       <input class="sr-only" type="file" accept="image/*,.pdf" capture="environment" data-worker-doc-file />
       <div class="selected-worker-actions">
-        <button class="ghost-button" type="button" data-worker-docs>\u05DE\u05E1\u05DE\u05DB\u05D9 \u05E2\u05D5\u05D1\u05D3</button>
         <button class="ghost-button" type="button" data-scan-worker-doc>\u05E1\u05E8\u05D5\u05E7/\u05E6\u05DC\u05DD \u05DE\u05E1\u05DE\u05DA</button>
         <button class="primary-button" type="button" data-add-worker-today>\u05D4\u05D5\u05E1\u05E3 \u05DC\u05D9\u05D5\u05DE\u05DF \u05D4\u05D9\u05D5\u05DD</button>
       </div>
@@ -1073,9 +1072,15 @@ function renderSelectedWorker(worker) {
       return;
     }
 
-    const selectedOption = docSelect.selectedOptions?.[0];
-    selectedDocText = selectedOption?.textContent?.split(" - ")[0] || "\u05DE\u05E1\u05DE\u05DA \u05E2\u05D5\u05D1\u05D3";
-    openWorkerDocs(worker, docSelect.value);
+    const selectedDoc = getWorkerDocuments(worker).find((doc) => doc.id === docSelect.value);
+    selectedDocText = selectedDoc?.name || "\u05DE\u05E1\u05DE\u05DA \u05E2\u05D5\u05D1\u05D3";
+
+    if (selectedDoc?.url) {
+      openWorkerDocument(selectedDoc);
+      return;
+    }
+
+    queueWorkerDocumentUpload(selectedDoc?.name || "");
   });
 
   docFile?.addEventListener("change", async () => {
@@ -1142,10 +1147,6 @@ function renderSelectedWorker(worker) {
     docFile?.click();
   });
 
-  selectedWorkerPanel.querySelector("[data-worker-docs]")?.addEventListener("click", () => {
-    openWorkerDocs(worker);
-  });
-
   selectedWorkerPanel.querySelector("[data-add-worker-today]")?.addEventListener("click", () => {
     addWorkerToToday(worker, "\u05EA\u05E7\u05D9\u05DF", docFile?.files?.[0]?.name ?? selectedDocText);
     selectedWorkerPanel.classList.remove("is-open");
@@ -1168,7 +1169,7 @@ function addWorkerToToday(worker, docStatus = "\u05EA\u05E7\u05D9\u05DF", docFil
     <button class="worker-head" type="button" data-worker-toggle>
       <div>
         <h3>${worker.name}</h3>
-        <p>${worker.role} ג€¢ ${worker.contractor}</p>
+        <p>${worker.role} • ${worker.contractor}</p>
       </div>
       <div class="worker-head-meta">
         <span>07:00 - 16:30</span>
