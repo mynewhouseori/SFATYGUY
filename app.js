@@ -4,7 +4,11 @@ const CLOUD_DOCUMENTS_COLLECTION = "safety_worker_documents";
 const CLOUD_DOCUMENT_CHUNKS_COLLECTION = "safety_worker_document_chunks";
 const FIRESTORE_PAYLOAD_CHUNK_SIZE = 180000;
 const MAX_DOCUMENT_FILE_SIZE = 8 * 1024 * 1024;
-const ALLOWED_WORKER_DOCUMENTS = ["׳×׳¢׳•׳“׳× ׳–׳”׳•׳×", "׳¨׳©׳™׳•׳ ׳ ׳”׳™׳’׳”", "׳׳™׳©׳•׳¨ ׳¢׳‘׳•׳“׳” ׳‘׳’׳•׳‘׳”"];
+const ALLOWED_WORKER_DOCUMENTS = [
+  "\u05EA\u05E2\u05D5\u05D3\u05EA \u05D6\u05D4\u05D5\u05EA",
+  "\u05E8\u05E9\u05D9\u05D5\u05DF \u05E0\u05D4\u05D9\u05D2\u05D4",
+  "\u05D0\u05D9\u05E9\u05D5\u05E8 \u05E2\u05D1\u05D5\u05D3\u05D4 \u05D1\u05D2\u05D5\u05D1\u05D4",
+];
 const FIREBASE_STORAGE_CONFIG = {
   apiKey: "AIzaSyCba5FEsy3WlrrkzjXFPZrKyW9nXsdZ5l4",
   authDomain: "nfc-demo-91f72.firebaseapp.com",
@@ -204,16 +208,26 @@ function loadCloudDocuments() {
 function normalizeWorkerDocumentName(name = "") {
   const normalized = String(name).trim();
 
-  if (normalized.includes("׳×׳¢׳•׳“׳×") && normalized.includes("׳–׳”׳•׳×")) {
-    return "׳×׳¢׳•׳“׳× ׳–׳”׳•׳×";
+  if (
+    normalized.includes("\u05EA\u05E2\u05D5\u05D3\u05EA") &&
+    normalized.includes("\u05D6\u05D4\u05D5\u05EA")
+  ) {
+    return "\u05EA\u05E2\u05D5\u05D3\u05EA \u05D6\u05D4\u05D5\u05EA";
   }
 
-  if (normalized.includes("׳¨׳©׳™׳•׳") || normalized.includes("׳¨׳™׳©׳™׳•׳") || normalized.includes("׳ ׳”׳™׳’׳”")) {
-    return "׳¨׳©׳™׳•׳ ׳ ׳”׳™׳’׳”";
+  if (
+    normalized.includes("\u05E8\u05E9\u05D9\u05D5\u05DF") ||
+    normalized.includes("\u05E8\u05D9\u05E9\u05D9\u05D5\u05DF") ||
+    normalized.includes("\u05E0\u05D4\u05D9\u05D2\u05D4")
+  ) {
+    return "\u05E8\u05E9\u05D9\u05D5\u05DF \u05E0\u05D4\u05D9\u05D2\u05D4";
   }
 
-  if (normalized.includes("׳¢׳‘׳•׳“׳”") && normalized.includes("׳’׳•׳‘׳”")) {
-    return "׳׳™׳©׳•׳¨ ׳¢׳‘׳•׳“׳” ׳‘׳’׳•׳‘׳”";
+  if (
+    normalized.includes("\u05E2\u05D1\u05D5\u05D3\u05D4") &&
+    normalized.includes("\u05D2\u05D5\u05D1\u05D4")
+  ) {
+    return "\u05D0\u05D9\u05E9\u05D5\u05E8 \u05E2\u05D1\u05D5\u05D3\u05D4 \u05D1\u05D2\u05D5\u05D1\u05D4";
   }
 
   return "";
