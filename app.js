@@ -294,6 +294,11 @@ function buildWorkerDocumentViewerHtml(documentUrl, mimeType = "", fileName = ""
 </html>`;
 }
 
+function createViewerPageUrl(viewerHtml) {
+  const viewerBlob = new Blob([viewerHtml], { type: "text/html;charset=utf-8" });
+  return URL.createObjectURL(viewerBlob);
+}
+
 async function prepareDocumentViewerSource(doc, documentUrl) {
   if (/^data:|^blob:/i.test(String(documentUrl))) {
     return {
@@ -659,23 +664,18 @@ async function openWorkerDocument(doc) {
       viewerSource.mimeType || doc.mimeType || "",
       doc.fileName || doc.name || "מסמך עובד"
     );
+    const viewerPageUrl = createViewerPageUrl(viewerHtml);
 
     if (previewWindow && !previewWindow.closed) {
-      previewWindow.document.open();
-      previewWindow.document.write(viewerHtml);
-      previewWindow.document.close();
+      previewWindow.location.replace(viewerPageUrl);
       return;
     }
 
-    const viewerTab = window.open("", "_blank");
+    const viewerTab = window.open(viewerPageUrl, "_blank");
 
     if (!viewerTab) {
       throw new Error("הדפדפן חסם את פתיחת המסמך.");
     }
-
-    viewerTab.document.open();
-    viewerTab.document.write(viewerHtml);
-    viewerTab.document.close();
   } catch (error) {
     if (previewWindow && !previewWindow.closed) {
       previewWindow.close();
