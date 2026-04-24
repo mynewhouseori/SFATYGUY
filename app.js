@@ -921,6 +921,38 @@ function queueWorkerDocumentUpload(documentName = "") {
   selectedWorkerPanel.querySelector("[data-worker-doc-file]")?.click();
 }
 
+function attachPressFeedback(button) {
+  if (!button) {
+    return;
+  }
+
+  let releaseTimer = null;
+  const clearPressed = () => {
+    if (releaseTimer) {
+      window.clearTimeout(releaseTimer);
+      releaseTimer = null;
+    }
+    button.classList.remove("is-pressed");
+  };
+  const scheduleRelease = () => {
+    if (releaseTimer) {
+      window.clearTimeout(releaseTimer);
+    }
+    releaseTimer = window.setTimeout(() => {
+      button.classList.remove("is-pressed");
+      releaseTimer = null;
+    }, 180);
+  };
+
+  button.addEventListener("pointerdown", () => {
+    button.classList.add("is-pressed");
+  });
+  button.addEventListener("pointerup", scheduleRelease);
+  button.addEventListener("pointercancel", clearPressed);
+  button.addEventListener("pointerleave", scheduleRelease);
+  button.addEventListener("blur", clearPressed);
+}
+
 workerDocsClose?.addEventListener("click", closeWorkerDocs);
 
 workerDocsModal?.addEventListener("click", (event) => {
@@ -1067,15 +1099,20 @@ function renderSelectedWorker(worker) {
       </div>
       <input class="sr-only" type="file" accept="image/*,.pdf" capture="environment" data-worker-doc-file />
       <div class="selected-worker-actions">
-        <button class="ghost-button" type="button" data-scan-worker-doc>\u05E1\u05E8\u05D5\u05E7/\u05E6\u05DC\u05DD \u05DE\u05E1\u05DE\u05DA</button>
-        <button class="primary-button" type="button" data-add-worker-today>\u05D4\u05D5\u05E1\u05E3 \u05DC\u05D9\u05D5\u05DE\u05DF \u05D4\u05D9\u05D5\u05DD</button>
+        <button class="ghost-button action-button scan-doc-button" type="button" data-scan-worker-doc>\u05E1\u05E8\u05D5\u05E7/\u05E6\u05DC\u05DD \u05DE\u05E1\u05DE\u05DA</button>
+        <button class="primary-button action-button" type="button" data-add-worker-today>\u05D4\u05D5\u05E1\u05E3 \u05DC\u05D9\u05D5\u05DE\u05DF \u05D4\u05D9\u05D5\u05DD</button>
       </div>
     </article>
   `;
 
   const docSelect = selectedWorkerPanel.querySelector("[data-worker-doc-select]");
   const docFile = selectedWorkerPanel.querySelector("[data-worker-doc-file]");
+  const scanButton = selectedWorkerPanel.querySelector("[data-scan-worker-doc]");
+  const addTodayButton = selectedWorkerPanel.querySelector("[data-add-worker-today]");
   let selectedDocText = "\u05DE\u05E1\u05DE\u05DB\u05D9\u05DD \u05D1\u05DE\u05D0\u05D2\u05E8";
+
+  attachPressFeedback(scanButton);
+  attachPressFeedback(addTodayButton);
 
   refreshWorkerDocumentSelect(worker, docSelect);
   refreshWorkerDocumentsFromCloud(worker, docSelect);
@@ -1104,7 +1141,6 @@ function renderSelectedWorker(worker) {
       return;
     }
 
-    const scanButton = selectedWorkerPanel.querySelector("[data-scan-worker-doc]");
     const originalLabel = scanButton?.textContent ?? "\u05E1\u05E8\u05D5\u05E7/\u05E6\u05DC\u05DD \u05DE\u05E1\u05DE\u05DA";
     const pendingDocType = selectedWorkerPanel.dataset.pendingDocType?.trim();
     const selectedOption = docSelect?.selectedOptions?.[0];

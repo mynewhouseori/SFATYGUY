@@ -508,6 +508,25 @@ input {
   padding: 12px 14px;
   color: var(--text);
   background: rgba(255, 255, 255, 0.08);
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    color 0.2s ease;
+}
+
+.ghost-button:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.ghost-button:active,
+.ghost-button.is-pressed {
+  color: #fff4e6;
+  background: rgba(209, 138, 58, 0.26);
+  border-color: rgba(209, 138, 58, 0.62);
+  box-shadow: 0 10px 24px rgba(140, 84, 32, 0.18);
+  transform: scale(0.99);
 }
 
 .hero-summary-grid,
@@ -667,6 +686,20 @@ input {
 
 .mini-field select {
   grid-column: 1 / -1;
+  color-scheme: dark;
+}
+
+.mini-field select option,
+.mini-field select optgroup {
+  color: #132126;
+  background: #f3eee3;
+}
+
+.mini-field select option:checked,
+.mini-field select option:hover,
+.mini-field select option:focus {
+  color: #132126;
+  background: #d8c19d;
 }
 
 .selected-worker-fields .mini-field:last-child {
@@ -675,8 +708,25 @@ input {
 
 .selected-worker-actions {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
+  align-items: stretch;
+}
+
+.selected-worker-actions .action-button {
+  width: 100%;
+  min-height: 54px;
+  margin-top: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.selected-worker-actions .scan-doc-button:active,
+.selected-worker-actions .scan-doc-button.is-pressed {
+  background: linear-gradient(135deg, rgba(209, 138, 58, 0.34), rgba(140, 84, 32, 0.28));
+  border-color: rgba(209, 138, 58, 0.72);
 }
 
 .doc-status-note {
