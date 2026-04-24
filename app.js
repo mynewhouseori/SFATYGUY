@@ -234,11 +234,18 @@ function buildWorkerDocumentViewerHtml(documentUrl, mimeType = "", fileName = ""
       .viewer-shell { height: 100%; display: grid; grid-template-rows: auto 1fr; }
       .viewer-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; background: rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.12); }
       .viewer-name { font-size: 16px; font-weight: 700; }
-      .viewer-frame { height: 100%; padding: 0; }
+      .viewer-frame { height: 100%; padding: 16px; overflow: auto; }
       .viewer-frame iframe { background: #ffffff; }
+      .viewer-frame img { width: 100%; max-width: 100%; height: auto; display: block; margin: 0 auto; object-fit: contain; border-radius: 18px; }
       .viewer-actions { display: flex; align-items: center; gap: 10px; }
       .viewer-share { color: #fff4e6; background: transparent; border: 1px solid rgba(209,138,58,0.45); padding: 8px 12px; border-radius: 999px; font: inherit; cursor: pointer; }
       .viewer-share:hover { background: rgba(209,138,58,0.18); }
+      @media (max-width: 720px) {
+        .viewer-bar { padding: 12px 14px; }
+        .viewer-name { font-size: 14px; max-width: 55vw; word-break: break-word; }
+        .viewer-frame { padding: 10px; }
+        .viewer-frame img { border-radius: 14px; }
+      }
     </style>
   </head>
   <body>
