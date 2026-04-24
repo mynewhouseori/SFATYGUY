@@ -191,7 +191,11 @@ function getFirebaseFirestore() {
 function loadCloudDocuments() {
   try {
     const stored = window.localStorage.getItem(CLOUD_DOCUMENTS_KEY);
-    return stored ? JSON.parse(stored) : [];
+    return stored
+      ? JSON.parse(stored)
+          .map(sanitizeCloudDocumentRecord)
+          .filter(Boolean)
+      : [];
   } catch {
     return [];
   }
@@ -215,16 +219,42 @@ function normalizeWorkerDocumentName(name = "") {
   return "";
 }
 
+function sanitizeCloudDocumentRecord(record) {
+  if (!record || typeof record !== "object") {
+    return null;
+  }
+
+  const documentType = normalizeWorkerDocumentName(record.documentType);
+
+  if (!documentType || !ALLOWED_WORKER_DOCUMENTS.includes(documentType)) {
+    return null;
+  }
+
+  return {
+    ...record,
+    documentType,
+  };
+}
+
 function saveCloudDocumentRecord(record) {
-  const records = loadCloudDocuments().filter((item) => item.id !== record.id);
-  records.unshift(record);
+  const sanitizedRecord = sanitizeCloudDocumentRecord(record);
+
+  if (!sanitizedRecord) {
+    return;
+  }
+
+  const records = loadCloudDocuments().filter((item) => item.id !== sanitizedRecord.id);
+  records.unshift(sanitizedRecord);
   window.localStorage.setItem(CLOUD_DOCUMENTS_KEY, JSON.stringify(records.slice(0, 120)));
 }
 
 function saveCloudDocumentRecords(recordsToMerge) {
   const existing = loadCloudDocuments();
   const byId = new Map(existing.map((item) => [item.id, item]));
-  recordsToMerge.forEach((item) => byId.set(item.id, item));
+  recordsToMerge
+    .map(sanitizeCloudDocumentRecord)
+    .filter(Boolean)
+    .forEach((item) => byId.set(item.id, item));
   const merged = Array.from(byId.values())
     .sort((a, b) => String(b.savedAt || "").localeCompare(String(a.savedAt || "")))
     .slice(0, 120);
