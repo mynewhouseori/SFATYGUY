@@ -561,6 +561,8 @@ function navigateTo(viewId) {
   screenPanel?.classList.toggle("is-login-active", viewId === "loginView");
 }
 
+navigateTo("loginView");
+
 function resetErrorState() {
   formNote.classList.remove("is-error");
   formNote.textContent =
