@@ -286,8 +286,9 @@ function getCloudDocumentsForWorker(worker) {
     .map((doc) => ({
       id: doc.id,
       name: doc.documentType,
-      status: "׳ ׳©׳׳¨ ׳‘׳¢׳ ׳",
+      status: "\u05E0\u05E9\u05DE\u05E8 \u05D1\u05E2\u05E0\u05DF",
       expiry: doc.savedAtDisplay,
+      savedAt: doc.savedAt || "",
       className: "ok",
       url: doc.publicUrl || doc.previewUrl || (doc.storageMode === "firestore-chunked" ? "cloud:" + doc.id : ""),
       cloudPath: doc.path,
@@ -296,6 +297,28 @@ function getCloudDocumentsForWorker(worker) {
       mimeType: doc.mimeType || "",
       fileName: doc.fileName || "",
     }));
+}
+
+function getLatestCloudDocumentsByType(worker) {
+  const latestByType = new Map();
+
+  getCloudDocumentsForWorker(worker).forEach((doc) => {
+    const existing = latestByType.get(doc.name);
+
+    if (!existing) {
+      latestByType.set(doc.name, doc);
+      return;
+    }
+
+    const existingStamp = String(existing.savedAt || "");
+    const nextStamp = String(doc.savedAt || "");
+
+    if (nextStamp >= existingStamp) {
+      latestByType.set(doc.name, doc);
+    }
+  });
+
+  return latestByType;
 }
 
 function sanitizePathSegment(value) {
@@ -525,7 +548,7 @@ function buildCloudDocumentRecord(worker, file, documentType, objectPath, public
     id: `${worker.id}-${now.getTime()}`,
     workerId: worker.id,
     workerName: worker.name,
-    documentType: documentType || file.name || "׳׳¡׳׳ ׳¢׳•׳‘׳“",
+    documentType: normalizeWorkerDocumentName(documentType) || ALLOWED_WORKER_DOCUMENTS[0],
     fileName: file.name || "document",
     path: objectPath,
     publicUrl,
@@ -792,34 +815,29 @@ dateModal?.addEventListener("click", (event) => {
 });
 
 function getWorkerDocuments(worker) {
-  const cloudDocs = getCloudDocumentsForWorker(worker);
-  const cloudNames = new Set(cloudDocs.map((doc) => doc.name));
-  const role = worker.role || "";
+  const cloudDocsByType = getLatestCloudDocumentsByType(worker);
 
-  const baseDocs = [
-    { name: "\u05EA\u05E2\u05D5\u05D3\u05EA \u05D6\u05D4\u05D5\u05EA", status: "\u05D1\u05EA\u05D5\u05E7\u05E3", expiry: "\u05E7\u05D1\u05D5\u05E2", className: "ok" },
-    {
-      name: "\u05E8\u05E9\u05D9\u05D5\u05DF \u05E0\u05D4\u05D9\u05D2\u05D4",
-      status: role.includes("\u05DE\u05E4\u05E2\u05D9\u05DC") ? "\u05D1\u05EA\u05D5\u05E7\u05E3" : "\u05D7\u05E1\u05E8",
-      expiry: role.includes("\u05DE\u05E4\u05E2\u05D9\u05DC") ? "15/08/2026" : "\u05E0\u05D3\u05E8\u05E9 \u05E6\u05D9\u05DC\u05D5\u05DD",
-      className: role.includes("\u05DE\u05E4\u05E2\u05D9\u05DC") ? "ok" : "warning",
-    },
-    {
-      name: "\u05D0\u05D9\u05E9\u05D5\u05E8 \u05E2\u05D1\u05D5\u05D3\u05D4 \u05D1\u05D2\u05D5\u05D1\u05D4",
-      status: ["\u05D8\u05E4\u05E1\u05DF", "\u05D1\u05E8\u05D6\u05DC\u05DF"].some((item) => role.includes(item)) ? "\u05D1\u05EA\u05D5\u05E7\u05E3" : "\u05D7\u05E1\u05E8",
-      expiry: ["\u05D8\u05E4\u05E1\u05DF", "\u05D1\u05E8\u05D6\u05DC\u05DF"].some((item) => role.includes(item)) ? "20/11/2026" : "\u05E0\u05D3\u05E8\u05E9 \u05E6\u05D9\u05DC\u05D5\u05DD",
-      className: ["\u05D8\u05E4\u05E1\u05DF", "\u05D1\u05E8\u05D6\u05DC\u05DF"].some((item) => role.includes(item)) ? "ok" : "warning",
-    },
-  ];
+  return ALLOWED_WORKER_DOCUMENTS.map((documentName) => {
+    const cloudDoc = cloudDocsByType.get(documentName);
 
-  return [
-    ...cloudDocs,
-    ...baseDocs.filter((doc) => !cloudNames.has(doc.name)),
-  ];
+    if (cloudDoc) {
+      return cloudDoc;
+    }
+
+    return {
+      id: `missing:${documentName}`,
+      name: documentName,
+      status: "\u05D7\u05E1\u05E8",
+      expiry: "\u05E2\u05D3\u05D9\u05D9\u05DF \u05DC\u05D0 \u05E6\u05D5\u05E8\u05E3",
+      className: "warning",
+      url: "",
+      fileName: "",
+    };
+  });
 }
 
 function getSavedWorkerDocuments(worker) {
-  return getWorkerDocuments(worker).filter((doc) => doc.status !== "׳—׳¡׳¨");
+  return getWorkerDocuments(worker).filter((doc) => Boolean(doc.url));
 }
 
 function openWorkerDocs(worker, selectedDocId = "") {
@@ -886,7 +904,7 @@ function refreshWorkerDocumentSelect(worker, select, selectedValue = "") {
   select.innerHTML = `
     <option value="">בחר מסמך</option>
     ${getWorkerDocuments(worker)
-      .map((doc) => `<option value="${doc.id}">${doc.name}</option>`)
+      .map((doc) => `<option value="${doc.name}">${doc.name}</option>`)
       .join("")}
   `;
 
@@ -1123,7 +1141,7 @@ function renderSelectedWorker(worker) {
       return;
     }
 
-    const selectedDoc = getWorkerDocuments(worker).find((doc) => doc.id === docSelect.value);
+    const selectedDoc = getWorkerDocuments(worker).find((doc) => doc.name === docSelect.value);
     selectedDocText = selectedDoc?.name || "\u05DE\u05E1\u05DE\u05DA \u05E2\u05D5\u05D1\u05D3";
 
     if (selectedDoc?.url) {
@@ -1143,9 +1161,9 @@ function renderSelectedWorker(worker) {
 
     const originalLabel = scanButton?.textContent ?? "\u05E1\u05E8\u05D5\u05E7/\u05E6\u05DC\u05DD \u05DE\u05E1\u05DE\u05DA";
     const pendingDocType = selectedWorkerPanel.dataset.pendingDocType?.trim();
-    const selectedOption = docSelect?.selectedOptions?.[0];
-    const selectedDocumentName = selectedOption?.textContent?.split(" - ")[0]?.trim();
-    const documentType = pendingDocType || selectedDocumentName || "\u05DE\u05E1\u05DE\u05DA \u05E2\u05D5\u05D1\u05D3";
+    const selectedDocumentName = docSelect?.value?.trim();
+    const firstMissingDocument = getWorkerDocuments(worker).find((doc) => !doc.url)?.name;
+    const documentType = pendingDocType || selectedDocumentName || firstMissingDocument || ALLOWED_WORKER_DOCUMENTS[0];
 
     if (scanButton) {
       scanButton.textContent = "\u05DE\u05E2\u05DC\u05D4 \u05DC\u05E2\u05E0\u05DF...";
@@ -1158,7 +1176,7 @@ function renderSelectedWorker(worker) {
       if (result.ok) {
         selectedDocText = result.record.documentType;
         selectedWorkerPanel.dataset.pendingDocType = "";
-        refreshWorkerDocumentSelect(worker, docSelect, result.record.id);
+        refreshWorkerDocumentSelect(worker, docSelect, result.record.documentType);
         if (scanButton) {
           scanButton.textContent = "\u05E0\u05E9\u05DE\u05E8 \u05D1\u05E2\u05E0\u05DF";
         }
