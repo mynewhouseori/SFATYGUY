@@ -510,10 +510,33 @@ async function resolveWorkerDocumentUrl(doc) {
 }
 
 async function openWorkerDocument(doc) {
+  let previewWindow = null;
+
+  try {
+    previewWindow = window.open("", "_blank");
+  } catch {
+    previewWindow = null;
+  }
+
   try {
     const documentUrl = await resolveWorkerDocumentUrl(doc);
-    window.open(documentUrl, "_blank", "noopener,noreferrer");
+
+    if (previewWindow && !previewWindow.closed) {
+      previewWindow.location.replace(documentUrl);
+      return;
+    }
+
+    const link = document.createElement("a");
+    link.href = documentUrl;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
   } catch (error) {
+    if (previewWindow && !previewWindow.closed) {
+      previewWindow.close();
+    }
     window.alert(error?.message || "Opening the document failed.");
   }
 }
