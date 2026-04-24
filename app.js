@@ -192,6 +192,27 @@ function getFirebaseFirestore() {
   return window.firebase.firestore(app);
 }
 
+function getFirebaseStorage() {
+  if (!window.firebase?.apps || !window.firebase?.storage) {
+    return null;
+  }
+
+  const app = window.firebase.apps.length
+    ? window.firebase.app()
+    : window.firebase.initializeApp(getFirebaseConfig());
+
+  return window.firebase.storage(app);
+}
+
+function withTimeout(promise, timeoutMs, message) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => {
+      window.setTimeout(() => reject(new Error(message)), timeoutMs);
+    }),
+  ]);
+}
+
 function loadCloudDocuments() {
   try {
     const stored = window.localStorage.getItem(CLOUD_DOCUMENTS_KEY);
@@ -340,7 +361,28 @@ async function uploadWorkerDocumentToCloud(worker, file, documentType) {
   }
 
   const now = new Date();
-  return uploadWorkerDocumentToFirestore(worker, file, documentType, now);
+  const normalizedDocumentType = normalizeWorkerDocumentName(documentType) || ALLOWED_WORKER_DOCUMENTS[0];
+
+  try {
+    return await withTimeout(
+      uploadWorkerDocumentToStorage(worker, file, normalizedDocumentType, now),
+      25000,
+      "העלאת המסמך ארכה יותר מדי זמן. נסה שוב."
+    );
+  } catch (storageError) {
+    try {
+      return await withTimeout(
+        uploadWorkerDocumentToFirestore(worker, file, normalizedDocumentType, now),
+        25000,
+        "שמירת המסמך נכשלה בזמן ההמתנה לענן."
+      );
+    } catch (firestoreError) {
+      return {
+        ok: false,
+        message: firestoreError?.message || storageError?.message || "שמירת המסמך נכשלה.",
+      };
+    }
+  }
 }
 
 async function fileToDataUrl(file) {
@@ -475,6 +517,45 @@ async function openWorkerDocument(doc) {
     window.alert(error?.message || "Opening the document failed.");
   }
 }
+
+async function uploadWorkerDocumentToStorage(worker, file, documentType, now = new Date()) {
+  const storage = getFirebaseStorage();
+  const firestore = getFirebaseFirestore();
+
+  if (!storage || !firestore) {
+    throw new Error("חיבור הענן למסמכים אינו זמין כרגע.");
+  }
+
+  const safeSite = sanitizePathSegment(getActiveSiteName());
+  const safeWorker = sanitizePathSegment(worker.name);
+  const safeDoc = sanitizePathSegment(documentType);
+  const safeFileName = sanitizePathSegment(file.name || `${safeDoc}.bin`);
+  const objectPath = `worker-documents/${safeSite}/${safeWorker}/${safeDoc}/${Date.now()}-${safeFileName}`;
+  const storageRef = storage.ref(objectPath);
+  const metadata = {
+    contentType: file.type || "application/octet-stream",
+    customMetadata: {
+      workerId: worker.id,
+      workerName: worker.name,
+      documentType,
+    },
+  };
+
+  await storageRef.put(file, metadata);
+  const publicUrl = await storageRef.getDownloadURL();
+
+  const docRef = firestore.collection(CLOUD_DOCUMENTS_COLLECTION).doc();
+  const record = buildCloudDocumentRecord(worker, file, documentType, objectPath, publicUrl, now);
+  record.id = docRef.id;
+  record.storageMode = "firebase-storage";
+  record.chunkCount = 1;
+  record.mimeType = file.type || "application/octet-stream";
+
+  await docRef.set(record);
+  saveCloudDocumentRecord(record);
+  return { ok: true, record };
+}
+
 async function uploadWorkerDocumentToFirestore(worker, file, documentType, now = new Date()) {
   const firestore = getFirebaseFirestore();
 
@@ -1206,6 +1287,10 @@ function renderSelectedWorker(worker) {
           window.setTimeout(() => {
             scanButton.textContent = originalLabel;
           }, 1800);
+        } else if (scanButton.textContent !== originalLabel) {
+          window.setTimeout(() => {
+            scanButton.textContent = originalLabel;
+          }, 2200);
         }
       }
     }
