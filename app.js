@@ -56,11 +56,11 @@ let selectedClockHour = "06";
 let selectedClockMinute = "35";
 
 const workerDatabase = [
-  { name: "׳™׳•׳¡׳™ ׳›׳”׳", id: "123456789", role: "׳‘׳¨׳–׳׳", contractor: "׳׳•׳¨ ׳₪׳׳“׳”", status: "׳›׳‘׳¨ ׳‘׳™׳•׳׳ ׳”׳™׳•׳" },
-  { name: "׳׳׳™׳¨ ׳׳•׳™", id: "234567891", role: "׳˜׳₪׳¡׳", contractor: "׳׳׳₪׳ ׳‘׳™׳¦׳•׳¢", status: "׳›׳‘׳¨ ׳‘׳™׳•׳׳ ׳”׳™׳•׳" },
-  { name: "׳׳•׳—׳׳“ ׳¡׳׳׳—", id: "345678912", role: "׳׳₪׳¢׳™׳ ׳¦׳™׳•׳“", contractor: "׳¦׳™׳•׳“ ׳“׳¨׳•׳", status: "׳‘׳׳׳’׳¨" },
-  { name: "׳©׳׳•׳׳™ ׳“׳“׳•׳", id: "456789123", role: "׳¨׳×׳", contractor: "׳׳׳₪׳ ׳‘׳™׳¦׳•׳¢", status: "׳‘׳׳׳’׳¨" },
-  { name: "׳¨׳׳׳™ ׳—׳˜׳™׳‘", id: "567891234", role: "׳׳₪׳¢׳™׳ ׳¦׳™׳•׳“", contractor: "׳¦׳™׳•׳“ ׳“׳¨׳•׳", status: "׳‘׳׳׳’׳¨" },
+  { name: "\u05D9\u05D5\u05E1\u05D9 \u05DB\u05D4\u05DF", id: "123456789", role: "\u05D1\u05E8\u05D6\u05DC\u05DF", contractor: "\u05D0\u05D5\u05E8 \u05E4\u05DC\u05D3\u05D4", status: "\u05DB\u05D1\u05E8 \u05D1\u05D9\u05D5\u05DE\u05DF \u05D4\u05D9\u05D5\u05DD" },
+  { name: "\u05D0\u05DE\u05D9\u05E8 \u05DC\u05D5\u05D9", id: "234567891", role: "\u05D8\u05E4\u05E1\u05DF", contractor: "\u05D0\u05DC\u05E4\u05D0 \u05D1\u05D9\u05E6\u05D5\u05E2", status: "\u05DB\u05D1\u05E8 \u05D1\u05D9\u05D5\u05DE\u05DF \u05D4\u05D9\u05D5\u05DD" },
+  { name: "\u05DE\u05D5\u05D7\u05DE\u05D3 \u05E1\u05D0\u05DC\u05D7", id: "345678912", role: "\u05DE\u05E4\u05E2\u05D9\u05DC \u05E6\u05D9\u05D5\u05D3", contractor: "\u05E6\u05D9\u05D5\u05D3 \u05D3\u05E8\u05D5\u05DD", status: "\u05D1\u05DE\u05D0\u05D2\u05E8" },
+  { name: "\u05E9\u05DC\u05D5\u05DE\u05D9 \u05D3\u05D3\u05D5\u05DF", id: "456789123", role: "\u05E8\u05EA\u05DA", contractor: "\u05D0\u05DC\u05E4\u05D0 \u05D1\u05D9\u05E6\u05D5\u05E2", status: "\u05D1\u05DE\u05D0\u05D2\u05E8" },
+  { name: "\u05E8\u05D0\u05DE\u05D9 \u05D7\u05D8\u05D9\u05D1", id: "567891234", role: "\u05DE\u05E4\u05E2\u05D9\u05DC \u05E6\u05D9\u05D5\u05D3", contractor: "\u05E6\u05D9\u05D5\u05D3 \u05D3\u05E8\u05D5\u05DD", status: "\u05D1\u05DE\u05D0\u05D2\u05E8" },
 ];
 
 const fields = {
@@ -832,11 +832,11 @@ function openWorkerDocs(worker, selectedDocId = "") {
         <article class="doc-card">
           <div>
             <strong>${doc.name}</strong>
-            <span>׳×׳•׳§׳£: ${doc.expiry}</span>
+            <span>\u05EA\u05D5\u05E7\u05E3: ${doc.expiry}</span>
           </div>
           <div class="doc-card-actions">
             <span class="status-chip ${doc.className}">${doc.status}</span>
-            ${doc.url ? `<button class="ghost-button doc-open-button" type="button" data-doc-id="${doc.id}">??? ????</button>` : `<button class="ghost-button doc-open-button" type="button" data-doc-upload="${doc.name}">??? ????</button>`}
+            ${doc.url ? `<button class="ghost-button doc-open-button" type="button" data-doc-id="${doc.id}">\u05E4\u05EA\u05D7 \u05E7\u05D5\u05D1\u05E5</button>` : `<button class="ghost-button doc-open-button" type="button" data-doc-upload="${doc.name}">\u05E6\u05E8\u05E3 \u05DE\u05E1\u05DE\u05DA</button>`}
           </div>
         </article>
       `
@@ -977,8 +977,8 @@ function renderWorkerSuggestions(query) {
   if (matches.length === 0) {
     workerSuggestions.innerHTML = `
       <div class="suggestion-empty">
-        <span>׳׳ ׳ ׳׳¦׳ ׳¢׳•׳‘׳“ ׳׳×׳׳™׳</span>
-        <button class="ghost-button" type="button" id="openWorkerModalFromSearch">+ ׳”׳•׳¡׳£ ׳¢׳•׳‘׳“ ׳—׳“׳©</button>
+        <span>\u05DC\u05D0 \u05E0\u05DE\u05E6\u05D0 \u05E2\u05D5\u05D1\u05D3 \u05DE\u05EA\u05D0\u05D9\u05DD</span>
+        <button class="ghost-button" type="button" id="openWorkerModalFromSearch">+ \u05D4\u05D5\u05E1\u05E3 \u05E2\u05D5\u05D1\u05D3 \u05D7\u05D3\u05E9</button>
       </div>
     `;
     document.getElementById("openWorkerModalFromSearch")?.addEventListener("click", () => {
@@ -1029,52 +1029,52 @@ function renderSelectedWorker(worker) {
     <article class="selected-worker-card">
       <div class="selected-worker-head">
         <div>
-          <span class="mini-label">׳¢׳•׳‘׳“ ׳ ׳‘׳—׳¨ ׳׳”׳׳׳’׳¨</span>
+          <span class="mini-label">\u05E2\u05D5\u05D1\u05D3 \u05E0\u05D1\u05D7\u05E8 \u05DE\u05D4\u05DE\u05D0\u05D2\u05E8</span>
           <h3>${worker.name}</h3>
           <p>${worker.role} ג€¢ ${worker.contractor} ג€¢ ${worker.status}</p>
         </div>
-        <span class="status-chip ok">׳׳׳•׳׳×</span>
+        <span class="status-chip ok">\u05DE\u05D0\u05D5\u05DE\u05EA</span>
       </div>
       <div class="selected-worker-fields">
         <label class="mini-field">
-          <span>׳©׳¢׳× ׳”׳×׳—׳׳”</span>
+          <span>\u05E9\u05E2\u05EA \u05D4\u05EA\u05D7\u05DC\u05D4</span>
           <input class="time-input" type="time" value="07:00" />
         </label>
         <label class="mini-field">
-          <span>׳©׳¢׳× ׳¡׳™׳•׳</span>
+          <span>\u05E9\u05E2\u05EA \u05E1\u05D9\u05D5\u05DD</span>
           <input class="time-input" type="time" value="16:30" />
         </label>
         <label class="mini-field">
-          <span>׳׳¡׳׳›׳™׳ ׳©׳׳•׳¨׳™׳</span>
+          <span>\u05DE\u05E1\u05DE\u05DB\u05D9\u05DD \u05E9\u05DE\u05D5\u05E8\u05D9\u05DD</span>
           <select data-worker-doc-select>
-            <option value="">׳‘׳—׳¨ ׳׳¡׳׳ ׳׳₪׳×׳™׳—׳”</option>
+            <option value="">\u05D1\u05D7\u05E8 \u05DE\u05E1\u05DE\u05DA \u05DC\u05E4\u05EA\u05D9\u05D7\u05D4</option>
           </select>
         </label>
       </div>
       <input class="sr-only" type="file" accept="image/*,.pdf" capture="environment" data-worker-doc-file />
       <div class="selected-worker-actions">
-        <button class="ghost-button" type="button" data-worker-docs>׳׳¡׳׳›׳™ ׳¢׳•׳‘׳“</button>
-        <button class="ghost-button" type="button" data-scan-worker-doc>׳¡׳¨׳•׳§/׳¦׳׳ ׳׳¡׳׳</button>
-        <button class="primary-button" type="button" data-add-worker-today>׳”׳•׳¡׳£ ׳׳™׳•׳׳ ׳”׳™׳•׳</button>
+        <button class="ghost-button" type="button" data-worker-docs>\u05DE\u05E1\u05DE\u05DB\u05D9 \u05E2\u05D5\u05D1\u05D3</button>
+        <button class="ghost-button" type="button" data-scan-worker-doc>\u05E1\u05E8\u05D5\u05E7/\u05E6\u05DC\u05DD \u05DE\u05E1\u05DE\u05DA</button>
+        <button class="primary-button" type="button" data-add-worker-today>\u05D4\u05D5\u05E1\u05E3 \u05DC\u05D9\u05D5\u05DE\u05DF \u05D4\u05D9\u05D5\u05DD</button>
       </div>
     </article>
   `;
 
   const docSelect = selectedWorkerPanel.querySelector("[data-worker-doc-select]");
   const docFile = selectedWorkerPanel.querySelector("[data-worker-doc-file]");
-  let selectedDocText = "׳׳¡׳׳›׳™׳ ׳‘׳׳׳’׳¨";
+  let selectedDocText = "\u05DE\u05E1\u05DE\u05DB\u05D9\u05DD \u05D1\u05DE\u05D0\u05D2\u05E8";
 
   refreshWorkerDocumentSelect(worker, docSelect);
   refreshWorkerDocumentsFromCloud(worker, docSelect);
 
   docSelect?.addEventListener("change", () => {
     if (!docSelect.value) {
-      selectedDocText = "׳׳¡׳׳›׳™׳ ׳‘׳׳׳’׳¨";
+      selectedDocText = "\u05DE\u05E1\u05DE\u05DB\u05D9\u05DD \u05D1\u05DE\u05D0\u05D2\u05E8";
       return;
     }
 
     const selectedOption = docSelect.selectedOptions?.[0];
-    selectedDocText = selectedOption?.textContent?.split(" - ")[0] || "׳׳¡׳׳ ׳¢׳•׳‘׳“";
+    selectedDocText = selectedOption?.textContent?.split(" - ")[0] || "\u05DE\u05E1\u05DE\u05DA \u05E2\u05D5\u05D1\u05D3";
     openWorkerDocs(worker, docSelect.value);
   });
 
@@ -1086,14 +1086,14 @@ function renderSelectedWorker(worker) {
     }
 
     const scanButton = selectedWorkerPanel.querySelector("[data-scan-worker-doc]");
-    const originalLabel = scanButton?.textContent ?? "????/??? ????";
+    const originalLabel = scanButton?.textContent ?? "\u05E1\u05E8\u05D5\u05E7/\u05E6\u05DC\u05DD \u05DE\u05E1\u05DE\u05DA";
     const pendingDocType = selectedWorkerPanel.dataset.pendingDocType?.trim();
     const selectedOption = docSelect?.selectedOptions?.[0];
     const selectedDocumentName = selectedOption?.textContent?.split(" - ")[0]?.trim();
-    const documentType = pendingDocType || selectedDocumentName || "???? ????";
+    const documentType = pendingDocType || selectedDocumentName || "\u05DE\u05E1\u05DE\u05DA \u05E2\u05D5\u05D1\u05D3";
 
     if (scanButton) {
-      scanButton.textContent = "???? ????...";
+      scanButton.textContent = "\u05DE\u05E2\u05DC\u05D4 \u05DC\u05E2\u05E0\u05DF...";
       scanButton.disabled = true;
     }
 
@@ -1105,12 +1105,12 @@ function renderSelectedWorker(worker) {
         selectedWorkerPanel.dataset.pendingDocType = "";
         refreshWorkerDocumentSelect(worker, docSelect, result.record.id);
         if (scanButton) {
-          scanButton.textContent = "???? ????";
+          scanButton.textContent = "\u05E0\u05E9\u05DE\u05E8 \u05D1\u05E2\u05E0\u05DF";
         }
       } else if (scanButton) {
         selectedDocText = fileName;
         selectedWorkerPanel.dataset.pendingDocType = "";
-        scanButton.textContent = "??? ?? ?????";
+        scanButton.textContent = "\u05E2\u05E0\u05DF \u05DC\u05D0 \u05DE\u05D7\u05D5\u05D1\u05E8";
         window.setTimeout(() => {
           scanButton.textContent = originalLabel;
         }, 2200);
@@ -1120,16 +1120,16 @@ function renderSelectedWorker(worker) {
       selectedDocText = fileName;
       selectedWorkerPanel.dataset.pendingDocType = "";
       if (scanButton) {
-        scanButton.textContent = "????? ?????";
+        scanButton.textContent = "\u05E9\u05DE\u05D9\u05E8\u05D4 \u05E0\u05DB\u05E9\u05DC\u05D4";
         window.setTimeout(() => {
           scanButton.textContent = originalLabel;
         }, 2200);
       }
-      window.alert("????? ????? ???? ?????. ???? ????? ?-Firebase.");
+      window.alert("\u05E9\u05DE\u05D9\u05E8\u05EA \u05D4\u05DE\u05E1\u05DE\u05DA \u05D1\u05E2\u05E0\u05DF \u05E0\u05DB\u05E9\u05DC\u05D4. \u05D1\u05D3\u05D5\u05E7 \u05D7\u05D9\u05D1\u05D5\u05E8 \u05D5-Firebase.");
     } finally {
       if (scanButton) {
         scanButton.disabled = false;
-        if (scanButton.textContent === "???? ????") {
+        if (scanButton.textContent === "\u05E0\u05E9\u05DE\u05E8 \u05D1\u05E2\u05E0\u05DF") {
           window.setTimeout(() => {
             scanButton.textContent = originalLabel;
           }, 1800);
@@ -1147,19 +1147,19 @@ function renderSelectedWorker(worker) {
   });
 
   selectedWorkerPanel.querySelector("[data-add-worker-today]")?.addEventListener("click", () => {
-    addWorkerToToday(worker, "׳×׳§׳™׳", docFile?.files?.[0]?.name ?? selectedDocText);
+    addWorkerToToday(worker, "\u05EA\u05E7\u05D9\u05DF", docFile?.files?.[0]?.name ?? selectedDocText);
     selectedWorkerPanel.classList.remove("is-open");
     selectedWorkerPanel.innerHTML = "";
     workerSearch.value = "";
   });
 }
 
-function addWorkerToToday(worker, docStatus = "׳×׳§׳™׳", docFileName = "") {
+function addWorkerToToday(worker, docStatus = "\u05EA\u05E7\u05D9\u05DF", docFileName = "") {
   if (!workerList) {
     return;
   }
 
-  const statusClass = docStatus === "׳×׳§׳™׳" ? "ok" : docStatus === "׳׳ ׳¨׳׳•׳•׳ ׳˜׳™" ? "muted" : "warning";
+  const statusClass = docStatus === "\u05EA\u05E7\u05D9\u05DF" ? "ok" : docStatus === "\u05DC\u05D0 \u05E8\u05DC\u05D5\u05D5\u05E0\u05D8\u05D9" ? "muted" : "warning";
   const docText = docFileName || docStatus;
 
   const card = document.createElement("article");
@@ -1172,25 +1172,25 @@ function addWorkerToToday(worker, docStatus = "׳×׳§׳™׳", docFileName =
       </div>
       <div class="worker-head-meta">
         <span>07:00 - 16:30</span>
-        <span class="status-chip ok">׳ ׳•׳¡׳£ ׳”׳™׳•׳</span>
+        <span class="status-chip ok">\u05E0\u05D5\u05E1\u05E3 \u05D4\u05D9\u05D5\u05DD</span>
       </div>
     </button>
     <div class="worker-body">
       <div class="worker-grid">
-        <div class="worker-line"><span>׳©׳¢׳× ׳”׳×׳—׳׳”</span><strong>07:00</strong></div>
-        <div class="worker-line"><span>׳©׳¢׳× ׳¡׳™׳•׳</span><strong>16:30</strong></div>
-        <div class="worker-line"><span>׳¡׳”"׳› ׳©׳¢׳•׳×</span><strong>9.5</strong></div>
-        <div class="worker-line"><span>׳׳§׳•׳¨</span><strong>׳׳׳’׳¨ ׳¢׳•׳‘׳“׳™׳</strong></div>
+        <div class="worker-line"><span>\u05E9\u05E2\u05EA \u05D4\u05EA\u05D7\u05DC\u05D4</span><strong>07:00</strong></div>
+        <div class="worker-line"><span>\u05E9\u05E2\u05EA \u05E1\u05D9\u05D5\u05DD</span><strong>16:30</strong></div>
+        <div class="worker-line"><span>\u05E1\u05D4\"\u05DB \u05E9\u05E2\u05D5\u05EA</span><strong>9.5</strong></div>
+        <div class="worker-line"><span>\u05DE\u05E7\u05D5\u05E8</span><strong>\u05DE\u05D0\u05D2\u05E8 \u05E2\u05D5\u05D1\u05D3\u05D9\u05DD</strong></div>
       </div>
       <div class="worker-tags">
-        <span>׳×׳“׳¨׳™׳: ׳׳‘׳™׳¦׳•׳¢/׳׳™׳©׳•׳¨</span>
-        <span>׳¡׳•׳’ ׳¢׳‘׳•׳“׳”: ${worker.role}</span>
-        <span>׳¡׳˜׳˜׳•׳¡: ׳ ׳•׳¡׳£ ׳׳™׳•׳׳ ׳”׳™׳•׳</span>
+        <span>\u05EA\u05D3\u05E8\u05D9\u05DA: \u05DC\u05D1\u05D9\u05E6\u05D5\u05E2/\u05D0\u05D9\u05E9\u05D5\u05E8</span>
+        <span>\u05E1\u05D5\u05D2 \u05E2\u05D1\u05D5\u05D3\u05D4: ${worker.role}</span>
+        <span>\u05E1\u05D8\u05D8\u05D5\u05E1: \u05E0\u05D5\u05E1\u05E3 \u05DC\u05D9\u05D5\u05DE\u05DF \u05D4\u05D9\u05D5\u05DD</span>
       </div>
       <div class="doc-row">
-        <span class="status-chip ok">׳×"׳–</span>
+        <span class="status-chip ok">\u05EA.\u05D6.</span>
         <span class="status-chip ${statusClass}">${docText}</span>
-        <span class="status-chip muted">׳¦׳™׳׳•׳ ׳׳₪׳™ ׳¦׳•׳¨׳</span>
+        <span class="status-chip muted">\u05E6\u05D9\u05DC\u05D5\u05DD \u05DC\u05E4\u05D9 \u05E6\u05D5\u05E8\u05DA</span>
       </div>
     </div>
   `;
