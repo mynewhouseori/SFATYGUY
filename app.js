@@ -1,10 +1,10 @@
-const STORAGE_KEY = "safety-field-general-defaults";
+﻿const STORAGE_KEY = "safety-field-general-defaults";
 const CLOUD_DOCUMENTS_KEY = "safety-field-cloud-documents";
 const CLOUD_DOCUMENTS_COLLECTION = "safety_worker_documents";
 const CLOUD_DOCUMENT_CHUNKS_COLLECTION = "safety_worker_document_chunks";
 const FIRESTORE_PAYLOAD_CHUNK_SIZE = 180000;
 const MAX_DOCUMENT_FILE_SIZE = 8 * 1024 * 1024;
-const ALLOWED_WORKER_DOCUMENTS = ["תעודת זהות", "רשיון נהיגה", "אישור עבודה בגובה"];
+const ALLOWED_WORKER_DOCUMENTS = ["׳×׳¢׳•׳“׳× ׳–׳”׳•׳×", "׳¨׳©׳™׳•׳ ׳ ׳”׳™׳’׳”", "׳׳™׳©׳•׳¨ ׳¢׳‘׳•׳“׳” ׳‘׳’׳•׳‘׳”"];
 const FIREBASE_STORAGE_CONFIG = {
   apiKey: "AIzaSyCba5FEsy3WlrrkzjXFPZrKyW9nXsdZ5l4",
   authDomain: "nfc-demo-91f72.firebaseapp.com",
@@ -56,11 +56,11 @@ let selectedClockHour = "06";
 let selectedClockMinute = "35";
 
 const workerDatabase = [
-  { name: "יוסי כהן", id: "123456789", role: "ברזלן", contractor: "אור פלדה", status: "כבר ביומן היום" },
-  { name: "אמיר לוי", id: "234567891", role: "טפסן", contractor: "אלפא ביצוע", status: "כבר ביומן היום" },
-  { name: "מוחמד סאלח", id: "345678912", role: "מפעיל ציוד", contractor: "ציוד דרום", status: "במאגר" },
-  { name: "שלומי דדון", id: "456789123", role: "רתך", contractor: "אלפא ביצוע", status: "במאגר" },
-  { name: "ראמי חטיב", id: "567891234", role: "מפעיל ציוד", contractor: "ציוד דרום", status: "במאגר" },
+  { name: "׳™׳•׳¡׳™ ׳›׳”׳", id: "123456789", role: "׳‘׳¨׳–׳׳", contractor: "׳׳•׳¨ ׳₪׳׳“׳”", status: "׳›׳‘׳¨ ׳‘׳™׳•׳׳ ׳”׳™׳•׳" },
+  { name: "׳׳׳™׳¨ ׳׳•׳™", id: "234567891", role: "׳˜׳₪׳¡׳", contractor: "׳׳׳₪׳ ׳‘׳™׳¦׳•׳¢", status: "׳›׳‘׳¨ ׳‘׳™׳•׳׳ ׳”׳™׳•׳" },
+  { name: "׳׳•׳—׳׳“ ׳¡׳׳׳—", id: "345678912", role: "׳׳₪׳¢׳™׳ ׳¦׳™׳•׳“", contractor: "׳¦׳™׳•׳“ ׳“׳¨׳•׳", status: "׳‘׳׳׳’׳¨" },
+  { name: "׳©׳׳•׳׳™ ׳“׳“׳•׳", id: "456789123", role: "׳¨׳×׳", contractor: "׳׳׳₪׳ ׳‘׳™׳¦׳•׳¢", status: "׳‘׳׳׳’׳¨" },
+  { name: "׳¨׳׳׳™ ׳—׳˜׳™׳‘", id: "567891234", role: "׳׳₪׳¢׳™׳ ׳¦׳™׳•׳“", contractor: "׳¦׳™׳•׳“ ׳“׳¨׳•׳", status: "׳‘׳׳׳’׳¨" },
 ];
 
 const fields = {
@@ -204,16 +204,16 @@ function loadCloudDocuments() {
 function normalizeWorkerDocumentName(name = "") {
   const normalized = String(name).trim();
 
-  if (normalized.includes("תעודת") && normalized.includes("זהות")) {
-    return "תעודת זהות";
+  if (normalized.includes("׳×׳¢׳•׳“׳×") && normalized.includes("׳–׳”׳•׳×")) {
+    return "׳×׳¢׳•׳“׳× ׳–׳”׳•׳×";
   }
 
-  if (normalized.includes("רשיון") || normalized.includes("רישיון") || normalized.includes("נהיגה")) {
-    return "רשיון נהיגה";
+  if (normalized.includes("׳¨׳©׳™׳•׳") || normalized.includes("׳¨׳™׳©׳™׳•׳") || normalized.includes("׳ ׳”׳™׳’׳”")) {
+    return "׳¨׳©׳™׳•׳ ׳ ׳”׳™׳’׳”";
   }
 
-  if (normalized.includes("עבודה") && normalized.includes("גובה")) {
-    return "אישור עבודה בגובה";
+  if (normalized.includes("׳¢׳‘׳•׳“׳”") && normalized.includes("׳’׳•׳‘׳”")) {
+    return "׳׳™׳©׳•׳¨ ׳¢׳‘׳•׳“׳” ׳‘׳’׳•׳‘׳”";
   }
 
   return "";
@@ -272,7 +272,7 @@ function getCloudDocumentsForWorker(worker) {
     .map((doc) => ({
       id: doc.id,
       name: doc.documentType,
-      status: "נשמר בענן",
+      status: "׳ ׳©׳׳¨ ׳‘׳¢׳ ׳",
       expiry: doc.savedAtDisplay,
       className: "ok",
       url: doc.publicUrl || doc.previewUrl || (doc.storageMode === "firestore-chunked" ? "cloud:" + doc.id : ""),
@@ -299,7 +299,7 @@ function getActiveSiteName() {
 
 async function uploadWorkerDocumentToCloud(worker, file, documentType) {
   if (!file) {
-    return { ok: false, message: "לא נבחר קובץ." };
+    return { ok: false, message: "׳׳ ׳ ׳‘׳—׳¨ ׳§׳•׳‘׳¥." };
   }
 
   const now = new Date();
@@ -310,7 +310,7 @@ async function fileToDataUrl(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(String(reader.result || ""));
-    reader.onerror = () => reject(new Error("קריאת הקובץ נכשלה."));
+    reader.onerror = () => reject(new Error("׳§׳¨׳™׳׳× ׳”׳§׳•׳‘׳¥ ׳ ׳›׳©׳׳”."));
     reader.readAsDataURL(file);
   });
 }
@@ -511,7 +511,7 @@ function buildCloudDocumentRecord(worker, file, documentType, objectPath, public
     id: `${worker.id}-${now.getTime()}`,
     workerId: worker.id,
     workerName: worker.name,
-    documentType: documentType || file.name || "מסמך עובד",
+    documentType: documentType || file.name || "׳׳¡׳׳ ׳¢׳•׳‘׳“",
     fileName: file.name || "document",
     path: objectPath,
     publicUrl,
@@ -566,7 +566,7 @@ navigateTo("loginView");
 function resetErrorState() {
   formNote.classList.remove("is-error");
   formNote.textContent =
-    "הפרטים יישמרו כברירת מחדל למכשיר הזה. את התאריך תבחר מחדש בכל פעם.";
+    "׳”׳₪׳¨׳˜׳™׳ ׳™׳™׳©׳׳¨׳• ׳›׳‘׳¨׳™׳¨׳× ׳׳—׳“׳ ׳׳׳›׳©׳™׳¨ ׳”׳–׳”. ׳׳× ׳”׳×׳׳¨׳™׳ ׳×׳‘׳—׳¨ ׳׳—׳“׳© ׳‘׳›׳ ׳₪׳¢׳.";
 }
 
 enterButton.addEventListener("click", () => {
@@ -581,13 +581,13 @@ detailsForm.addEventListener("submit", (event) => {
 
   if (!detailsForm.reportValidity()) {
     formNote.classList.add("is-error");
-    formNote.textContent = "יש למלא את כל שדות החובה לפני שממשיכים.";
+    formNote.textContent = "׳™׳© ׳׳׳׳ ׳׳× ׳›׳ ׳©׳“׳•׳× ׳”׳—׳•׳‘׳” ׳׳₪׳ ׳™ ׳©׳׳׳©׳™׳›׳™׳.";
     return;
   }
 
   animateButton(continueButton);
   saveDefaults();
-  formNote.textContent = "הפרטים נשמרו. אפשר להמשיך למילוי היומן.";
+  formNote.textContent = "׳”׳₪׳¨׳˜׳™׳ ׳ ׳©׳׳¨׳•. ׳׳₪׳©׳¨ ׳׳”׳׳©׳™׳ ׳׳׳™׳׳•׳™ ׳”׳™׳•׳׳.";
 
   window.setTimeout(() => navigateTo("dashboardView"), 180);
 });
@@ -805,7 +805,7 @@ function getWorkerDocuments(worker) {
 }
 
 function getSavedWorkerDocuments(worker) {
-  return getWorkerDocuments(worker).filter((doc) => doc.status !== "חסר");
+  return getWorkerDocuments(worker).filter((doc) => doc.status !== "׳—׳¡׳¨");
 }
 
 function openWorkerDocs(worker, selectedDocId = "") {
@@ -832,11 +832,11 @@ function openWorkerDocs(worker, selectedDocId = "") {
         <article class="doc-card">
           <div>
             <strong>${doc.name}</strong>
-            <span>תוקף: ${doc.expiry}</span>
+            <span>׳×׳•׳§׳£: ${doc.expiry}</span>
           </div>
           <div class="doc-card-actions">
             <span class="status-chip ${doc.className}">${doc.status}</span>
-            ${doc.url ? `<button class="ghost-button doc-open-button" type="button" data-doc-id="${doc.id}">פתח קובץ</button>` : ""}
+            ${doc.url ? `<button class="ghost-button doc-open-button" type="button" data-doc-id="${doc.id}">??? ????</button>` : `<button class="ghost-button doc-open-button" type="button" data-doc-upload="${doc.name}">??? ????</button>`}
           </div>
         </article>
       `
@@ -854,6 +854,12 @@ function openWorkerDocs(worker, selectedDocId = "") {
     });
   });
 
+  workerDocsList.querySelectorAll("[data-doc-upload]").forEach((button) => {
+    button.addEventListener("click", () => {
+      queueWorkerDocumentUpload(button.getAttribute("data-doc-upload") ?? "");
+    });
+  });
+
   workerDocsModal.classList.add("is-open");
   document.body.style.overflow = "hidden";
 }
@@ -864,7 +870,7 @@ function refreshWorkerDocumentSelect(worker, select, selectedValue = "") {
   }
 
   select.innerHTML = `
-    <option value="">בחר מסמך לפתיחה</option>
+    <option value="">׳‘׳—׳¨ ׳׳¡׳׳ ׳׳₪׳×׳™׳—׳”</option>
     ${getSavedWorkerDocuments(worker)
       .map((doc) => `<option value="${doc.id}">${doc.name} - ${doc.status} - ${doc.expiry}</option>`)
       .join("")}
@@ -891,6 +897,16 @@ function closeWorkerDocs() {
   document.body.style.overflow = "";
 }
 
+function queueWorkerDocumentUpload(documentName = "") {
+  if (!selectedWorkerPanel) {
+    return;
+  }
+
+  selectedWorkerPanel.dataset.pendingDocType = documentName;
+  closeWorkerDocs();
+  selectedWorkerPanel.querySelector("[data-worker-doc-file]")?.click();
+}
+
 workerDocsClose?.addEventListener("click", closeWorkerDocs);
 
 workerDocsModal?.addEventListener("click", (event) => {
@@ -900,8 +916,7 @@ workerDocsModal?.addEventListener("click", (event) => {
 });
 
 workerDocsScan?.addEventListener("click", () => {
-  closeWorkerDocs();
-  selectedWorkerPanel?.querySelector("[data-worker-doc-file]")?.click();
+  queueWorkerDocumentUpload();
 });
 
 reportStatusTrigger?.addEventListener("click", () => {
@@ -962,8 +977,8 @@ function renderWorkerSuggestions(query) {
   if (matches.length === 0) {
     workerSuggestions.innerHTML = `
       <div class="suggestion-empty">
-        <span>לא נמצא עובד מתאים</span>
-        <button class="ghost-button" type="button" id="openWorkerModalFromSearch">+ הוסף עובד חדש</button>
+        <span>׳׳ ׳ ׳׳¦׳ ׳¢׳•׳‘׳“ ׳׳×׳׳™׳</span>
+        <button class="ghost-button" type="button" id="openWorkerModalFromSearch">+ ׳”׳•׳¡׳£ ׳¢׳•׳‘׳“ ׳—׳“׳©</button>
       </div>
     `;
     document.getElementById("openWorkerModalFromSearch")?.addEventListener("click", () => {
@@ -978,7 +993,7 @@ function renderWorkerSuggestions(query) {
       (worker) => `
         <button class="suggestion-item" type="button" data-worker-name="${worker.name}">
           <strong>${worker.name}</strong>
-          <span>${worker.role} • ${worker.contractor} • ${worker.status}</span>
+          <span>${worker.role} ג€¢ ${worker.contractor} ג€¢ ${worker.status}</span>
         </button>
       `
     )
@@ -1014,52 +1029,52 @@ function renderSelectedWorker(worker) {
     <article class="selected-worker-card">
       <div class="selected-worker-head">
         <div>
-          <span class="mini-label">עובד נבחר מהמאגר</span>
+          <span class="mini-label">׳¢׳•׳‘׳“ ׳ ׳‘׳—׳¨ ׳׳”׳׳׳’׳¨</span>
           <h3>${worker.name}</h3>
-          <p>${worker.role} • ${worker.contractor} • ${worker.status}</p>
+          <p>${worker.role} ג€¢ ${worker.contractor} ג€¢ ${worker.status}</p>
         </div>
-        <span class="status-chip ok">מאומת</span>
+        <span class="status-chip ok">׳׳׳•׳׳×</span>
       </div>
       <div class="selected-worker-fields">
         <label class="mini-field">
-          <span>שעת התחלה</span>
+          <span>׳©׳¢׳× ׳”׳×׳—׳׳”</span>
           <input class="time-input" type="time" value="07:00" />
         </label>
         <label class="mini-field">
-          <span>שעת סיום</span>
+          <span>׳©׳¢׳× ׳¡׳™׳•׳</span>
           <input class="time-input" type="time" value="16:30" />
         </label>
         <label class="mini-field">
-          <span>מסמכים שמורים</span>
+          <span>׳׳¡׳׳›׳™׳ ׳©׳׳•׳¨׳™׳</span>
           <select data-worker-doc-select>
-            <option value="">בחר מסמך לפתיחה</option>
+            <option value="">׳‘׳—׳¨ ׳׳¡׳׳ ׳׳₪׳×׳™׳—׳”</option>
           </select>
         </label>
       </div>
       <input class="sr-only" type="file" accept="image/*,.pdf" capture="environment" data-worker-doc-file />
       <div class="selected-worker-actions">
-        <button class="ghost-button" type="button" data-worker-docs>מסמכי עובד</button>
-        <button class="ghost-button" type="button" data-scan-worker-doc>סרוק/צלם מסמך</button>
-        <button class="primary-button" type="button" data-add-worker-today>הוסף ליומן היום</button>
+        <button class="ghost-button" type="button" data-worker-docs>׳׳¡׳׳›׳™ ׳¢׳•׳‘׳“</button>
+        <button class="ghost-button" type="button" data-scan-worker-doc>׳¡׳¨׳•׳§/׳¦׳׳ ׳׳¡׳׳</button>
+        <button class="primary-button" type="button" data-add-worker-today>׳”׳•׳¡׳£ ׳׳™׳•׳׳ ׳”׳™׳•׳</button>
       </div>
     </article>
   `;
 
   const docSelect = selectedWorkerPanel.querySelector("[data-worker-doc-select]");
   const docFile = selectedWorkerPanel.querySelector("[data-worker-doc-file]");
-  let selectedDocText = "מסמכים במאגר";
+  let selectedDocText = "׳׳¡׳׳›׳™׳ ׳‘׳׳׳’׳¨";
 
   refreshWorkerDocumentSelect(worker, docSelect);
   refreshWorkerDocumentsFromCloud(worker, docSelect);
 
   docSelect?.addEventListener("change", () => {
     if (!docSelect.value) {
-      selectedDocText = "מסמכים במאגר";
+      selectedDocText = "׳׳¡׳׳›׳™׳ ׳‘׳׳׳’׳¨";
       return;
     }
 
     const selectedOption = docSelect.selectedOptions?.[0];
-    selectedDocText = selectedOption?.textContent?.split(" - ")[0] || "מסמך עובד";
+    selectedDocText = selectedOption?.textContent?.split(" - ")[0] || "׳׳¡׳׳ ׳¢׳•׳‘׳“";
     openWorkerDocs(worker, docSelect.value);
   });
 
@@ -1071,13 +1086,14 @@ function renderSelectedWorker(worker) {
     }
 
     const scanButton = selectedWorkerPanel.querySelector("[data-scan-worker-doc]");
-    const originalLabel = scanButton?.textContent ?? "סרוק/צלם מסמך";
+    const originalLabel = scanButton?.textContent ?? "????/??? ????";
+    const pendingDocType = selectedWorkerPanel.dataset.pendingDocType?.trim();
     const selectedOption = docSelect?.selectedOptions?.[0];
     const selectedDocumentName = selectedOption?.textContent?.split(" - ")[0]?.trim();
-    const documentType = selectedDocumentName || "מסמך עובד";
+    const documentType = pendingDocType || selectedDocumentName || "???? ????";
 
     if (scanButton) {
-      scanButton.textContent = "מעלה לענן...";
+      scanButton.textContent = "???? ????...";
       scanButton.disabled = true;
     }
 
@@ -1086,13 +1102,15 @@ function renderSelectedWorker(worker) {
 
       if (result.ok) {
         selectedDocText = result.record.documentType;
+        selectedWorkerPanel.dataset.pendingDocType = "";
         refreshWorkerDocumentSelect(worker, docSelect, result.record.id);
         if (scanButton) {
-          scanButton.textContent = "נשמר בענן";
+          scanButton.textContent = "???? ????";
         }
       } else if (scanButton) {
         selectedDocText = fileName;
-        scanButton.textContent = "ענן לא מחובר";
+        selectedWorkerPanel.dataset.pendingDocType = "";
+        scanButton.textContent = "??? ?? ?????";
         window.setTimeout(() => {
           scanButton.textContent = originalLabel;
         }, 2200);
@@ -1100,17 +1118,18 @@ function renderSelectedWorker(worker) {
       }
     } catch (error) {
       selectedDocText = fileName;
+      selectedWorkerPanel.dataset.pendingDocType = "";
       if (scanButton) {
-        scanButton.textContent = "שמירה נכשלה";
+        scanButton.textContent = "????? ?????";
         window.setTimeout(() => {
           scanButton.textContent = originalLabel;
         }, 2200);
       }
-      window.alert("שמירת המסמך בענן נכשלה. בדוק חיבור ו-Firebase.");
+      window.alert("????? ????? ???? ?????. ???? ????? ?-Firebase.");
     } finally {
       if (scanButton) {
         scanButton.disabled = false;
-        if (scanButton.textContent === "נשמר בענן") {
+        if (scanButton.textContent === "???? ????") {
           window.setTimeout(() => {
             scanButton.textContent = originalLabel;
           }, 1800);
@@ -1128,19 +1147,19 @@ function renderSelectedWorker(worker) {
   });
 
   selectedWorkerPanel.querySelector("[data-add-worker-today]")?.addEventListener("click", () => {
-    addWorkerToToday(worker, "תקין", docFile?.files?.[0]?.name ?? selectedDocText);
+    addWorkerToToday(worker, "׳×׳§׳™׳", docFile?.files?.[0]?.name ?? selectedDocText);
     selectedWorkerPanel.classList.remove("is-open");
     selectedWorkerPanel.innerHTML = "";
     workerSearch.value = "";
   });
 }
 
-function addWorkerToToday(worker, docStatus = "תקין", docFileName = "") {
+function addWorkerToToday(worker, docStatus = "׳×׳§׳™׳", docFileName = "") {
   if (!workerList) {
     return;
   }
 
-  const statusClass = docStatus === "תקין" ? "ok" : docStatus === "לא רלוונטי" ? "muted" : "warning";
+  const statusClass = docStatus === "׳×׳§׳™׳" ? "ok" : docStatus === "׳׳ ׳¨׳׳•׳•׳ ׳˜׳™" ? "muted" : "warning";
   const docText = docFileName || docStatus;
 
   const card = document.createElement("article");
@@ -1149,29 +1168,29 @@ function addWorkerToToday(worker, docStatus = "תקין", docFileName = "") {
     <button class="worker-head" type="button" data-worker-toggle>
       <div>
         <h3>${worker.name}</h3>
-        <p>${worker.role} • ${worker.contractor}</p>
+        <p>${worker.role} ג€¢ ${worker.contractor}</p>
       </div>
       <div class="worker-head-meta">
         <span>07:00 - 16:30</span>
-        <span class="status-chip ok">נוסף היום</span>
+        <span class="status-chip ok">׳ ׳•׳¡׳£ ׳”׳™׳•׳</span>
       </div>
     </button>
     <div class="worker-body">
       <div class="worker-grid">
-        <div class="worker-line"><span>שעת התחלה</span><strong>07:00</strong></div>
-        <div class="worker-line"><span>שעת סיום</span><strong>16:30</strong></div>
-        <div class="worker-line"><span>סה"כ שעות</span><strong>9.5</strong></div>
-        <div class="worker-line"><span>מקור</span><strong>מאגר עובדים</strong></div>
+        <div class="worker-line"><span>׳©׳¢׳× ׳”׳×׳—׳׳”</span><strong>07:00</strong></div>
+        <div class="worker-line"><span>׳©׳¢׳× ׳¡׳™׳•׳</span><strong>16:30</strong></div>
+        <div class="worker-line"><span>׳¡׳”"׳› ׳©׳¢׳•׳×</span><strong>9.5</strong></div>
+        <div class="worker-line"><span>׳׳§׳•׳¨</span><strong>׳׳׳’׳¨ ׳¢׳•׳‘׳“׳™׳</strong></div>
       </div>
       <div class="worker-tags">
-        <span>תדריך: לביצוע/אישור</span>
-        <span>סוג עבודה: ${worker.role}</span>
-        <span>סטטוס: נוסף ליומן היום</span>
+        <span>׳×׳“׳¨׳™׳: ׳׳‘׳™׳¦׳•׳¢/׳׳™׳©׳•׳¨</span>
+        <span>׳¡׳•׳’ ׳¢׳‘׳•׳“׳”: ${worker.role}</span>
+        <span>׳¡׳˜׳˜׳•׳¡: ׳ ׳•׳¡׳£ ׳׳™׳•׳׳ ׳”׳™׳•׳</span>
       </div>
       <div class="doc-row">
-        <span class="status-chip ok">ת"ז</span>
+        <span class="status-chip ok">׳×"׳–</span>
         <span class="status-chip ${statusClass}">${docText}</span>
-        <span class="status-chip muted">צילום לפי צורך</span>
+        <span class="status-chip muted">׳¦׳™׳׳•׳ ׳׳₪׳™ ׳¦׳•׳¨׳</span>
       </div>
     </div>
   `;
@@ -1179,3 +1198,4 @@ function addWorkerToToday(worker, docStatus = "תקין", docFileName = "") {
   attachWorkerToggle(card.querySelector("[data-worker-toggle]"));
   workerList.prepend(card);
 }
+
