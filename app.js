@@ -4,6 +4,7 @@ const CLOUD_DOCUMENTS_COLLECTION = "safety_worker_documents";
 const CLOUD_DOCUMENT_CHUNKS_COLLECTION = "safety_worker_document_chunks";
 const FIRESTORE_PAYLOAD_CHUNK_SIZE = 180000;
 const MAX_DOCUMENT_FILE_SIZE = 8 * 1024 * 1024;
+const ALLOWED_WORKER_DOCUMENTS = ["תעודת זהות", "רשיון נהיגה", "אישור עבודה בגובה"];
 const FIREBASE_STORAGE_CONFIG = {
   apiKey: "AIzaSyCba5FEsy3WlrrkzjXFPZrKyW9nXsdZ5l4",
   authDomain: "nfc-demo-91f72.firebaseapp.com",
@@ -196,6 +197,24 @@ function loadCloudDocuments() {
   }
 }
 
+function normalizeWorkerDocumentName(name = "") {
+  const normalized = String(name).trim();
+
+  if (normalized.includes("תעודת") && normalized.includes("זהות")) {
+    return "תעודת זהות";
+  }
+
+  if (normalized.includes("רשיון") || normalized.includes("רישיון") || normalized.includes("נהיגה")) {
+    return "רשיון נהיגה";
+  }
+
+  if (normalized.includes("עבודה") && normalized.includes("גובה")) {
+    return "אישור עבודה בגובה";
+  }
+
+  return "";
+}
+
 function saveCloudDocumentRecord(record) {
   const records = loadCloudDocuments().filter((item) => item.id !== record.id);
   records.unshift(record);
@@ -215,6 +234,11 @@ function saveCloudDocumentRecords(recordsToMerge) {
 function getCloudDocumentsForWorker(worker) {
   return loadCloudDocuments()
     .filter((doc) => doc.workerId === worker.id)
+    .map((doc) => ({
+      ...doc,
+      documentType: normalizeWorkerDocumentName(doc.documentType),
+    }))
+    .filter((doc) => ALLOWED_WORKER_DOCUMENTS.includes(doc.documentType))
     .map((doc) => ({
       id: doc.id,
       name: doc.documentType,
