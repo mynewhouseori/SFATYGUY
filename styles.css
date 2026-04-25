@@ -650,10 +650,6 @@ input {
   accent-color: #61d07d;
 }
 
-.worker-picker-item.is-disabled {
-  opacity: 0.64;
-}
-
 .worker-picker-copy {
   min-width: 0;
   display: flex;
@@ -710,11 +706,6 @@ input {
   flex: 1 1 auto;
   min-width: 0;
   font-size: 0.84rem;
-}
-
-.worker-picker-actions {
-  grid-template-columns: auto 1fr;
-  gap: 10px;
 }
 
 .worker-edit-grid {
@@ -1392,7 +1383,6 @@ input {
   }
 
   .worker-picker-head,
-  .worker-picker-actions,
   .worker-edit-grid {
     grid-template-columns: 1fr;
   }

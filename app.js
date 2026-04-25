@@ -1712,6 +1712,18 @@ addWorkerToToday = function addWorkerToTodayFromPicker(worker, options = {}) {
   updateWorkerCount();
 };
 
+function removeWorkerFromToday(workerId) {
+  const existingCard = workerList?.querySelector(`.worker-card[data-worker-id="${workerId}"]`);
+
+  if (!existingCard) {
+    return false;
+  }
+
+  existingCard.remove();
+  updateWorkerCount();
+  return true;
+}
+
 function focusWorkerCard(workerId) {
   const existingCard = workerList?.querySelector(`.worker-card[data-worker-id="${workerId}"]`);
 
@@ -1794,7 +1806,7 @@ function renderWorkerPicker() {
   }
 
   const activeWorkerIds = getCurrentWorkerIds();
-  const displayedSelectedCount = new Set([...activeWorkerIds, ...selectedWorkerIds]).size;
+  const displayedSelectedCount = activeWorkerIds.size;
   const sortedWorkers = [...workerDatabase].sort((left, right) =>
     left.name.localeCompare(right.name, "he")
   );
@@ -1811,22 +1823,18 @@ function renderWorkerPicker() {
         ${sortedWorkers
           .map((worker) => {
             const isActive = activeWorkerIds.has(worker.id);
-            const isChecked = isActive || selectedWorkerIds.has(worker.id);
+            const isChecked = isActive;
             return `
-              <div class="worker-picker-item ${isActive ? "is-disabled" : ""}">
-                <input type="checkbox" value="${worker.id}" ${isChecked ? "checked" : ""} ${isActive ? "disabled" : ""} data-worker-pick />
+              <div class="worker-picker-item">
+                <input type="checkbox" value="${worker.id}" ${isChecked ? "checked" : ""} data-worker-pick />
                 <button class="worker-picker-open" type="button" data-worker-open="${worker.id}">
                   <strong>${worker.name}</strong>
-                  <span>${worker.role} • ${isActive ? "\u05DB\u05D1\u05E8 \u05D1\u05DE\u05E6\u05D1\u05D4" : worker.contractor}</span>
+                  <span>${worker.role} • ${worker.contractor}</span>
                 </button>
               </div>
             `;
           })
           .join("")}
-      </div>
-      <div class="worker-picker-actions">
-        <button class="ghost-button" type="button" data-close-worker-picker>\u05E1\u05D2\u05D5\u05E8</button>
-        <button class="primary-button" type="button" data-add-selected-workers>\u05D4\u05D5\u05E1\u05E3 \u05DE\u05E1\u05D5\u05DE\u05E0\u05D9\u05DD</button>
       </div>
     </div>
   `;
@@ -1834,9 +1842,27 @@ function renderWorkerPicker() {
   workerSuggestions.querySelectorAll("[data-worker-pick]").forEach((checkbox) => {
     checkbox.addEventListener("change", () => {
       if (checkbox.checked) {
-        selectedWorkerIds.add(checkbox.value);
+        const worker = workerDatabase.find((entry) => entry.id === checkbox.value);
+        if (worker) {
+          addWorkerToToday(worker, {
+            startTime: DEFAULT_WORKDAY_START,
+            endTime: DEFAULT_WORKDAY_END,
+            area: "\u05DC\u05D1\u05D7\u05D9\u05E8\u05D4",
+            note: "\u05D4\u05D5\u05E1\u05E3 \u05D1\u05E1\u05D9\u05DE\u05D5\u05DF \u05DE\u05D4\u05D0\u05EA\u05E8",
+            briefing: "\u05DC\u05D1\u05D9\u05E6\u05D5\u05E2",
+            docStatus: "\u05E0\u05D1\u05D3\u05E7 \u05D1\u05DE\u05D0\u05D2\u05E8",
+            statusLabel: "\u05E0\u05D5\u05E1\u05E3 \u05D4\u05D9\u05D5\u05DD",
+          });
+        }
       } else {
-        selectedWorkerIds.delete(checkbox.value);
+        removeWorkerFromToday(checkbox.value);
+        if (selectedWorkerPanel?.classList.contains("is-open")) {
+          const previewCard = selectedWorkerPanel.querySelector(`.worker-card[data-worker-id="${checkbox.value}"]`);
+          if (previewCard) {
+            selectedWorkerPanel.classList.remove("is-open");
+            selectedWorkerPanel.innerHTML = "";
+          }
+        }
       }
       renderWorkerPicker();
       workerSuggestions.classList.add("is-open");
@@ -1862,30 +1888,6 @@ function renderWorkerPicker() {
         }
       }
     });
-  });
-
-  workerSuggestions.querySelector("[data-close-worker-picker]")?.addEventListener("click", () => {
-    workerSuggestions.classList.remove("is-open");
-  });
-
-  workerSuggestions.querySelector("[data-add-selected-workers]")?.addEventListener("click", () => {
-    Array.from(selectedWorkerIds).forEach((workerId) => {
-      const worker = workerDatabase.find((entry) => entry.id === workerId);
-      if (worker) {
-        addWorkerToToday(worker, {
-          startTime: DEFAULT_WORKDAY_START,
-          endTime: DEFAULT_WORKDAY_END,
-          area: "\u05DC\u05D1\u05D7\u05D9\u05E8\u05D4",
-          note: "\u05D4\u05D5\u05E1\u05E3 \u05D1\u05E1\u05D9\u05DE\u05D5\u05DF \u05DE\u05D4\u05D0\u05EA\u05E8",
-          briefing: "\u05DC\u05D1\u05D9\u05E6\u05D5\u05E2",
-          docStatus: "\u05E0\u05D1\u05D3\u05E7 \u05D1\u05DE\u05D0\u05D2\u05E8",
-          statusLabel: "\u05E0\u05D5\u05E1\u05E3 \u05D4\u05D9\u05D5\u05DD",
-        });
-      }
-    });
-    selectedWorkerIds.clear();
-    renderWorkerPicker();
-    workerSuggestions.classList.remove("is-open");
   });
 }
 
