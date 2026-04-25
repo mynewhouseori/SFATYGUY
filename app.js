@@ -1736,14 +1736,11 @@ function renderWorkerPicker() {
             const isChecked = isActive || selectedWorkerIds.has(worker.id);
             return `
               <label class="worker-picker-item ${isActive ? "is-disabled" : ""}">
+                <span class="worker-picker-indicator ${isActive ? "is-active" : "is-ready"}" aria-hidden="true"></span>
                 <input type="checkbox" value="${worker.id}" ${isChecked ? "checked" : ""} ${isActive ? "disabled" : ""} data-worker-pick />
                 <div class="worker-picker-copy">
-                  <strong>${firstName}</strong>
-                  <span>${lastName || worker.name}</span>
-                </div>
-                <div class="worker-picker-meta">
-                  <span>${worker.role}</span>
-                  <span>${isActive ? "\u05DB\u05D1\u05E8 \u05D1\u05DE\u05E6\u05D1\u05D4" : worker.contractor}</span>
+                  <strong>${worker.name}</strong>
+                  <span>${worker.role} • ${isActive ? "\u05DB\u05D1\u05E8 \u05D1\u05DE\u05E6\u05D1\u05D4" : worker.contractor}</span>
                 </div>
               </label>
             `;

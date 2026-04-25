@@ -635,30 +635,61 @@ input {
 
 .worker-picker-item {
   display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: 12px;
+  grid-template-columns: auto auto 1fr;
+  gap: 10px;
   align-items: center;
-  padding: 12px 14px;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 10px 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.worker-picker-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #61d07d;
+  box-shadow: 0 0 0 4px rgba(97, 208, 125, 0.12);
+}
+
+.worker-picker-indicator.is-active {
+  background: #4db56c;
+  box-shadow: 0 0 0 4px rgba(77, 181, 108, 0.12);
 }
 
 .worker-picker-item input {
-  width: 18px;
-  height: 18px;
-  accent-color: #d89433;
+  width: 17px;
+  height: 17px;
+  accent-color: #61d07d;
 }
 
 .worker-picker-item.is-disabled {
   opacity: 0.64;
 }
 
-.worker-picker-meta {
-  display: grid;
-  gap: 4px;
-  justify-items: end;
-  text-align: left;
+.worker-picker-copy {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.92rem;
+}
+
+.worker-picker-copy strong,
+.worker-picker-copy span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.worker-picker-copy strong {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.worker-picker-copy span {
+  flex: 1 1 auto;
+  min-width: 0;
   font-size: 0.84rem;
 }
 
@@ -1309,22 +1340,29 @@ input {
   }
 
   .worker-picker-head,
-  .worker-picker-item,
   .worker-picker-actions,
   .worker-edit-grid {
     grid-template-columns: 1fr;
   }
 
   .worker-picker-item {
+    grid-template-columns: auto auto 1fr;
     justify-items: start;
+    padding: 9px 12px;
   }
 
   .worker-picker-item input {
-    order: -1;
+    order: 0;
   }
 
-  .worker-picker-meta {
-    justify-items: start;
+  .worker-picker-copy {
+    width: 100%;
+    gap: 6px;
+    font-size: 0.88rem;
+  }
+
+  .worker-picker-copy span {
+    font-size: 0.8rem;
     text-align: right;
   }
 
