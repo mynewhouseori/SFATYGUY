@@ -1125,6 +1125,38 @@ input {
     gap: 6px;
   }
 
+  #detailsView .toolbar {
+    gap: 10px;
+  }
+
+  #detailsView .toolbar-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+    flex-wrap: nowrap;
+  }
+
+  #detailsView .toolbar .mobile-screen-index {
+    order: 1;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  #detailsView .toolbar-brand {
+    order: 2;
+  }
+
+  #detailsView .toolbar .ghost-button {
+    order: 3;
+    flex: 0 0 auto;
+  }
+
+  #detailsView .toolbar-copy .screen-eyebrow {
+    display: none;
+  }
+
   .toolbar .mobile-screen-index {
     display: block;
     font-size: 0.74rem;
