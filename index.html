@@ -11,7 +11,7 @@
       href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=20260425-12" />
+    <link rel="stylesheet" href="styles.css?v=20260425-13" />
   </head>
   <body>
     <main class="app-shell">
@@ -539,28 +539,24 @@
       <section class="screen-card modal-card">
         <div class="details-head modal-head">
           <div>
-            <p class="screen-eyebrow">הוספת עובד</p>
-            <h2>מהמאגר או עובד חדש</h2>
+            <p class="screen-eyebrow">עובד חדש</p>
+            <h2>הוספת עובד חדש למאגר</h2>
           </div>
           <button class="ghost-button" id="closeWorkerModal" type="button">סגור</button>
         </div>
 
         <div class="modal-section">
-          <p class="screen-copy">בחירה מהירה מהמאגר</p>
-          <div class="quick-pick-list">
-            <button class="quick-pick" type="button">שלומי דדון • אלפא ביצוע</button>
-            <button class="quick-pick" type="button">ראמי חטיב • ציוד דרום</button>
-          </div>
+          <p class="screen-copy">יצירת עובד חדש בבסיס הנתונים של האתר. לאחר השמירה ניתן להוסיף אותו למצבת כוח האדם היומית אם הגיע לעבודה.</p>
         </div>
 
         <div class="field-grid">
-          <label class="field is-inline"><span>שם מלא</span><input type="text" placeholder="עבור עובד חדש" /></label>
-          <label class="field is-inline"><span>ת"ז</span><input type="text" placeholder="מספר מזהה" /></label>
+          <label class="field is-inline"><span>שם מלא</span><input type="text" placeholder="שם העובד החדש" /></label>
+          <label class="field is-inline"><span>ת"ז</span><input type="text" placeholder="מספר מזהה של העובד" /></label>
           <label class="field is-inline"><span>טלפון</span><input type="text" placeholder="050-0000000" /></label>
-          <label class="field is-inline"><span>חברה / קבלן משנה</span><input type="text" placeholder="שם חברה" /></label>
+          <label class="field is-inline"><span>חברה / קבלן משנה</span><input type="text" placeholder="החברה או קבלן המשנה" /></label>
           <div class="two-col-grid">
-            <label class="field is-inline"><span>שעת התחלה</span><input type="text" value="07:00" /></label>
-            <label class="field is-inline"><span>שעת סיום</span><input type="text" value="16:00" /></label>
+            <label class="field is-inline"><span>שעת התחלה ברירת מחדל</span><input type="text" value="07:00" /></label>
+            <label class="field is-inline"><span>שעת סיום ברירת מחדל</span><input type="text" value="17:00" /></label>
           </div>
         </div>
 
@@ -575,6 +571,11 @@
             <button class="ghost-button" type="button">צלם מסמך</button>
             <button class="ghost-button" type="button">העלה מהגלריה</button>
           </div>
+        </div>
+
+        <div class="action-grid">
+          <button class="primary-button action-fill" type="button">שמור עובד במאגר</button>
+          <button class="ghost-button" id="closeWorkerModalFooter" type="button">ביטול</button>
         </div>
       </section>
     </div>
@@ -652,6 +653,6 @@
     <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-storage-compat.js"></script>
-    <script src="app.js?v=20260425-12"></script>
+    <script src="app.js?v=20260425-13"></script>
   </body>
 </html>

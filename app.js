@@ -27,6 +27,7 @@ const formNote = document.getElementById("formNote");
 const workerModal = document.getElementById("workerModal");
 const openWorkerModal = document.getElementById("openWorkerModal");
 const closeWorkerModal = document.getElementById("closeWorkerModal");
+const closeWorkerModalFooter = document.getElementById("closeWorkerModalFooter");
 const workerPickerTrigger = document.getElementById("workerPickerTrigger");
 const reportStatusSelect = document.getElementById("reportStatusSelect");
 const reportStatusTrigger = document.getElementById("reportStatusTrigger");
@@ -81,26 +82,7 @@ const workerDatabase = [
 const DEFAULT_WORKDAY_START = "07:00";
 const DEFAULT_WORKDAY_END = "17:00";
 const selectedWorkerIds = new Set();
-const initialTodayWorkers = [
-  {
-    workerId: "123456789",
-    startTime: "07:00",
-    endTime: "16:30",
-    area: "\u05E7\u05D5\u05DE\u05D4 4",
-    note: "\u05E6\u05D5\u05D5\u05EA \u05DE\u05DC\u05D0",
-    briefing: "\u05D1\u05D5\u05E6\u05E2",
-    docStatus: "\u05EA\u05E7\u05D9\u05DF",
-  },
-  {
-    workerId: "234567891",
-    startTime: "07:30",
-    endTime: "15:00",
-    area: "\u05D7\u05D6\u05D9\u05EA \u05DE\u05E2\u05E8\u05D1\u05D9\u05EA",
-    note: "\u05DE\u05DE\u05EA\u05D9\u05DF \u05DC\u05D0\u05D9\u05E9\u05D5\u05E8 \u05D2\u05D5\u05D1\u05D4",
-    briefing: "\u05D1\u05D5\u05E6\u05E2",
-    docStatus: "\u05D7\u05E1\u05E8 \u05DE\u05E1\u05DE\u05DA",
-  },
-];
+const initialTodayWorkers = [];
 
 const fields = {
   workDate: document.getElementById("workDate"),
@@ -946,6 +928,11 @@ openWorkerModal?.addEventListener("click", () => {
 });
 
 closeWorkerModal?.addEventListener("click", () => {
+  workerModal?.classList.remove("is-open");
+  document.body.style.overflow = "";
+});
+
+closeWorkerModalFooter?.addEventListener("click", () => {
   workerModal?.classList.remove("is-open");
   document.body.style.overflow = "";
 });
