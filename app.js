@@ -1718,6 +1718,10 @@ function renderWorkerPicker() {
   }
 
   const activeWorkerIds = getCurrentWorkerIds();
+  const displayedSelectedCount = new Set([...activeWorkerIds, ...selectedWorkerIds]).size;
+  const sortedWorkers = [...workerDatabase].sort((left, right) =>
+    left.name.localeCompare(right.name, "he")
+  );
   workerSuggestions.innerHTML = `
     <div class="worker-picker-shell">
       <div class="worker-picker-head">
@@ -1725,13 +1729,11 @@ function renderWorkerPicker() {
           <strong>\u05D1\u05D7\u05E8 \u05E2\u05D5\u05D1\u05D3\u05D9\u05DD \u05DE\u05D4\u05DE\u05D0\u05D2\u05E8</strong>
           <span>\u05DE\u05E1\u05DE\u05E0\u05D9\u05DD \u05DE\u05D9 \u05D4\u05D2\u05D9\u05E2 \u05D4\u05D9\u05D5\u05DD \u05D5\u05DE\u05D5\u05E1\u05D9\u05E4\u05D9\u05DD \u05D1\u05D1\u05EA \u05D0\u05D7\u05EA.</span>
         </div>
-        <span class="status-chip muted">${selectedWorkerIds.size} \u05DE\u05E1\u05D5\u05DE\u05E0\u05D9\u05DD</span>
+        <span class="status-chip muted">${displayedSelectedCount} \u05DE\u05E1\u05D5\u05DE\u05E0\u05D9\u05DD</span>
       </div>
       <div class="worker-picker-list">
-        ${workerDatabase
+        ${sortedWorkers
           .map((worker) => {
-            const [firstName, ...rest] = worker.name.split(" ");
-            const lastName = rest.join(" ");
             const isActive = activeWorkerIds.has(worker.id);
             const isChecked = isActive || selectedWorkerIds.has(worker.id);
             return `
