@@ -992,6 +992,15 @@ function attachWorkerToggle(button) {
   });
 }
 
+function clearSelectedWorkerPanel() {
+  if (!selectedWorkerPanel) {
+    return;
+  }
+
+  selectedWorkerPanel.classList.remove("is-open");
+  selectedWorkerPanel.innerHTML = "";
+}
+
 document.querySelectorAll("[data-worker-toggle]").forEach(attachWorkerToggle);
 
 document.querySelectorAll(".choice-group").forEach((group) => {
@@ -1787,6 +1796,99 @@ function createWorkerCard(worker, options = {}) {
   return card;
 }
 
+function getWorkerCardOptions(card, worker) {
+  if (!card) {
+    return {
+      startTime: DEFAULT_WORKDAY_START,
+      endTime: DEFAULT_WORKDAY_END,
+      area: "\u05DC\u05D1\u05D7\u05D9\u05E8\u05D4",
+      note: "\u05DC\u05DC\u05D0 \u05D4\u05E2\u05E8\u05D4",
+      role: worker.role,
+      contractor: worker.contractor,
+      briefing: "\u05DC\u05D1\u05D9\u05E6\u05D5\u05E2",
+      docStatus: "\u05EA\u05E7\u05D9\u05DF",
+      statusLabel: "\u05D1\u05D0\u05EA\u05E8 \u05D4\u05D9\u05D5\u05DD",
+    };
+  }
+
+  return {
+    startTime: card.querySelector("[data-worker-start]")?.value || DEFAULT_WORKDAY_START,
+    endTime: card.querySelector("[data-worker-end]")?.value || DEFAULT_WORKDAY_END,
+    area: card.querySelector("[data-worker-area]")?.value || "\u05DC\u05D1\u05D7\u05D9\u05E8\u05D4",
+    note: card.querySelector("[data-worker-note]")?.value || "\u05DC\u05DC\u05D0 \u05D4\u05E2\u05E8\u05D4",
+    role: card.querySelector("[data-worker-role]")?.value || worker.role,
+    contractor: card.querySelector("[data-worker-contractor]")?.value || worker.contractor,
+    briefing: "\u05DC\u05D1\u05D9\u05E6\u05D5\u05E2",
+    docStatus: "\u05E0\u05D1\u05D3\u05E7 \u05D1\u05DE\u05D0\u05D2\u05E8",
+    statusLabel:
+      card.querySelector(".worker-head-meta .status-chip")?.textContent?.trim() ||
+      "\u05D1\u05D0\u05EA\u05E8 \u05D4\u05D9\u05D5\u05DD",
+  };
+}
+
+function mirrorWorkerFieldValue(sourceCard, targetCard, selector) {
+  const sourceField = sourceCard?.querySelector(selector);
+  const targetField = targetCard?.querySelector(selector);
+
+  if (!sourceField || !targetField) {
+    return;
+  }
+
+  targetField.value = sourceField.value;
+  targetField.dispatchEvent(new Event("input", { bubbles: true }));
+  targetField.dispatchEvent(new Event("change", { bubbles: true }));
+}
+
+function syncWorkerCardToSource(panelCard, sourceCard) {
+  [
+    "[data-worker-start]",
+    "[data-worker-end]",
+    "[data-worker-area]",
+    "[data-worker-note]",
+    "[data-worker-role]",
+    "[data-worker-contractor]",
+  ].forEach((selector) => mirrorWorkerFieldValue(panelCard, sourceCard, selector));
+}
+
+function renderSelectedWorkerEditor(worker, sourceCard) {
+  if (!selectedWorkerPanel || !sourceCard) {
+    return false;
+  }
+
+  selectedWorkerPanel.classList.add("is-open");
+  selectedWorkerPanel.innerHTML = "";
+
+  const editorCard = createWorkerCard(worker, getWorkerCardOptions(sourceCard, worker));
+  editorCard.classList.add("selected-worker-card", "is-open");
+  attachWorkerCardControls(editorCard);
+
+  const actions = document.createElement("div");
+  actions.className = "selected-worker-actions";
+  actions.innerHTML = `
+    <button class="ghost-button action-button" type="button" data-close-selected-worker>\u05E1\u05D2\u05D5\u05E8</button>
+  `;
+  editorCard.querySelector(".worker-body")?.append(actions);
+  selectedWorkerPanel.append(editorCard);
+
+  [
+    "[data-worker-start]",
+    "[data-worker-end]",
+    "[data-worker-area]",
+    "[data-worker-note]",
+    "[data-worker-role]",
+    "[data-worker-contractor]",
+  ].forEach((selector) => {
+    const field = editorCard.querySelector(selector);
+    field?.addEventListener("input", () => syncWorkerCardToSource(editorCard, sourceCard));
+    field?.addEventListener("change", () => syncWorkerCardToSource(editorCard, sourceCard));
+  });
+
+  const closeButton = selectedWorkerPanel.querySelector("[data-close-selected-worker]");
+  attachPressFeedback(closeButton);
+  closeButton?.addEventListener("click", clearSelectedWorkerPanel);
+  return true;
+}
+
 function attachWorkerCardControls(card) {
   const toggleButton = card.querySelector("[data-worker-toggle]");
   const startInput = card.querySelector("[data-worker-start]");
@@ -1853,8 +1955,9 @@ function removeWorkerFromToday(workerId) {
 
 function focusWorkerCard(workerId) {
   const existingCard = workerList?.querySelector(`.worker-card[data-worker-id="${workerId}"]`);
+  const worker = workerDatabase.find((entry) => entry.id === workerId);
 
-  if (!existingCard) {
+  if (!existingCard || !worker) {
     return false;
   }
 
@@ -1863,10 +1966,11 @@ function focusWorkerCard(workerId) {
       card.classList.remove("is-open");
     }
   });
-  existingCard.classList.add("is-open", "is-highlighted");
-  existingCard.scrollIntoView({ behavior: "smooth", block: "center" });
+  existingCard.classList.add("is-highlighted");
+  const didRender = renderSelectedWorkerEditor(worker, existingCard);
+  selectedWorkerPanel?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   window.setTimeout(() => existingCard.classList.remove("is-highlighted"), 1800);
-  return true;
+  return didRender;
 }
 
 function renderSelectedWorkerPreview(worker) {
@@ -1921,15 +2025,11 @@ function renderSelectedWorkerPreview(worker) {
       statusLabel: "\u05E0\u05D5\u05E1\u05E3 \u05D4\u05D9\u05D5\u05DD",
     });
     selectedWorkerIds.delete(worker.id);
-    selectedWorkerPanel.classList.remove("is-open");
-    selectedWorkerPanel.innerHTML = "";
+    clearSelectedWorkerPanel();
     renderWorkerPicker();
   });
 
-  closeButton?.addEventListener("click", () => {
-    selectedWorkerPanel.classList.remove("is-open");
-    selectedWorkerPanel.innerHTML = "";
-  });
+  closeButton?.addEventListener("click", clearSelectedWorkerPanel);
 }
 
 function renderWorkerPicker() {
@@ -1990,8 +2090,7 @@ function renderWorkerPicker() {
         if (selectedWorkerPanel?.classList.contains("is-open")) {
           const previewCard = selectedWorkerPanel.querySelector(`.worker-card[data-worker-id="${checkbox.value}"]`);
           if (previewCard) {
-            selectedWorkerPanel.classList.remove("is-open");
-            selectedWorkerPanel.innerHTML = "";
+            clearSelectedWorkerPanel();
           }
         }
       }
@@ -2012,11 +2111,6 @@ function renderWorkerPicker() {
       if (!focusWorkerCard(worker.id)) {
         renderSelectedWorkerPreview(worker);
         selectedWorkerPanel?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-      } else {
-        selectedWorkerPanel?.classList.remove("is-open");
-        if (selectedWorkerPanel) {
-          selectedWorkerPanel.innerHTML = "";
-        }
       }
     });
   });
@@ -2049,6 +2143,7 @@ async function loadDailyWorkersForCurrentDate() {
   }
 
   workerList.innerHTML = "";
+  clearSelectedWorkerPanel();
   savedWorkers.forEach((entry) => {
     const worker = workerDatabase.find((item) => item.id === entry.workerId);
     if (worker) {

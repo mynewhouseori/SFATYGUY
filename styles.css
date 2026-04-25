@@ -961,6 +961,10 @@ input {
   padding-right: 2px;
 }
 
+#personnelView .worker-list {
+  display: none;
+}
+
 .worker-card.is-highlighted {
   border-color: rgba(97, 208, 125, 0.7);
   box-shadow: 0 0 0 1px rgba(97, 208, 125, 0.28), 0 18px 32px rgba(0, 0, 0, 0.18);
