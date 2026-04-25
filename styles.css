@@ -127,6 +127,10 @@ input {
   overflow: auto;
 }
 
+.modal-toolbar {
+  margin-bottom: 20px;
+}
+
 .login-card {
   text-align: center;
 }
@@ -1339,6 +1343,29 @@ input {
   }
 
   #dashboardView .toolbar-copy .screen-eyebrow {
+    display: none;
+  }
+
+  #workerModal .toolbar-actions {
+    flex-wrap: nowrap;
+  }
+
+  #workerModal .toolbar .mobile-screen-index {
+    order: 1;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  #workerModal .toolbar-brand {
+    order: 2;
+  }
+
+  #workerModal .toolbar .ghost-button {
+    order: 3;
+    flex: 0 0 auto;
+  }
+
+  #workerModal .toolbar-copy .screen-eyebrow {
     display: none;
   }
 

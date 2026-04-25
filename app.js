@@ -32,6 +32,10 @@ const workerModal = document.getElementById("workerModal");
 const openWorkerModal = document.getElementById("openWorkerModal");
 const closeWorkerModal = document.getElementById("closeWorkerModal");
 const closeWorkerModalFooter = document.getElementById("closeWorkerModalFooter");
+const workerModalCameraInput = document.getElementById("workerModalCameraInput");
+const workerModalGalleryInput = document.getElementById("workerModalGalleryInput");
+const workerModalCameraButton = document.getElementById("workerModalCameraButton");
+const workerModalGalleryButton = document.getElementById("workerModalGalleryButton");
 const workerPickerTrigger = document.getElementById("workerPickerTrigger");
 const reportStatusSelect = document.getElementById("reportStatusSelect");
 const reportStatusTrigger = document.getElementById("reportStatusTrigger");
@@ -1001,6 +1005,40 @@ function clearSelectedWorkerPanel() {
   selectedWorkerPanel.innerHTML = "";
 }
 
+function resetWorkerModalDocumentButtons() {
+  if (workerModalCameraInput) {
+    workerModalCameraInput.value = "";
+  }
+  if (workerModalGalleryInput) {
+    workerModalGalleryInput.value = "";
+  }
+  if (workerModalCameraButton) {
+    workerModalCameraButton.textContent = "\u05E6\u05DC\u05DD \u05DE\u05E1\u05DE\u05DA";
+  }
+  if (workerModalGalleryButton) {
+    workerModalGalleryButton.textContent = "\u05D4\u05E2\u05DC\u05D4 \u05DE\u05D4\u05D2\u05DC\u05E8\u05D9\u05D4";
+  }
+}
+
+function openWorkerModalPanel() {
+  workerModal?.classList.add("is-open");
+  document.body.style.overflow = "hidden";
+  resetWorkerModalDocumentButtons();
+}
+
+function closeWorkerModalPanel() {
+  workerModal?.classList.remove("is-open");
+  document.body.style.overflow = "";
+}
+
+function updateWorkerModalDocumentButton(button, file, fallbackLabel) {
+  if (!button) {
+    return;
+  }
+
+  button.textContent = file?.name?.trim() || fallbackLabel;
+}
+
 document.querySelectorAll("[data-worker-toggle]").forEach(attachWorkerToggle);
 
 document.querySelectorAll(".choice-group").forEach((group) => {
@@ -1013,26 +1051,40 @@ document.querySelectorAll(".choice-group").forEach((group) => {
   });
 });
 
-openWorkerModal?.addEventListener("click", () => {
-  workerModal?.classList.add("is-open");
-  document.body.style.overflow = "hidden";
-});
+openWorkerModal?.addEventListener("click", openWorkerModalPanel);
 
-closeWorkerModal?.addEventListener("click", () => {
-  workerModal?.classList.remove("is-open");
-  document.body.style.overflow = "";
-});
+closeWorkerModal?.addEventListener("click", closeWorkerModalPanel);
 
-closeWorkerModalFooter?.addEventListener("click", () => {
-  workerModal?.classList.remove("is-open");
-  document.body.style.overflow = "";
-});
+closeWorkerModalFooter?.addEventListener("click", closeWorkerModalPanel);
 
 workerModal?.addEventListener("click", (event) => {
   if (event.target === workerModal) {
-    workerModal.classList.remove("is-open");
-    document.body.style.overflow = "";
+    closeWorkerModalPanel();
   }
+});
+
+workerModalCameraButton?.addEventListener("click", () => {
+  workerModalCameraInput?.click();
+});
+
+workerModalGalleryButton?.addEventListener("click", () => {
+  workerModalGalleryInput?.click();
+});
+
+workerModalCameraInput?.addEventListener("change", () => {
+  updateWorkerModalDocumentButton(
+    workerModalCameraButton,
+    workerModalCameraInput.files?.[0],
+    "\u05DE\u05E1\u05DE\u05DA \u05E6\u05D5\u05DC\u05DD"
+  );
+});
+
+workerModalGalleryInput?.addEventListener("change", () => {
+  updateWorkerModalDocumentButton(
+    workerModalGalleryButton,
+    workerModalGalleryInput.files?.[0],
+    "\u05E7\u05D5\u05D1\u05E5 \u05E0\u05D1\u05D7\u05E8"
+  );
 });
 
 function updateClockValue() {
@@ -1410,8 +1462,7 @@ function renderWorkerSuggestions(query) {
       </div>
     `;
     document.getElementById("openWorkerModalFromSearch")?.addEventListener("click", () => {
-      workerModal?.classList.add("is-open");
-      document.body.style.overflow = "hidden";
+      openWorkerModalPanel();
     });
     return;
   }

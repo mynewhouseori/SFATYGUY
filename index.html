@@ -11,7 +11,7 @@
       href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=20260425-18" />
+    <link rel="stylesheet" href="styles.css?v=20260425-19" />
   </head>
   <body>
     <main class="app-shell">
@@ -537,16 +537,18 @@
 
     <div class="modal-backdrop" id="workerModal">
       <section class="screen-card modal-card">
-        <div class="details-head modal-head">
-          <div>
+        <div class="toolbar modal-toolbar">
+          <div class="toolbar-actions">
+            <span class="mobile-screen-index">עובד חדש</span>
+            <a class="toolbar-brand brand-mark" href="#" aria-label="דף הבית של האפליקציה">
+              <img src="logo01.jpeg" alt="לוגו OL Safety" />
+            </a>
+            <button class="ghost-button" id="closeWorkerModal" type="button">סגור</button>
+          </div>
+          <div class="toolbar-copy">
             <p class="screen-eyebrow">עובד חדש</p>
             <h2>הוספת עובד חדש למאגר</h2>
           </div>
-          <button class="ghost-button" id="closeWorkerModal" type="button">סגור</button>
-        </div>
-
-        <div class="modal-section">
-          <p class="screen-copy">יצירת עובד חדש בבסיס הנתונים של האתר. לאחר השמירה ניתן להוסיף אותו למצבת כוח האדם היומית אם הגיע לעבודה.</p>
         </div>
 
         <div class="field-grid">
@@ -567,9 +569,11 @@
             <span class="status-chip warning">עבודה בגובה</span>
             <span class="status-chip muted">רישיון נהיגה</span>
           </div>
+          <input class="sr-only" id="workerModalCameraInput" type="file" accept="image/*,.pdf" capture="environment" />
+          <input class="sr-only" id="workerModalGalleryInput" type="file" accept="image/*,.pdf" />
           <div class="two-col-grid media-actions">
-            <button class="ghost-button" type="button">צלם מסמך</button>
-            <button class="ghost-button" type="button">העלה מהגלריה</button>
+            <button class="ghost-button" id="workerModalCameraButton" type="button">צלם מסמך</button>
+            <button class="ghost-button" id="workerModalGalleryButton" type="button">העלה מהגלריה</button>
           </div>
         </div>
 
@@ -653,6 +657,6 @@
     <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-storage-compat.js"></script>
-    <script src="app.js?v=20260425-18"></script>
+    <script src="app.js?v=20260425-19"></script>
   </body>
 </html>
