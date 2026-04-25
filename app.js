@@ -1,6 +1,7 @@
 ﻿const STORAGE_KEY = "safety-field-general-defaults";
 const DAILY_WORKERS_KEY = "safety-field-daily-workers";
 const CLOUD_DOCUMENTS_KEY = "safety-field-cloud-documents";
+const DAILY_WORKFORCE_COLLECTION = "safety_daily_workforce";
 const CLOUD_DOCUMENTS_COLLECTION = "safety_worker_documents";
 const CLOUD_DOCUMENT_CHUNKS_COLLECTION = "safety_worker_document_chunks";
 const FIRESTORE_PAYLOAD_CHUNK_SIZE = 180000;
@@ -19,6 +20,8 @@ const FIREBASE_STORAGE_CONFIG = {
   appId: "1:1097334929129:web:73ee3cc80f0b86572d2278",
 };
 let workerDocumentRefreshToken = 0;
+let dailyWorkforceLoadToken = 0;
+let dailyWorkersSaveTimeout = null;
 const workerDocumentUrlCache = new Map();
 
 const enterButton = document.getElementById("enterButton");
@@ -206,6 +209,54 @@ function saveDailyWorkersStore(store) {
 
 function getCurrentDateStorageKey() {
   return normalizeDateValue(fields.workDate?.value || getTodayValue());
+}
+
+function getDailyWorkforceSiteName() {
+  return fields.siteName?.value?.trim() || "";
+}
+
+function buildDailyWorkforceDocumentId(dateKey = getCurrentDateStorageKey(), siteName = getDailyWorkforceSiteName()) {
+  return `${sanitizePathSegment(siteName || "site")}_${dateKey || normalizeDateValue(getTodayValue())}`;
+}
+
+async function saveDailyWorkersToCloud(dateKey, workers) {
+  const firestore = getFirebaseFirestore();
+  const siteName = getDailyWorkforceSiteName();
+
+  if (!firestore || !siteName) {
+    return false;
+  }
+
+  const documentId = buildDailyWorkforceDocumentId(dateKey, siteName);
+  await firestore.collection(DAILY_WORKFORCE_COLLECTION).doc(documentId).set({
+    id: documentId,
+    siteName,
+    dateKey,
+    workers,
+    updatedAt: new Date().toISOString(),
+  });
+  return true;
+}
+
+async function loadDailyWorkersFromCloud(dateKey) {
+  const firestore = getFirebaseFirestore();
+  const siteName = getDailyWorkforceSiteName();
+
+  if (!firestore || !siteName) {
+    return null;
+  }
+
+  const snapshot = await firestore
+    .collection(DAILY_WORKFORCE_COLLECTION)
+    .doc(buildDailyWorkforceDocumentId(dateKey, siteName))
+    .get();
+
+  if (!snapshot.exists) {
+    return [];
+  }
+
+  const payload = snapshot.data();
+  return Array.isArray(payload?.workers) ? payload.workers : [];
 }
 
 function getFirebaseConfig() {
@@ -1623,6 +1674,21 @@ function saveCurrentDailyWorkers() {
 
   store[dateKey] = { workers };
   saveDailyWorkersStore(store);
+  scheduleDailyWorkersCloudSave(dateKey, workers);
+}
+
+function scheduleDailyWorkersCloudSave(dateKey, workers) {
+  if (dailyWorkersSaveTimeout) {
+    window.clearTimeout(dailyWorkersSaveTimeout);
+  }
+
+  dailyWorkersSaveTimeout = window.setTimeout(async () => {
+    try {
+      await saveDailyWorkersToCloud(dateKey, workers);
+    } catch {
+      // Keep the local cache as fallback if cloud sync fails temporarily.
+    }
+  }, 250);
 }
 
 function getStatusClass(status = "") {
@@ -1939,14 +2005,31 @@ function renderWorkerPicker() {
   });
 }
 
-function loadDailyWorkersForCurrentDate() {
+async function loadDailyWorkersForCurrentDate() {
   if (!workerList) {
     return;
   }
 
   const dateKey = getCurrentDateStorageKey();
   const store = loadDailyWorkersStore();
-  const savedWorkers = Array.isArray(store[dateKey]?.workers) ? store[dateKey].workers : [];
+  const loadToken = ++dailyWorkforceLoadToken;
+  let savedWorkers = Array.isArray(store[dateKey]?.workers) ? store[dateKey].workers : [];
+
+  try {
+    const cloudWorkers = await loadDailyWorkersFromCloud(dateKey);
+    if (loadToken !== dailyWorkforceLoadToken) {
+      return;
+    }
+    if (Array.isArray(cloudWorkers)) {
+      savedWorkers = cloudWorkers;
+      store[dateKey] = { workers: cloudWorkers };
+      saveDailyWorkersStore(store);
+    }
+  } catch {
+    if (loadToken !== dailyWorkforceLoadToken) {
+      return;
+    }
+  }
 
   workerList.innerHTML = "";
   savedWorkers.forEach((entry) => {
