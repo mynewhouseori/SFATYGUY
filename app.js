@@ -23,6 +23,7 @@ let workerDocumentRefreshToken = 0;
 let dailyWorkforceLoadToken = 0;
 let dailyWorkersSaveTimeout = null;
 const workerDocumentUrlCache = new Map();
+const pendingWorkerModalDocuments = new Map();
 
 const enterButton = document.getElementById("enterButton");
 const continueButton = document.getElementById("continueButton");
@@ -32,10 +33,7 @@ const workerModal = document.getElementById("workerModal");
 const openWorkerModal = document.getElementById("openWorkerModal");
 const closeWorkerModal = document.getElementById("closeWorkerModal");
 const closeWorkerModalFooter = document.getElementById("closeWorkerModalFooter");
-const workerModalCameraInput = document.getElementById("workerModalCameraInput");
-const workerModalGalleryInput = document.getElementById("workerModalGalleryInput");
-const workerModalCameraButton = document.getElementById("workerModalCameraButton");
-const workerModalGalleryButton = document.getElementById("workerModalGalleryButton");
+const workerModalDocumentRows = Array.from(document.querySelectorAll("[data-worker-modal-doc]"));
 const workerPickerTrigger = document.getElementById("workerPickerTrigger");
 const reportStatusSelect = document.getElementById("reportStatusSelect");
 const reportStatusTrigger = document.getElementById("reportStatusTrigger");
@@ -1005,38 +1003,48 @@ function clearSelectedWorkerPanel() {
   selectedWorkerPanel.innerHTML = "";
 }
 
-function resetWorkerModalDocumentButtons() {
-  if (workerModalCameraInput) {
-    workerModalCameraInput.value = "";
+function setWorkerModalDocumentState(row, file = null, source = "") {
+  const docType = normalizeWorkerDocumentName(row?.dataset.workerModalDoc || "");
+  const status = row?.querySelector("[data-worker-modal-doc-status]");
+  const meta = row?.querySelector("[data-worker-modal-doc-meta]");
+
+  if (!row || !docType || !status || !meta) {
+    return;
   }
-  if (workerModalGalleryInput) {
-    workerModalGalleryInput.value = "";
+
+  if (!file) {
+    pendingWorkerModalDocuments.delete(docType);
+    status.className = "status-chip muted";
+    status.textContent = "\u05DC\u05D0 \u05E6\u05D5\u05E8\u05E3";
+    meta.textContent = "\u05E2\u05D3\u05D9\u05D9\u05DF \u05DC\u05D0 \u05E6\u05D5\u05E8\u05E3 \u05DE\u05E1\u05DE\u05DA";
+    return;
   }
-  if (workerModalCameraButton) {
-    workerModalCameraButton.textContent = "\u05E6\u05DC\u05DD \u05DE\u05E1\u05DE\u05DA";
-  }
-  if (workerModalGalleryButton) {
-    workerModalGalleryButton.textContent = "\u05D4\u05E2\u05DC\u05D4 \u05DE\u05D4\u05D2\u05DC\u05E8\u05D9\u05D4";
-  }
+
+  pendingWorkerModalDocuments.set(docType, { file, source });
+  status.className = "status-chip ok";
+  status.textContent = source === "camera" ? "\u05E6\u05D5\u05DC\u05DD" : "\u05E0\u05D1\u05D7\u05E8";
+  meta.textContent = file.name || docType;
+}
+
+function resetWorkerModalDocuments() {
+  pendingWorkerModalDocuments.clear();
+  workerModalDocumentRows.forEach((row) => {
+    row.querySelectorAll("[data-worker-modal-doc-input]").forEach((input) => {
+      input.value = "";
+    });
+    setWorkerModalDocumentState(row);
+  });
 }
 
 function openWorkerModalPanel() {
   workerModal?.classList.add("is-open");
   document.body.style.overflow = "hidden";
-  resetWorkerModalDocumentButtons();
+  resetWorkerModalDocuments();
 }
 
 function closeWorkerModalPanel() {
   workerModal?.classList.remove("is-open");
   document.body.style.overflow = "";
-}
-
-function updateWorkerModalDocumentButton(button, file, fallbackLabel) {
-  if (!button) {
-    return;
-  }
-
-  button.textContent = file?.name?.trim() || fallbackLabel;
 }
 
 document.querySelectorAll("[data-worker-toggle]").forEach(attachWorkerToggle);
@@ -1063,28 +1071,31 @@ workerModal?.addEventListener("click", (event) => {
   }
 });
 
-workerModalCameraButton?.addEventListener("click", () => {
-  workerModalCameraInput?.click();
-});
+workerModalDocumentRows.forEach((row) => {
+  const cameraTrigger = row.querySelector('[data-worker-modal-doc-trigger="camera"]');
+  const galleryTrigger = row.querySelector('[data-worker-modal-doc-trigger="gallery"]');
+  const cameraInput = row.querySelector('[data-worker-modal-doc-input="camera"]');
+  const galleryInput = row.querySelector('[data-worker-modal-doc-input="gallery"]');
 
-workerModalGalleryButton?.addEventListener("click", () => {
-  workerModalGalleryInput?.click();
-});
+  attachPressFeedback(cameraTrigger);
+  attachPressFeedback(galleryTrigger);
+  setWorkerModalDocumentState(row);
 
-workerModalCameraInput?.addEventListener("change", () => {
-  updateWorkerModalDocumentButton(
-    workerModalCameraButton,
-    workerModalCameraInput.files?.[0],
-    "\u05DE\u05E1\u05DE\u05DA \u05E6\u05D5\u05DC\u05DD"
-  );
-});
+  cameraTrigger?.addEventListener("click", () => {
+    cameraInput?.click();
+  });
 
-workerModalGalleryInput?.addEventListener("change", () => {
-  updateWorkerModalDocumentButton(
-    workerModalGalleryButton,
-    workerModalGalleryInput.files?.[0],
-    "\u05E7\u05D5\u05D1\u05E5 \u05E0\u05D1\u05D7\u05E8"
-  );
+  galleryTrigger?.addEventListener("click", () => {
+    galleryInput?.click();
+  });
+
+  cameraInput?.addEventListener("change", () => {
+    setWorkerModalDocumentState(row, cameraInput.files?.[0] || null, "camera");
+  });
+
+  galleryInput?.addEventListener("change", () => {
+    setWorkerModalDocumentState(row, galleryInput.files?.[0] || null, "gallery");
+  });
 });
 
 function updateClockValue() {

@@ -11,7 +11,7 @@
       href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=20260425-19" />
+    <link rel="stylesheet" href="styles.css?v=20260425-20" />
   </head>
   <body>
     <main class="app-shell">
@@ -564,16 +564,54 @@
 
         <div class="modal-section">
           <p class="screen-copy">מסמכים ואישורים</p>
-          <div class="doc-row">
-            <span class="status-chip ok">ת"ז</span>
-            <span class="status-chip warning">עבודה בגובה</span>
-            <span class="status-chip muted">רישיון נהיגה</span>
-          </div>
-          <input class="sr-only" id="workerModalCameraInput" type="file" accept="image/*,.pdf" capture="environment" />
-          <input class="sr-only" id="workerModalGalleryInput" type="file" accept="image/*,.pdf" />
-          <div class="two-col-grid media-actions">
-            <button class="ghost-button" id="workerModalCameraButton" type="button">צלם מסמך</button>
-            <button class="ghost-button" id="workerModalGalleryButton" type="button">העלה מהגלריה</button>
+          <div class="worker-doc-capture-list">
+            <article class="doc-card worker-doc-capture-item" data-worker-modal-doc="תעודת זהות">
+              <div>
+                <strong>תעודת זהות</strong>
+                <span data-worker-modal-doc-meta>עדיין לא צורף מסמך</span>
+              </div>
+              <div class="doc-card-actions worker-doc-actions">
+                <span class="status-chip muted" data-worker-modal-doc-status>לא צורף</span>
+                <input class="sr-only" type="file" accept="image/*,.pdf" capture="environment" data-worker-modal-doc-input="camera" />
+                <input class="sr-only" type="file" accept="image/*,.pdf" data-worker-modal-doc-input="gallery" />
+                <div class="worker-doc-action-grid">
+                  <button class="ghost-button doc-open-button" type="button" data-worker-modal-doc-trigger="camera">צלם</button>
+                  <button class="ghost-button doc-open-button" type="button" data-worker-modal-doc-trigger="gallery">גלריה</button>
+                </div>
+              </div>
+            </article>
+
+            <article class="doc-card worker-doc-capture-item" data-worker-modal-doc="רישיון נהיגה">
+              <div>
+                <strong>רישיון נהיגה</strong>
+                <span data-worker-modal-doc-meta>עדיין לא צורף מסמך</span>
+              </div>
+              <div class="doc-card-actions worker-doc-actions">
+                <span class="status-chip muted" data-worker-modal-doc-status>לא צורף</span>
+                <input class="sr-only" type="file" accept="image/*,.pdf" capture="environment" data-worker-modal-doc-input="camera" />
+                <input class="sr-only" type="file" accept="image/*,.pdf" data-worker-modal-doc-input="gallery" />
+                <div class="worker-doc-action-grid">
+                  <button class="ghost-button doc-open-button" type="button" data-worker-modal-doc-trigger="camera">צלם</button>
+                  <button class="ghost-button doc-open-button" type="button" data-worker-modal-doc-trigger="gallery">גלריה</button>
+                </div>
+              </div>
+            </article>
+
+            <article class="doc-card worker-doc-capture-item" data-worker-modal-doc="אישור עבודה בגובה">
+              <div>
+                <strong>אישור עבודה בגובה</strong>
+                <span data-worker-modal-doc-meta>עדיין לא צורף מסמך</span>
+              </div>
+              <div class="doc-card-actions worker-doc-actions">
+                <span class="status-chip muted" data-worker-modal-doc-status>לא צורף</span>
+                <input class="sr-only" type="file" accept="image/*,.pdf" capture="environment" data-worker-modal-doc-input="camera" />
+                <input class="sr-only" type="file" accept="image/*,.pdf" data-worker-modal-doc-input="gallery" />
+                <div class="worker-doc-action-grid">
+                  <button class="ghost-button doc-open-button" type="button" data-worker-modal-doc-trigger="camera">צלם</button>
+                  <button class="ghost-button doc-open-button" type="button" data-worker-modal-doc-trigger="gallery">גלריה</button>
+                </div>
+              </div>
+            </article>
           </div>
         </div>
 
@@ -657,6 +695,6 @@
     <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-storage-compat.js"></script>
-    <script src="app.js?v=20260425-19"></script>
+    <script src="app.js?v=20260425-20"></script>
   </body>
 </html>
