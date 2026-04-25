@@ -1291,6 +1291,38 @@ input {
     display: none;
   }
 
+  #dashboardView .toolbar {
+    gap: 10px;
+  }
+
+  #dashboardView .toolbar-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+    flex-wrap: nowrap;
+  }
+
+  #dashboardView .toolbar .mobile-screen-index {
+    order: 1;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  #dashboardView .toolbar-brand {
+    order: 2;
+  }
+
+  #dashboardView .toolbar .ghost-button {
+    order: 3;
+    flex: 0 0 auto;
+  }
+
+  #dashboardView .toolbar-copy .screen-eyebrow {
+    display: none;
+  }
+
   .toolbar .mobile-screen-index {
     display: block;
     font-size: 0.74rem;
