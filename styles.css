@@ -1251,24 +1251,20 @@ input {
     grid-template-columns: 1fr;
   }
 
-  .toolbar-actions {
-    display: grid;
-    align-items: center;
-    justify-items: start;
-    justify-content: flex-start;
-    gap: 6px;
-  }
-
-  #detailsView .toolbar {
+  .toolbar {
     gap: 10px;
   }
 
-  #detailsView .toolbar-actions {
+  .toolbar-actions {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 10px;
     width: 100%;
+    flex-wrap: wrap;
+  }
+
+  #detailsView .toolbar-actions {
     flex-wrap: nowrap;
   }
 
@@ -1291,16 +1287,7 @@ input {
     display: none;
   }
 
-  #dashboardView .toolbar {
-    gap: 10px;
-  }
-
   #dashboardView .toolbar-actions {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    width: 100%;
     flex-wrap: nowrap;
   }
 
@@ -1328,6 +1315,9 @@ input {
     font-size: 0.74rem;
     line-height: 1.2;
     color: var(--text-soft);
+    order: 1;
+    flex: 1 1 auto;
+    min-width: 0;
   }
 
   .toolbar-copy .screen-eyebrow {
@@ -1344,6 +1334,12 @@ input {
     height: 42px;
     border-radius: 14px;
     box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+    flex: 0 0 auto;
+    order: 2;
+  }
+
+  .toolbar .ghost-button {
+    order: 3;
     flex: 0 0 auto;
   }
 
