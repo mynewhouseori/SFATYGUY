@@ -1,4 +1,5 @@
 ﻿const STORAGE_KEY = "safety-field-general-defaults";
+const DAILY_WORKERS_KEY = "safety-field-daily-workers";
 const CLOUD_DOCUMENTS_KEY = "safety-field-cloud-documents";
 const CLOUD_DOCUMENTS_COLLECTION = "safety_worker_documents";
 const CLOUD_DOCUMENT_CHUNKS_COLLECTION = "safety_worker_document_chunks";
@@ -188,6 +189,23 @@ function saveDefaults() {
   };
 
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(defaults));
+}
+
+function loadDailyWorkersStore() {
+  try {
+    const stored = window.localStorage.getItem(DAILY_WORKERS_KEY);
+    return stored ? JSON.parse(stored) : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveDailyWorkersStore(store) {
+  window.localStorage.setItem(DAILY_WORKERS_KEY, JSON.stringify(store));
+}
+
+function getCurrentDateStorageKey() {
+  return normalizeDateValue(fields.workDate?.value || getTodayValue());
 }
 
 function getFirebaseConfig() {
@@ -837,6 +855,7 @@ function setWorkDateValue(dateValue) {
 
   fields.workDate.value = dateValue;
   updateReportDateDisplays();
+  loadDailyWorkersForCurrentDate();
 }
 
 function updateReportDateDisplays() {
@@ -1573,6 +1592,39 @@ function updateWorkerCount() {
   }
 }
 
+function serializeWorkerCard(card) {
+  const workerId = card.dataset.workerId ?? "";
+  const startTime = card.querySelector("[data-worker-start]")?.value || DEFAULT_WORKDAY_START;
+  const endTime = card.querySelector("[data-worker-end]")?.value || DEFAULT_WORKDAY_END;
+  const area = card.querySelector("[data-worker-area]")?.value || "";
+  const note = card.querySelector("[data-worker-note]")?.value || "";
+  const role = card.querySelector("[data-worker-role]")?.value || "";
+  const contractor = card.querySelector("[data-worker-contractor]")?.value || "";
+
+  return {
+    workerId,
+    startTime,
+    endTime,
+    area,
+    note,
+    role,
+    contractor,
+  };
+}
+
+function saveCurrentDailyWorkers() {
+  if (!workerList) {
+    return;
+  }
+
+  const store = loadDailyWorkersStore();
+  const dateKey = getCurrentDateStorageKey();
+  const workers = Array.from(workerList.querySelectorAll(".worker-card[data-worker-id]")).map(serializeWorkerCard);
+
+  store[dateKey] = { workers };
+  saveDailyWorkersStore(store);
+}
+
 function getStatusClass(status = "") {
   if (status === "\u05EA\u05E7\u05D9\u05DF" || status === "\u05D1\u05D0\u05EA\u05E8 \u05D4\u05D9\u05D5\u05DD" || status === "\u05E0\u05D5\u05E1\u05E3 \u05D4\u05D9\u05D5\u05DD") {
     return "ok";
@@ -1590,6 +1642,8 @@ function createWorkerCard(worker, options = {}) {
   const endTime = options.endTime || DEFAULT_WORKDAY_END;
   const area = options.area || "\u05DC\u05D1\u05D7\u05D9\u05E8\u05D4";
   const note = options.note || "\u05DC\u05DC\u05D0 \u05D4\u05E2\u05E8\u05D4";
+  const role = options.role || worker.role;
+  const contractor = options.contractor || worker.contractor;
   const briefing = options.briefing || "\u05DC\u05D1\u05D9\u05E6\u05D5\u05E2";
   const docStatus = options.docStatus || "\u05EA\u05E7\u05D9\u05DF";
   const statusLabel = options.statusLabel || "\u05E0\u05D5\u05E1\u05E3 \u05D4\u05D9\u05D5\u05DD";
@@ -1601,7 +1655,7 @@ function createWorkerCard(worker, options = {}) {
     <button class="worker-head" type="button" data-worker-toggle>
       <div>
         <h3>${worker.name}</h3>
-        <p>${worker.role} • ${worker.contractor}</p>
+        <p>${role} • ${contractor}</p>
       </div>
       <div class="worker-head-meta">
         <span data-worker-range>${formatWorkRange(startTime, endTime)}</span>
@@ -1628,11 +1682,11 @@ function createWorkerCard(worker, options = {}) {
         </label>
         <label class="worker-edit-field">
           <span>\u05EA\u05E4\u05E7\u05D9\u05D3</span>
-          <input type="text" value="${worker.role}" data-worker-role />
+          <input type="text" value="${role}" data-worker-role />
         </label>
         <label class="worker-edit-field">
           <span>\u05E7\u05D1\u05DC\u05DF \u05DE\u05E9\u05E0\u05D4</span>
-          <input type="text" value="${worker.contractor}" data-worker-contractor />
+          <input type="text" value="${contractor}" data-worker-contractor />
         </label>
         <label class="worker-edit-field worker-edit-field-wide">
           <span>\u05D4\u05E2\u05E8\u05D4</span>
@@ -1685,6 +1739,12 @@ function attachWorkerCardControls(card) {
   endInput?.addEventListener("input", syncCardSummary);
   roleInput?.addEventListener("input", syncCardSummary);
   contractorInput?.addEventListener("input", syncCardSummary);
+  [startInput, endInput, roleInput, contractorInput, card.querySelector("[data-worker-area]"), card.querySelector("[data-worker-note]")]
+    .filter(Boolean)
+    .forEach((input) => {
+      input.addEventListener("input", saveCurrentDailyWorkers);
+      input.addEventListener("change", saveCurrentDailyWorkers);
+    });
   syncCardSummary();
 }
 
@@ -1697,6 +1757,7 @@ addWorkerToToday = function addWorkerToTodayFromPicker(worker, options = {}) {
   attachWorkerCardControls(card);
   workerList.prepend(card);
   updateWorkerCount();
+  saveCurrentDailyWorkers();
 };
 
 function removeWorkerFromToday(workerId) {
@@ -1708,6 +1769,7 @@ function removeWorkerFromToday(workerId) {
 
   existingCard.remove();
   updateWorkerCount();
+  saveCurrentDailyWorkers();
   return true;
 }
 
@@ -1877,22 +1939,46 @@ function renderWorkerPicker() {
   });
 }
 
+function loadDailyWorkersForCurrentDate() {
+  if (!workerList) {
+    return;
+  }
+
+  const dateKey = getCurrentDateStorageKey();
+  const store = loadDailyWorkersStore();
+  const savedWorkers = Array.isArray(store[dateKey]?.workers) ? store[dateKey].workers : [];
+
+  workerList.innerHTML = "";
+  savedWorkers.forEach((entry) => {
+    const worker = workerDatabase.find((item) => item.id === entry.workerId);
+    if (worker) {
+      addWorkerToToday(worker, {
+        startTime: entry.startTime,
+        endTime: entry.endTime,
+        area: entry.area,
+        note: entry.note,
+        role: entry.role,
+        contractor: entry.contractor,
+        briefing: "\u05DC\u05D1\u05D9\u05E6\u05D5\u05E2",
+        docStatus: "\u05E0\u05D1\u05D3\u05E7 \u05D1\u05DE\u05D0\u05D2\u05E8",
+        statusLabel: "\u05D1\u05D0\u05EA\u05E8 \u05D4\u05D9\u05D5\u05DD",
+      });
+    }
+  });
+
+  updateWorkerCount();
+  renderWorkerPicker();
+}
+
 function initializeTodayWorkers() {
   if (!workerList) {
     return;
   }
 
-  workerList.innerHTML = "";
-  initialTodayWorkers.forEach((entry) => {
-    const worker = workerDatabase.find((item) => item.id === entry.workerId);
-    if (worker) {
-      addWorkerToToday(worker, {
-        ...entry,
-        statusLabel: "\u05D1\u05D0\u05EA\u05E8 \u05D4\u05D9\u05D5\u05DD",
-      });
-    }
-  });
-  renderWorkerPicker();
+  if (!loadDailyWorkersStore()[getCurrentDateStorageKey()]) {
+    saveCurrentDailyWorkers();
+  }
+  loadDailyWorkersForCurrentDate();
 }
 
 workerPickerTrigger?.addEventListener("click", () => {
