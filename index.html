@@ -11,7 +11,7 @@
       href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=20260425-21" />
+    <link rel="stylesheet" href="styles.css?v=20260425-22" />
   </head>
   <body>
     <main class="app-shell">
@@ -566,12 +566,14 @@
           <p class="screen-copy">מסמכים ואישורים</p>
           <div class="worker-doc-capture-list">
             <article class="doc-card worker-doc-capture-item" data-worker-modal-doc="תעודת זהות">
-              <div>
-                <strong>תעודת זהות</strong>
-                <span data-worker-modal-doc-meta>עדיין לא צורף מסמך</span>
+              <div class="worker-doc-copy">
+                <div class="worker-doc-title-row">
+                  <strong>תעודת זהות</strong>
+                  <span class="status-chip muted" data-worker-modal-doc-status>לא צורף</span>
+                </div>
+                <span data-worker-modal-doc-meta></span>
               </div>
               <div class="doc-card-actions worker-doc-actions">
-                <span class="status-chip muted" data-worker-modal-doc-status>לא צורף</span>
                 <input class="sr-only" type="file" accept="image/*,.pdf" capture="environment" data-worker-modal-doc-input="camera" />
                 <input class="sr-only" type="file" accept="image/*,.pdf" data-worker-modal-doc-input="gallery" />
                 <div class="worker-doc-action-grid">
@@ -582,12 +584,14 @@
             </article>
 
             <article class="doc-card worker-doc-capture-item" data-worker-modal-doc="רישיון נהיגה">
-              <div>
-                <strong>רישיון נהיגה</strong>
-                <span data-worker-modal-doc-meta>עדיין לא צורף מסמך</span>
+              <div class="worker-doc-copy">
+                <div class="worker-doc-title-row">
+                  <strong>רישיון נהיגה</strong>
+                  <span class="status-chip muted" data-worker-modal-doc-status>לא צורף</span>
+                </div>
+                <span data-worker-modal-doc-meta></span>
               </div>
               <div class="doc-card-actions worker-doc-actions">
-                <span class="status-chip muted" data-worker-modal-doc-status>לא צורף</span>
                 <input class="sr-only" type="file" accept="image/*,.pdf" capture="environment" data-worker-modal-doc-input="camera" />
                 <input class="sr-only" type="file" accept="image/*,.pdf" data-worker-modal-doc-input="gallery" />
                 <div class="worker-doc-action-grid">
@@ -598,12 +602,14 @@
             </article>
 
             <article class="doc-card worker-doc-capture-item" data-worker-modal-doc="אישור עבודה בגובה">
-              <div>
-                <strong>אישור עבודה בגובה</strong>
-                <span data-worker-modal-doc-meta>עדיין לא צורף מסמך</span>
+              <div class="worker-doc-copy">
+                <div class="worker-doc-title-row">
+                  <strong>אישור עבודה בגובה</strong>
+                  <span class="status-chip muted" data-worker-modal-doc-status>לא צורף</span>
+                </div>
+                <span data-worker-modal-doc-meta></span>
               </div>
               <div class="doc-card-actions worker-doc-actions">
-                <span class="status-chip muted" data-worker-modal-doc-status>לא צורף</span>
                 <input class="sr-only" type="file" accept="image/*,.pdf" capture="environment" data-worker-modal-doc-input="camera" />
                 <input class="sr-only" type="file" accept="image/*,.pdf" data-worker-modal-doc-input="gallery" />
                 <div class="worker-doc-action-grid">
@@ -695,6 +701,6 @@
     <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-storage-compat.js"></script>
-    <script src="app.js?v=20260425-21"></script>
+    <script src="app.js?v=20260425-22"></script>
   </body>
 </html>
