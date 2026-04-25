@@ -1014,7 +1014,7 @@ function setWorkerModalDocumentState(row, file = null, source = "") {
 
   if (!file) {
     pendingWorkerModalDocuments.delete(docType);
-    status.className = "status-chip muted";
+    status.className = "status-chip danger worker-doc-missing";
     status.textContent = "\u05DC\u05D0 \u05E6\u05D5\u05E8\u05E3";
     meta.textContent = "\u05E2\u05D3\u05D9\u05D9\u05DF \u05DC\u05D0 \u05E6\u05D5\u05E8\u05E3 \u05DE\u05E1\u05DE\u05DA";
     return;
