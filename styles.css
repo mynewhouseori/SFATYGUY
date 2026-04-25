@@ -1141,4 +1141,18 @@ input {
   .dashboard-topline {
     margin-bottom: 12px;
   }
+
+  .personnel-toolbar {
+    gap: 14px;
+    margin-bottom: 12px;
+  }
+
+  .add-worker-button {
+    min-height: 52px;
+  }
+
+  .personnel-summary {
+    gap: 12px;
+    margin-top: 4px;
+  }
 }
