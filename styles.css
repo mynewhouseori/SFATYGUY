@@ -598,6 +598,109 @@ input {
   gap: 8px;
 }
 
+.worker-picker-shell,
+.worker-picker-head,
+.worker-picker-list,
+.worker-picker-actions,
+.worker-edit-grid {
+  display: grid;
+}
+
+.worker-picker-shell {
+  gap: 12px;
+}
+
+.worker-picker-head {
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: start;
+}
+
+.worker-picker-head strong,
+.worker-picker-copy strong {
+  display: block;
+}
+
+.worker-picker-head span,
+.worker-picker-copy span,
+.worker-picker-meta span {
+  color: var(--text-soft);
+}
+
+.worker-picker-list {
+  gap: 8px;
+  max-height: 320px;
+  overflow: auto;
+}
+
+.worker-picker-item {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.worker-picker-item input {
+  width: 18px;
+  height: 18px;
+  accent-color: #d89433;
+}
+
+.worker-picker-item.is-disabled {
+  opacity: 0.64;
+}
+
+.worker-picker-meta {
+  display: grid;
+  gap: 4px;
+  justify-items: end;
+  text-align: left;
+  font-size: 0.84rem;
+}
+
+.worker-picker-actions {
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+}
+
+.worker-edit-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  padding-top: 12px;
+}
+
+.worker-edit-field {
+  display: grid;
+  gap: 6px;
+}
+
+.worker-edit-field span {
+  color: var(--text-soft);
+  font-size: 0.9rem;
+}
+
+.worker-edit-field input {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 16px;
+  padding: 10px 12px;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.worker-edit-field input[readonly] {
+  color: var(--text-soft);
+}
+
+.worker-edit-field-wide {
+  grid-column: 1 / -1;
+}
+
 .suggestion-item {
   width: 100%;
   display: grid;
@@ -1203,6 +1306,26 @@ input {
 
   .add-worker-button {
     min-height: 52px;
+  }
+
+  .worker-picker-head,
+  .worker-picker-item,
+  .worker-picker-actions,
+  .worker-edit-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .worker-picker-item {
+    justify-items: start;
+  }
+
+  .worker-picker-item input {
+    order: -1;
+  }
+
+  .worker-picker-meta {
+    justify-items: start;
+    text-align: right;
   }
 
   .personnel-summary {

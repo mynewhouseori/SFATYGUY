@@ -27,6 +27,7 @@ const formNote = document.getElementById("formNote");
 const workerModal = document.getElementById("workerModal");
 const openWorkerModal = document.getElementById("openWorkerModal");
 const closeWorkerModal = document.getElementById("closeWorkerModal");
+const workerPickerTrigger = document.getElementById("workerPickerTrigger");
 const reportStatusSelect = document.getElementById("reportStatusSelect");
 const reportStatusTrigger = document.getElementById("reportStatusTrigger");
 const reportStatusMenu = document.getElementById("reportStatusMenu");
@@ -34,6 +35,7 @@ const workerSearch = document.getElementById("workerSearch");
 const workerSuggestions = document.getElementById("workerSuggestions");
 const selectedWorkerPanel = document.getElementById("selectedWorkerPanel");
 const workerList = document.querySelector(".worker-list");
+const workerCountValue = document.getElementById("workerCountValue");
 const workDateDisplay = document.getElementById("workDateDisplay");
 const clockModal = document.getElementById("clockModal");
 const clockValue = document.getElementById("clockValue");
@@ -75,6 +77,29 @@ const workerDatabase = [
   { name: "\u05DE\u05D5\u05D0\u05DE\u05DF \u05D7\u05D1\u05D9\u05D1", id: "445566778", role: "\u05E8\u05E6\u05E3", contractor: "\u05D8\u05D9\u05D9\u05D7 \u05D5\u05E6\u05D1\u05E2 \u05E9\u05E8\u05D5\u05DF", status: "\u05D1\u05DE\u05D0\u05D2\u05E8" },
   { name: "\u05E2\u05D5\u05DE\u05E8 \u05D3\u05E8\u05D0\u05D5\u05D5\u05E9\u05D4", id: "556677889", role: "\u05DE\u05E4\u05E2\u05D9\u05DC \u05DE\u05DC\u05D2\u05D6\u05D4", contractor: "\u05D4\u05E8\u05DE\u05D4 \u05D5\u05E9\u05D9\u05E0\u05D5\u05E2", status: "\u05D1\u05DE\u05D0\u05D2\u05E8" },
   { name: "\u05D0\u05D7\u05DE\u05D3 \u05E2\u05D1\u05D3 \u05D0\u05DC\u05DC\u05D4", id: "667788990", role: "\u05E2\u05D5\u05D1\u05D3 \u05DB\u05DC\u05DC\u05D9", contractor: "\u05D1\u05E0\u05D9\u05D9\u05D4 \u05D3\u05E8\u05D5\u05DD", status: "\u05D1\u05DE\u05D0\u05D2\u05E8" },
+];
+const DEFAULT_WORKDAY_START = "07:00";
+const DEFAULT_WORKDAY_END = "17:00";
+const selectedWorkerIds = new Set();
+const initialTodayWorkers = [
+  {
+    workerId: "123456789",
+    startTime: "07:00",
+    endTime: "16:30",
+    area: "\u05E7\u05D5\u05DE\u05D4 4",
+    note: "\u05E6\u05D5\u05D5\u05EA \u05DE\u05DC\u05D0",
+    briefing: "\u05D1\u05D5\u05E6\u05E2",
+    docStatus: "\u05EA\u05E7\u05D9\u05DF",
+  },
+  {
+    workerId: "234567891",
+    startTime: "07:30",
+    endTime: "15:00",
+    area: "\u05D7\u05D6\u05D9\u05EA \u05DE\u05E2\u05E8\u05D1\u05D9\u05EA",
+    note: "\u05DE\u05DE\u05EA\u05D9\u05DF \u05DC\u05D0\u05D9\u05E9\u05D5\u05E8 \u05D2\u05D5\u05D1\u05D4",
+    briefing: "\u05D1\u05D5\u05E6\u05E2",
+    docStatus: "\u05D7\u05E1\u05E8 \u05DE\u05E1\u05DE\u05DA",
+  },
 ];
 
 const fields = {
@@ -1263,7 +1288,11 @@ document.addEventListener("click", (event) => {
     reportStatusTrigger?.setAttribute("aria-expanded", "false");
   }
 
-  if (!workerSuggestions?.contains(event.target) && event.target !== workerSearch) {
+  if (
+    !workerSuggestions?.contains(event.target) &&
+    event.target !== workerSearch &&
+    event.target !== workerPickerTrigger
+  ) {
     workerSuggestions?.classList.remove("is-open");
     workerSearch?.classList.remove("has-worker-match");
   }
@@ -1528,4 +1557,265 @@ function addWorkerToToday(worker, docStatus = "\u05EA\u05E7\u05D9\u05DF", docFil
   attachWorkerToggle(card.querySelector("[data-worker-toggle]"));
   workerList.prepend(card);
 }
+
+function getCurrentWorkerIds() {
+  return new Set(
+    Array.from(workerList?.querySelectorAll(".worker-card[data-worker-id]") ?? []).map(
+      (card) => card.dataset.workerId
+    )
+  );
+}
+
+function formatWorkRange(startTime, endTime) {
+  return `${startTime} - ${endTime}`;
+}
+
+function calculateHours(startTime, endTime) {
+  const [startHour = "0", startMinute = "0"] = startTime.split(":");
+  const [endHour = "0", endMinute = "0"] = endTime.split(":");
+  const startMinutes = Number(startHour) * 60 + Number(startMinute);
+  const endMinutes = Number(endHour) * 60 + Number(endMinute);
+  const diff = Math.max(endMinutes - startMinutes, 0) / 60;
+  const rounded = Math.round(diff * 10) / 10;
+  return Number.isInteger(rounded) ? `${rounded}` : rounded.toFixed(1);
+}
+
+function updateWorkerCount() {
+  if (workerCountValue) {
+    workerCountValue.textContent = String(workerList?.querySelectorAll(".worker-card").length ?? 0);
+  }
+}
+
+function getStatusClass(status = "") {
+  if (status === "\u05EA\u05E7\u05D9\u05DF" || status === "\u05D1\u05D0\u05EA\u05E8 \u05D4\u05D9\u05D5\u05DD" || status === "\u05E0\u05D5\u05E1\u05E3 \u05D4\u05D9\u05D5\u05DD") {
+    return "ok";
+  }
+
+  if (status.includes("\u05D7\u05E1\u05E8")) {
+    return "warning";
+  }
+
+  return "muted";
+}
+
+function createWorkerCard(worker, options = {}) {
+  const startTime = options.startTime || DEFAULT_WORKDAY_START;
+  const endTime = options.endTime || DEFAULT_WORKDAY_END;
+  const area = options.area || "\u05DC\u05D1\u05D7\u05D9\u05E8\u05D4";
+  const note = options.note || "\u05DC\u05DC\u05D0 \u05D4\u05E2\u05E8\u05D4";
+  const briefing = options.briefing || "\u05DC\u05D1\u05D9\u05E6\u05D5\u05E2";
+  const docStatus = options.docStatus || "\u05EA\u05E7\u05D9\u05DF";
+  const statusLabel = options.statusLabel || "\u05E0\u05D5\u05E1\u05E3 \u05D4\u05D9\u05D5\u05DD";
+  const card = document.createElement("article");
+
+  card.className = "worker-card is-open";
+  card.dataset.workerId = worker.id;
+  card.innerHTML = `
+    <button class="worker-head" type="button" data-worker-toggle>
+      <div>
+        <h3>${worker.name}</h3>
+        <p>${worker.role} • ${worker.contractor}</p>
+      </div>
+      <div class="worker-head-meta">
+        <span data-worker-range>${formatWorkRange(startTime, endTime)}</span>
+        <span class="status-chip ${getStatusClass(statusLabel)}">${statusLabel}</span>
+      </div>
+    </button>
+    <div class="worker-body">
+      <div class="worker-grid worker-edit-grid">
+        <label class="worker-edit-field">
+          <span>\u05E9\u05E2\u05EA \u05D4\u05EA\u05D7\u05DC\u05D4</span>
+          <input type="time" value="${startTime}" data-worker-start />
+        </label>
+        <label class="worker-edit-field">
+          <span>\u05E9\u05E2\u05EA \u05E1\u05D9\u05D5\u05DD</span>
+          <input type="time" value="${endTime}" data-worker-end />
+        </label>
+        <label class="worker-edit-field">
+          <span>\u05E1\u05D4\"\u05DB \u05E9\u05E2\u05D5\u05EA</span>
+          <input type="text" value="${calculateHours(startTime, endTime)}" data-worker-total readonly />
+        </label>
+        <label class="worker-edit-field">
+          <span>\u05D0\u05D6\u05D5\u05E8 \u05E2\u05D1\u05D5\u05D3\u05D4</span>
+          <input type="text" value="${area}" data-worker-area />
+        </label>
+        <label class="worker-edit-field">
+          <span>\u05EA\u05E4\u05E7\u05D9\u05D3</span>
+          <input type="text" value="${worker.role}" data-worker-role />
+        </label>
+        <label class="worker-edit-field">
+          <span>\u05E7\u05D1\u05DC\u05DF \u05DE\u05E9\u05E0\u05D4</span>
+          <input type="text" value="${worker.contractor}" data-worker-contractor />
+        </label>
+        <label class="worker-edit-field worker-edit-field-wide">
+          <span>\u05D4\u05E2\u05E8\u05D4</span>
+          <input type="text" value="${note}" data-worker-note />
+        </label>
+      </div>
+      <div class="worker-tags">
+        <span>\u05EA\u05D3\u05E8\u05D9\u05DA: ${briefing}</span>
+        <span>\u05E1\u05D8\u05D8\u05D5\u05E1 \u05DE\u05E1\u05DE\u05DB\u05D9\u05DD: ${docStatus}</span>
+        <span>\u05DE\u05E7\u05D5\u05E8: \u05DE\u05D0\u05D2\u05E8 \u05E2\u05D5\u05D1\u05D3\u05D9\u05DD</span>
+      </div>
+      <div class="doc-row">
+        <span class="status-chip ok">\u05EA.\u05D6.</span>
+        <span class="status-chip ${getStatusClass(docStatus)}">${docStatus}</span>
+        <span class="status-chip muted">${worker.id}</span>
+      </div>
+    </div>
+  `;
+
+  return card;
+}
+
+function attachWorkerCardControls(card) {
+  const toggleButton = card.querySelector("[data-worker-toggle]");
+  const startInput = card.querySelector("[data-worker-start]");
+  const endInput = card.querySelector("[data-worker-end]");
+  const totalInput = card.querySelector("[data-worker-total]");
+  const rangeText = card.querySelector("[data-worker-range]");
+  const roleInput = card.querySelector("[data-worker-role]");
+  const contractorInput = card.querySelector("[data-worker-contractor]");
+  const headDescription = toggleButton?.querySelector("p");
+
+  attachWorkerToggle(toggleButton);
+
+  function syncCardSummary() {
+    const startTime = startInput?.value || DEFAULT_WORKDAY_START;
+    const endTime = endInput?.value || DEFAULT_WORKDAY_END;
+    if (rangeText) {
+      rangeText.textContent = formatWorkRange(startTime, endTime);
+    }
+    if (totalInput) {
+      totalInput.value = calculateHours(startTime, endTime);
+    }
+    if (headDescription) {
+      headDescription.textContent = `${roleInput?.value || ""} • ${contractorInput?.value || ""}`;
+    }
+  }
+
+  startInput?.addEventListener("input", syncCardSummary);
+  endInput?.addEventListener("input", syncCardSummary);
+  roleInput?.addEventListener("input", syncCardSummary);
+  contractorInput?.addEventListener("input", syncCardSummary);
+  syncCardSummary();
+}
+
+addWorkerToToday = function addWorkerToTodayFromPicker(worker, options = {}) {
+  if (!workerList || !worker?.id || getCurrentWorkerIds().has(worker.id)) {
+    return;
+  }
+
+  const card = createWorkerCard(worker, options);
+  attachWorkerCardControls(card);
+  workerList.prepend(card);
+  updateWorkerCount();
+};
+
+function renderWorkerPicker() {
+  if (!workerSuggestions) {
+    return;
+  }
+
+  const activeWorkerIds = getCurrentWorkerIds();
+  workerSuggestions.innerHTML = `
+    <div class="worker-picker-shell">
+      <div class="worker-picker-head">
+        <div>
+          <strong>\u05D1\u05D7\u05E8 \u05E2\u05D5\u05D1\u05D3\u05D9\u05DD \u05DE\u05D4\u05DE\u05D0\u05D2\u05E8</strong>
+          <span>\u05DE\u05E1\u05DE\u05E0\u05D9\u05DD \u05DE\u05D9 \u05D4\u05D2\u05D9\u05E2 \u05D4\u05D9\u05D5\u05DD \u05D5\u05DE\u05D5\u05E1\u05D9\u05E4\u05D9\u05DD \u05D1\u05D1\u05EA \u05D0\u05D7\u05EA.</span>
+        </div>
+        <span class="status-chip muted">${selectedWorkerIds.size} \u05DE\u05E1\u05D5\u05DE\u05E0\u05D9\u05DD</span>
+      </div>
+      <div class="worker-picker-list">
+        ${workerDatabase
+          .map((worker) => {
+            const [firstName, ...rest] = worker.name.split(" ");
+            const lastName = rest.join(" ");
+            const isActive = activeWorkerIds.has(worker.id);
+            const isChecked = isActive || selectedWorkerIds.has(worker.id);
+            return `
+              <label class="worker-picker-item ${isActive ? "is-disabled" : ""}">
+                <input type="checkbox" value="${worker.id}" ${isChecked ? "checked" : ""} ${isActive ? "disabled" : ""} data-worker-pick />
+                <div class="worker-picker-copy">
+                  <strong>${firstName}</strong>
+                  <span>${lastName || worker.name}</span>
+                </div>
+                <div class="worker-picker-meta">
+                  <span>${worker.role}</span>
+                  <span>${isActive ? "\u05DB\u05D1\u05E8 \u05D1\u05DE\u05E6\u05D1\u05D4" : worker.contractor}</span>
+                </div>
+              </label>
+            `;
+          })
+          .join("")}
+      </div>
+      <div class="worker-picker-actions">
+        <button class="ghost-button" type="button" data-close-worker-picker>\u05E1\u05D2\u05D5\u05E8</button>
+        <button class="primary-button" type="button" data-add-selected-workers>\u05D4\u05D5\u05E1\u05E3 \u05DE\u05E1\u05D5\u05DE\u05E0\u05D9\u05DD</button>
+      </div>
+    </div>
+  `;
+
+  workerSuggestions.querySelectorAll("[data-worker-pick]").forEach((checkbox) => {
+    checkbox.addEventListener("change", () => {
+      if (checkbox.checked) {
+        selectedWorkerIds.add(checkbox.value);
+      } else {
+        selectedWorkerIds.delete(checkbox.value);
+      }
+      renderWorkerPicker();
+      workerSuggestions.classList.add("is-open");
+    });
+  });
+
+  workerSuggestions.querySelector("[data-close-worker-picker]")?.addEventListener("click", () => {
+    workerSuggestions.classList.remove("is-open");
+  });
+
+  workerSuggestions.querySelector("[data-add-selected-workers]")?.addEventListener("click", () => {
+    Array.from(selectedWorkerIds).forEach((workerId) => {
+      const worker = workerDatabase.find((entry) => entry.id === workerId);
+      if (worker) {
+        addWorkerToToday(worker, {
+          startTime: DEFAULT_WORKDAY_START,
+          endTime: DEFAULT_WORKDAY_END,
+          area: "\u05DC\u05D1\u05D7\u05D9\u05E8\u05D4",
+          note: "\u05D4\u05D5\u05E1\u05E3 \u05D1\u05E1\u05D9\u05DE\u05D5\u05DF \u05DE\u05D4\u05D0\u05EA\u05E8",
+          briefing: "\u05DC\u05D1\u05D9\u05E6\u05D5\u05E2",
+          docStatus: "\u05E0\u05D1\u05D3\u05E7 \u05D1\u05DE\u05D0\u05D2\u05E8",
+          statusLabel: "\u05E0\u05D5\u05E1\u05E3 \u05D4\u05D9\u05D5\u05DD",
+        });
+      }
+    });
+    selectedWorkerIds.clear();
+    renderWorkerPicker();
+    workerSuggestions.classList.remove("is-open");
+  });
+}
+
+function initializeTodayWorkers() {
+  if (!workerList) {
+    return;
+  }
+
+  workerList.innerHTML = "";
+  initialTodayWorkers.forEach((entry) => {
+    const worker = workerDatabase.find((item) => item.id === entry.workerId);
+    if (worker) {
+      addWorkerToToday(worker, {
+        ...entry,
+        statusLabel: "\u05D1\u05D0\u05EA\u05E8 \u05D4\u05D9\u05D5\u05DD",
+      });
+    }
+  });
+  renderWorkerPicker();
+}
+
+workerPickerTrigger?.addEventListener("click", () => {
+  renderWorkerPicker();
+  workerSuggestions?.classList.toggle("is-open");
+});
+
+initializeTodayWorkers();
 

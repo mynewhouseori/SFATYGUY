@@ -11,7 +11,7 @@
       href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=20260425-4" />
+    <link rel="stylesheet" href="styles.css?v=20260425-5" />
   </head>
   <body>
     <main class="app-shell">
@@ -264,17 +264,14 @@
             </div>
 
             <div class="personnel-toolbar">
-              <label class="field field-search is-inline">
-                <span>חיפוש עובד</span>
-                <input id="workerSearch" name="workerSearch" type="text" placeholder="שם, תעודה מזהה או קבלן משנה" />
-              </label>
-              <button class="primary-button add-worker-button" id="openWorkerModal" type="button">+ הוסף עובד</button>
+              <button class="primary-button add-worker-button" id="workerPickerTrigger" type="button">בחירת עובדים</button>
+              <button class="ghost-button add-worker-button" id="openWorkerModal" type="button">+ הוסף עובד חדש</button>
             </div>
             <div class="worker-suggestions" id="workerSuggestions" aria-live="polite"></div>
             <div class="selected-worker-panel" id="selectedWorkerPanel" aria-live="polite"></div>
 
             <div class="personnel-summary">
-              <div class="summary-box"><span>מספר עובדים באתר היום</span><strong>12</strong></div>
+              <div class="summary-box"><span>מספר עובדים באתר היום</span><strong id="workerCountValue">0</strong></div>
             </div>
 
             <div class="section-note-list">
@@ -283,69 +280,7 @@
               <div class="note-line"><span>הערת כשירות</span><strong>2 עובדים חדשים, אחד ממתין לאישור גובה</strong></div>
             </div>
 
-            <div class="worker-list">
-              <article class="worker-card">
-                <button class="worker-head" type="button" data-worker-toggle>
-                  <div>
-                    <h3>יוסי כהן</h3>
-                    <p>ברזלן • אור פלדה</p>
-                  </div>
-                  <div class="worker-head-meta">
-                    <span>07:00 - 16:30</span>
-                    <span class="status-chip ok">תקין</span>
-                  </div>
-                </button>
-                <div class="worker-body">
-                  <div class="worker-grid">
-                    <div class="worker-line"><span>שעת התחלה</span><strong>07:00</strong></div>
-                    <div class="worker-line"><span>שעת סיום</span><strong>16:30</strong></div>
-                    <div class="worker-line"><span>סה"כ שעות</span><strong>9.5</strong></div>
-                    <div class="worker-line"><span>אזור עבודה</span><strong>קומה 4</strong></div>
-                  </div>
-                  <div class="worker-tags">
-                    <span>תדריך: בוצע</span>
-                    <span>סוג עבודה: ברזל</span>
-                    <span>הערה: צוות מלא</span>
-                  </div>
-                  <div class="doc-row">
-                    <span class="status-chip ok">ת"ז</span>
-                    <span class="status-chip ok">עבודה בגובה</span>
-                    <span class="status-chip ok">רישיון נהיגה</span>
-                  </div>
-                </div>
-              </article>
-
-              <article class="worker-card">
-                <button class="worker-head" type="button" data-worker-toggle>
-                  <div>
-                    <h3>אמיר לוי</h3>
-                    <p>טפסן • אלפא ביצוע</p>
-                  </div>
-                  <div class="worker-head-meta">
-                    <span>07:30 - 15:00</span>
-                    <span class="status-chip warning">חסר מסמך</span>
-                  </div>
-                </button>
-                <div class="worker-body">
-                  <div class="worker-grid">
-                    <div class="worker-line"><span>שעת התחלה</span><strong>07:30</strong></div>
-                    <div class="worker-line"><span>שעת סיום</span><strong>15:00</strong></div>
-                    <div class="worker-line"><span>סה"כ שעות</span><strong>7.5</strong></div>
-                    <div class="worker-line"><span>אזור עבודה</span><strong>חזית מערבית</strong></div>
-                  </div>
-                  <div class="worker-tags">
-                    <span>תדריך: בוצע</span>
-                    <span>סוג עבודה: טפסנות</span>
-                    <span>הערה: ממתין לאישור גובה</span>
-                  </div>
-                  <div class="doc-row">
-                    <span class="status-chip ok">ת"ז</span>
-                    <span class="status-chip warning">אישור גובה חסר</span>
-                    <span class="status-chip muted">רישיון לא נדרש</span>
-                  </div>
-                </div>
-              </article>
-            </div>
+            <div class="worker-list" id="workerList"></div>
           </section>
         </section>
 
@@ -687,6 +622,6 @@
     <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-storage-compat.js"></script>
-    <script src="app.js?v=20260425-4"></script>
+    <script src="app.js?v=20260425-5"></script>
   </body>
 </html>
