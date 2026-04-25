@@ -1815,7 +1815,6 @@ function renderWorkerPicker() {
       <div class="worker-picker-head">
         <div>
           <strong>\u05D1\u05D7\u05E8 \u05E2\u05D5\u05D1\u05D3\u05D9\u05DD \u05DE\u05D4\u05DE\u05D0\u05D2\u05E8</strong>
-          <span>\u05DE\u05E1\u05DE\u05E0\u05D9\u05DD \u05DE\u05D9 \u05D4\u05D2\u05D9\u05E2 \u05D4\u05D9\u05D5\u05DD \u05D5\u05DE\u05D5\u05E1\u05D9\u05E4\u05D9\u05DD \u05D1\u05D1\u05EA \u05D0\u05D7\u05EA.</span>
         </div>
         <span class="status-chip muted">${displayedSelectedCount} \u05DE\u05E1\u05D5\u05DE\u05E0\u05D9\u05DD</span>
       </div>
