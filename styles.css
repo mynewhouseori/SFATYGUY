@@ -221,6 +221,10 @@ input {
   display: none;
 }
 
+.mobile-screen-index {
+  display: none;
+}
+
 .dashboard-topline {
   display: flex;
   justify-content: flex-start;
@@ -1116,6 +1120,23 @@ input {
   .toolbar-actions {
     align-items: center;
     justify-content: flex-start;
+  }
+
+  #personnelView .toolbar-actions {
+    display: grid;
+    justify-items: start;
+    gap: 6px;
+  }
+
+  #personnelView .mobile-screen-index {
+    display: block;
+    font-size: 0.74rem;
+    line-height: 1.2;
+    color: var(--text-soft);
+  }
+
+  #personnelView .personnel-toolbar-title .screen-eyebrow {
+    display: none;
   }
 
   .toolbar-brand {
