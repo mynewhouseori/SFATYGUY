@@ -951,6 +951,12 @@ input {
   overflow: hidden;
 }
 
+.worker-list {
+  max-height: min(42dvh, 380px);
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
 .worker-card.is-highlighted {
   border-color: rgba(97, 208, 125, 0.7);
   box-shadow: 0 0 0 1px rgba(97, 208, 125, 0.28), 0 18px 32px rgba(0, 0, 0, 0.18);
@@ -1411,5 +1417,9 @@ input {
   .personnel-summary {
     gap: 12px;
     margin-top: 4px;
+  }
+
+  .worker-list {
+    max-height: min(36dvh, 320px);
   }
 }

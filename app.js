@@ -976,7 +976,19 @@ navButtons.forEach((button) => {
 
 function attachWorkerToggle(button) {
   button.addEventListener("click", () => {
-    button.closest(".worker-card")?.classList.toggle("is-open");
+    const currentCard = button.closest(".worker-card");
+
+    if (!currentCard) {
+      return;
+    }
+
+    const willOpen = !currentCard.classList.contains("is-open");
+    workerList?.querySelectorAll(".worker-card.is-open").forEach((card) => {
+      if (card !== currentCard) {
+        card.classList.remove("is-open");
+      }
+    });
+    currentCard.classList.toggle("is-open", willOpen);
   });
 }
 
@@ -1715,7 +1727,7 @@ function createWorkerCard(worker, options = {}) {
   const statusLabel = options.statusLabel || "\u05E0\u05D5\u05E1\u05E3 \u05D4\u05D9\u05D5\u05DD";
   const card = document.createElement("article");
 
-  card.className = "worker-card is-open";
+  card.className = "worker-card";
   card.dataset.workerId = worker.id;
   card.innerHTML = `
     <button class="worker-head" type="button" data-worker-toggle>
@@ -1846,6 +1858,11 @@ function focusWorkerCard(workerId) {
     return false;
   }
 
+  workerList?.querySelectorAll(".worker-card.is-open").forEach((card) => {
+    if (card !== existingCard) {
+      card.classList.remove("is-open");
+    }
+  });
   existingCard.classList.add("is-open", "is-highlighted");
   existingCard.scrollIntoView({ behavior: "smooth", block: "center" });
   window.setTimeout(() => existingCard.classList.remove("is-highlighted"), 1800);
