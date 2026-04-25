@@ -1118,21 +1118,22 @@ input {
   }
 
   .toolbar-actions {
-    align-items: center;
-    justify-content: flex-start;
-  }
-
-  #personnelView .toolbar-actions {
     display: grid;
+    align-items: center;
     justify-items: start;
+    justify-content: flex-start;
     gap: 6px;
   }
 
-  #personnelView .mobile-screen-index {
+  .toolbar .mobile-screen-index {
     display: block;
     font-size: 0.74rem;
     line-height: 1.2;
     color: var(--text-soft);
+  }
+
+  .toolbar-copy .screen-eyebrow {
+    display: none;
   }
 
   #personnelView .personnel-toolbar-title .screen-eyebrow {
