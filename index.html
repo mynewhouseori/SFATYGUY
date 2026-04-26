@@ -3,7 +3,33 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
     <title>SAFTYGUY</title>
+    <script>
+      (function () {
+        var appVersion = "20260426-10";
+        var versionKey = "sfatyguy-app-version";
+        var currentUrl = new URL(window.location.href);
+        var currentVersion = currentUrl.searchParams.get("v");
+        var storedVersion = "";
+
+        try {
+          storedVersion = window.localStorage.getItem(versionKey) || "";
+        } catch (_) {}
+
+        if (storedVersion && storedVersion !== appVersion && currentVersion !== appVersion) {
+          currentUrl.searchParams.set("v", appVersion);
+          window.location.replace(currentUrl.toString());
+          return;
+        }
+
+        try {
+          window.localStorage.setItem(versionKey, appVersion);
+        } catch (_) {}
+      })();
+    </script>
     <link rel="icon" type="image/jpeg" href="logo01.jpeg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -11,7 +37,7 @@
       href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=20260426-9" />
+    <link rel="stylesheet" href="styles.css?v=20260426-10" />
   </head>
   <body>
     <main class="app-shell">
@@ -707,6 +733,6 @@
     <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-storage-compat.js"></script>
-    <script src="app.js?v=20260426-9"></script>
+    <script src="app.js?v=20260426-10"></script>
   </body>
 </html>
