@@ -1189,10 +1189,47 @@ input {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
 .worker-doc-title-row strong {
   margin: 0;
+}
+
+.worker-doc-inline-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.worker-doc-inline-button {
+  min-height: 30px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+}
+
+.worker-doc-inline-button.is-view {
+  border-color: rgba(132, 210, 255, 0.34);
+  color: #d7f2ff;
+  background: rgba(80, 146, 198, 0.16);
+}
+
+.worker-doc-inline-button.is-share {
+  border-color: rgba(239, 176, 82, 0.34);
+  color: #ffe8ba;
+  background: rgba(216, 148, 51, 0.14);
+}
+
+.worker-doc-inline-button.is-delete {
+  border-color: rgba(255, 110, 110, 0.34);
+  color: #ffb9b9;
+  background: rgba(180, 57, 57, 0.14);
+}
+
+.worker-doc-inline-button:disabled {
+  opacity: 0.42;
 }
 
 .worker-doc-copy [data-worker-modal-doc-meta]:empty {

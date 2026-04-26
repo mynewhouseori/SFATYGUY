@@ -1007,6 +1007,7 @@ function setWorkerModalDocumentState(row, file = null, source = "") {
   const docType = normalizeWorkerDocumentName(row?.dataset.workerModalDoc || "");
   const status = row?.querySelector("[data-worker-modal-doc-status]");
   const meta = row?.querySelector("[data-worker-modal-doc-meta]");
+  const actionButtons = row?.querySelectorAll("[data-worker-modal-doc-action]");
 
   if (!row || !docType || !status || !meta) {
     return;
@@ -1017,6 +1018,9 @@ function setWorkerModalDocumentState(row, file = null, source = "") {
     status.className = "status-chip danger worker-doc-missing";
     status.textContent = "\u05DC\u05D0 \u05E6\u05D5\u05E8\u05E3";
     meta.textContent = "";
+    actionButtons?.forEach((button) => {
+      button.disabled = true;
+    });
     return;
   }
 
@@ -1024,6 +1028,70 @@ function setWorkerModalDocumentState(row, file = null, source = "") {
   status.className = "status-chip ok";
   status.textContent = source === "camera" ? "\u05E6\u05D5\u05DC\u05DD" : "\u05E0\u05D1\u05D7\u05E8";
   meta.textContent = file.name || docType;
+  actionButtons?.forEach((button) => {
+    button.disabled = false;
+  });
+}
+
+function getWorkerModalDocumentEntry(row) {
+  const docType = normalizeWorkerDocumentName(row?.dataset.workerModalDoc || "");
+
+  if (!docType) {
+    return null;
+  }
+
+  const entry = pendingWorkerModalDocuments.get(docType);
+  return entry?.file ? { docType, file: entry.file, source: entry.source || "" } : null;
+}
+
+function openWorkerModalLocalDocument(row) {
+  const entry = getWorkerModalDocumentEntry(row);
+
+  if (!entry?.file) {
+    return;
+  }
+
+  const fileUrl = URL.createObjectURL(entry.file);
+  const viewerHtml = buildWorkerDocumentViewerHtml(fileUrl, entry.file.type || "", entry.file.name || entry.docType);
+  const viewerPageUrl = createViewerPageUrl(viewerHtml);
+  window.open(viewerPageUrl, "_blank", "noopener,noreferrer");
+}
+
+async function shareWorkerModalLocalDocument(row, button) {
+  const entry = getWorkerModalDocumentEntry(row);
+
+  if (!entry?.file || !button) {
+    return;
+  }
+
+  const originalLabel = button.textContent || "\u05E9\u05EA\u05E3";
+
+  try {
+    if (navigator.canShare?.({ files: [entry.file] })) {
+      await navigator.share({
+        files: [entry.file],
+        title: entry.file.name || entry.docType,
+        text: entry.docType,
+      });
+      return;
+    }
+
+    if (navigator.share) {
+      await navigator.share({
+        title: entry.file.name || entry.docType,
+        text: entry.docType,
+      });
+      return;
+    }
+
+    button.textContent = "\u05E9\u05D9\u05EA\u05D5\u05E3 \u05DC\u05D0 \u05D6\u05DE\u05D9\u05DF";
+  } catch {
+    button.textContent = "\u05E9\u05D9\u05EA\u05D5\u05E3 \u05E0\u05DB\u05E9\u05DC";
+  }
+
+  window.setTimeout(() => {
+    button.textContent = originalLabel;
+  }, 1800);
 }
 
 function resetWorkerModalDocuments() {
@@ -1076,9 +1144,15 @@ workerModalDocumentRows.forEach((row) => {
   const galleryTrigger = row.querySelector('[data-worker-modal-doc-trigger="gallery"]');
   const cameraInput = row.querySelector('[data-worker-modal-doc-input="camera"]');
   const galleryInput = row.querySelector('[data-worker-modal-doc-input="gallery"]');
+  const viewButton = row.querySelector('[data-worker-modal-doc-action="view"]');
+  const shareButton = row.querySelector('[data-worker-modal-doc-action="share"]');
+  const deleteButton = row.querySelector('[data-worker-modal-doc-action="delete"]');
 
   attachPressFeedback(cameraTrigger);
   attachPressFeedback(galleryTrigger);
+  attachPressFeedback(viewButton);
+  attachPressFeedback(shareButton);
+  attachPressFeedback(deleteButton);
   setWorkerModalDocumentState(row);
 
   cameraTrigger?.addEventListener("click", () => {
@@ -1095,6 +1169,21 @@ workerModalDocumentRows.forEach((row) => {
 
   galleryInput?.addEventListener("change", () => {
     setWorkerModalDocumentState(row, galleryInput.files?.[0] || null, "gallery");
+  });
+
+  viewButton?.addEventListener("click", () => {
+    openWorkerModalLocalDocument(row);
+  });
+
+  shareButton?.addEventListener("click", async () => {
+    await shareWorkerModalLocalDocument(row, shareButton);
+  });
+
+  deleteButton?.addEventListener("click", () => {
+    row.querySelectorAll("[data-worker-modal-doc-input]").forEach((input) => {
+      input.value = "";
+    });
+    setWorkerModalDocumentState(row);
   });
 });
 
