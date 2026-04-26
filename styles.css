@@ -1185,11 +1185,10 @@ input {
 }
 
 .worker-doc-title-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  flex-wrap: wrap;
+  gap: 8px 10px;
 }
 
 .worker-doc-title-row strong {
@@ -1197,10 +1196,12 @@ input {
 }
 
 .worker-doc-inline-actions {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, auto));
   align-items: center;
   gap: 6px;
-  flex-wrap: wrap;
+  grid-column: 1 / -1;
+  justify-content: start;
 }
 
 .worker-doc-inline-button {
@@ -1458,10 +1459,18 @@ input {
     grid-template-columns: 1fr;
   }
 
+  .worker-doc-title-row {
+    grid-template-columns: 1fr auto;
+  }
+
   .worker-doc-actions {
     width: 100%;
     min-width: 0;
     justify-items: stretch;
+  }
+
+  .worker-doc-inline-actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .toolbar .mobile-screen-index {
