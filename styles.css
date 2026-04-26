@@ -545,6 +545,10 @@ input {
 }
 
 .summary-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   padding: 14px;
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.08);
@@ -552,8 +556,8 @@ input {
 }
 
 .summary-box span {
-  display: block;
-  margin-bottom: 6px;
+  display: inline-block;
+  margin-bottom: 0;
   color: var(--text-soft);
   font-size: 0.9rem;
 }
