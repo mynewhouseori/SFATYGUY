@@ -1,9 +1,11 @@
 ﻿const STORAGE_KEY = "safety-field-general-defaults";
 const DAILY_WORKERS_KEY = "safety-field-daily-workers";
 const CLOUD_DOCUMENTS_KEY = "safety-field-cloud-documents";
+const WORKER_REGISTRY_KEY = "safety-field-worker-registry";
 const DAILY_WORKFORCE_COLLECTION = "safety_daily_workforce";
 const CLOUD_DOCUMENTS_COLLECTION = "safety_worker_documents";
 const CLOUD_DOCUMENT_CHUNKS_COLLECTION = "safety_worker_document_chunks";
+const WORKER_REGISTRY_COLLECTION = "safety_worker_registry";
 const FIRESTORE_PAYLOAD_CHUNK_SIZE = 180000;
 const MAX_DOCUMENT_FILE_SIZE = 8 * 1024 * 1024;
 const ALLOWED_WORKER_DOCUMENTS = [
@@ -22,6 +24,7 @@ const FIREBASE_STORAGE_CONFIG = {
 let workerDocumentRefreshToken = 0;
 let dailyWorkforceLoadToken = 0;
 let dailyWorkersSaveTimeout = null;
+let workerRegistryLoadToken = 0;
 const workerDocumentUrlCache = new Map();
 const pendingWorkerModalDocuments = new Map();
 
@@ -34,6 +37,11 @@ const openWorkerModal = document.getElementById("openWorkerModal");
 const closeWorkerModal = document.getElementById("closeWorkerModal");
 const closeWorkerModalFooter = document.getElementById("closeWorkerModalFooter");
 const workerModalDocumentRows = Array.from(document.querySelectorAll("[data-worker-modal-doc]"));
+const newWorkerNameInput = document.getElementById("newWorkerName");
+const newWorkerIdInput = document.getElementById("newWorkerId");
+const newWorkerPhoneInput = document.getElementById("newWorkerPhone");
+const newWorkerContractorInput = document.getElementById("newWorkerContractor");
+const saveWorkerModalButton = document.getElementById("saveWorkerModalButton");
 const workerPickerTrigger = document.getElementById("workerPickerTrigger");
 const reportStatusSelect = document.getElementById("reportStatusSelect");
 const reportStatusTrigger = document.getElementById("reportStatusTrigger");
@@ -68,7 +76,7 @@ let activeClockTrigger = null;
 let selectedClockHour = "06";
 let selectedClockMinute = "35";
 
-const workerDatabase = [
+const seedWorkerDatabase = [
   { name: "\u05D9\u05D5\u05E1\u05D9 \u05DB\u05D4\u05DF", id: "123456789", role: "\u05D1\u05E8\u05D6\u05DC\u05DF", contractor: "\u05D0\u05D5\u05E8 \u05E4\u05DC\u05D3\u05D4", status: "\u05DB\u05D1\u05E8 \u05D1\u05D9\u05D5\u05DE\u05DF \u05D4\u05D9\u05D5\u05DD" },
   { name: "\u05D0\u05DE\u05D9\u05E8 \u05DC\u05D5\u05D9", id: "234567891", role: "\u05D8\u05E4\u05E1\u05DF", contractor: "\u05D0\u05DC\u05E4\u05D0 \u05D1\u05D9\u05E6\u05D5\u05E2", status: "\u05DB\u05D1\u05E8 \u05D1\u05D9\u05D5\u05DE\u05DF \u05D4\u05D9\u05D5\u05DD" },
   { name: "\u05DE\u05D5\u05D7\u05DE\u05D3 \u05E1\u05D0\u05DC\u05D7", id: "345678912", role: "\u05DE\u05E4\u05E2\u05D9\u05DC \u05E6\u05D9\u05D5\u05D3", contractor: "\u05E6\u05D9\u05D5\u05D3 \u05D3\u05E8\u05D5\u05DD", status: "\u05D1\u05DE\u05D0\u05D2\u05E8" },
@@ -85,6 +93,7 @@ const workerDatabase = [
   { name: "\u05E2\u05D5\u05DE\u05E8 \u05D3\u05E8\u05D0\u05D5\u05D5\u05E9\u05D4", id: "556677889", role: "\u05DE\u05E4\u05E2\u05D9\u05DC \u05DE\u05DC\u05D2\u05D6\u05D4", contractor: "\u05D4\u05E8\u05DE\u05D4 \u05D5\u05E9\u05D9\u05E0\u05D5\u05E2", status: "\u05D1\u05DE\u05D0\u05D2\u05E8" },
   { name: "\u05D0\u05D7\u05DE\u05D3 \u05E2\u05D1\u05D3 \u05D0\u05DC\u05DC\u05D4", id: "667788990", role: "\u05E2\u05D5\u05D1\u05D3 \u05DB\u05DC\u05DC\u05D9", contractor: "\u05D1\u05E0\u05D9\u05D9\u05D4 \u05D3\u05E8\u05D5\u05DD", status: "\u05D1\u05DE\u05D0\u05D2\u05E8" },
 ];
+const workerDatabase = [...seedWorkerDatabase];
 const DEFAULT_WORKDAY_START = "07:00";
 const DEFAULT_WORKDAY_END = "17:00";
 const selectedWorkerIds = new Set();
@@ -207,6 +216,143 @@ function loadDailyWorkersStore() {
 
 function saveDailyWorkersStore(store) {
   window.localStorage.setItem(DAILY_WORKERS_KEY, JSON.stringify(store));
+}
+
+function loadWorkerRegistryStore() {
+  try {
+    const stored = window.localStorage.getItem(WORKER_REGISTRY_KEY);
+    return stored ? JSON.parse(stored) : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveWorkerRegistryStore(store) {
+  window.localStorage.setItem(WORKER_REGISTRY_KEY, JSON.stringify(store));
+}
+
+function getWorkerRegistrySiteName() {
+  return fields.siteName?.value?.trim() || "";
+}
+
+function sanitizeWorkerRecord(record) {
+  const name = String(record?.name || "").trim();
+  const id = String(record?.id || "").trim();
+
+  if (!name || !id) {
+    return null;
+  }
+
+  return {
+    name,
+    id,
+    phone: String(record?.phone || "").trim(),
+    role: String(record?.role || "\u05E2\u05D5\u05D1\u05D3 \u05DB\u05DC\u05DC\u05D9").trim() || "\u05E2\u05D5\u05D1\u05D3 \u05DB\u05DC\u05DC\u05D9",
+    contractor:
+      String(record?.contractor || "").trim() ||
+      fields.contractorName?.value?.trim() ||
+      "\u05DC\u05DC\u05D0 \u05E7\u05D1\u05DC\u05DF",
+    status: "\u05D1\u05DE\u05D0\u05D2\u05E8",
+    defaultStartTime: String(record?.defaultStartTime || DEFAULT_WORKDAY_START).trim() || DEFAULT_WORKDAY_START,
+    defaultEndTime: String(record?.defaultEndTime || DEFAULT_WORKDAY_END).trim() || DEFAULT_WORKDAY_END,
+    siteName: String(record?.siteName || getWorkerRegistrySiteName()).trim(),
+    createdAt: String(record?.createdAt || new Date().toISOString()),
+  };
+}
+
+function mergeWorkerRecords(records = []) {
+  const byId = new Map();
+  [...seedWorkerDatabase, ...records]
+    .map(sanitizeWorkerRecord)
+    .filter(Boolean)
+    .forEach((worker) => {
+      const existing = byId.get(worker.id) || {};
+      byId.set(worker.id, { ...existing, ...worker });
+    });
+
+  workerDatabase.length = 0;
+  workerDatabase.push(...Array.from(byId.values()));
+}
+
+function getStoredWorkersForCurrentSite() {
+  const siteName = getWorkerRegistrySiteName();
+  const store = loadWorkerRegistryStore();
+  return Array.isArray(store[siteName]?.workers) ? store[siteName].workers : [];
+}
+
+function saveStoredWorkersForCurrentSite(workers) {
+  const siteName = getWorkerRegistrySiteName();
+
+  if (!siteName) {
+    return;
+  }
+
+  const store = loadWorkerRegistryStore();
+  store[siteName] = { workers };
+  saveWorkerRegistryStore(store);
+}
+
+function buildWorkerRegistryDocumentId(workerId, siteName = getWorkerRegistrySiteName()) {
+  return `${sanitizePathSegment(siteName || "site")}_${sanitizePathSegment(workerId || "worker")}`;
+}
+
+async function saveWorkerToCloud(worker) {
+  const firestore = getFirebaseFirestore();
+  const siteName = getWorkerRegistrySiteName();
+
+  if (!firestore || !siteName) {
+    return false;
+  }
+
+  const payload = sanitizeWorkerRecord({ ...worker, siteName });
+
+  if (!payload) {
+    return false;
+  }
+
+  await firestore.collection(WORKER_REGISTRY_COLLECTION).doc(buildWorkerRegistryDocumentId(payload.id, siteName)).set(payload);
+  return true;
+}
+
+async function loadWorkersFromCloud() {
+  const firestore = getFirebaseFirestore();
+  const siteName = getWorkerRegistrySiteName();
+
+  if (!firestore || !siteName) {
+    return null;
+  }
+
+  const snapshot = await firestore.collection(WORKER_REGISTRY_COLLECTION).where("siteName", "==", siteName).get();
+  return snapshot.docs.map((doc) => sanitizeWorkerRecord(doc.data())).filter(Boolean);
+}
+
+async function loadWorkerRegistryForCurrentSite() {
+  const siteName = getWorkerRegistrySiteName();
+  const loadToken = ++workerRegistryLoadToken;
+
+  if (!siteName) {
+    mergeWorkerRecords([]);
+    return;
+  }
+
+  let workers = getStoredWorkersForCurrentSite();
+
+  try {
+    const cloudWorkers = await loadWorkersFromCloud();
+    if (loadToken !== workerRegistryLoadToken) {
+      return;
+    }
+    if (Array.isArray(cloudWorkers)) {
+      workers = cloudWorkers;
+      saveStoredWorkersForCurrentSite(cloudWorkers);
+    }
+  } catch {
+    if (loadToken !== workerRegistryLoadToken) {
+      return;
+    }
+  }
+
+  mergeWorkerRecords(workers);
 }
 
 function getCurrentDateStorageKey() {
@@ -1070,12 +1216,118 @@ function resetWorkerModalDocuments() {
 function openWorkerModalPanel() {
   workerModal?.classList.add("is-open");
   document.body.style.overflow = "hidden";
+  resetWorkerModalForm();
   resetWorkerModalDocuments();
 }
 
 function closeWorkerModalPanel() {
   workerModal?.classList.remove("is-open");
   document.body.style.overflow = "";
+}
+
+function resetWorkerModalForm() {
+  if (newWorkerNameInput) {
+    newWorkerNameInput.value = "";
+  }
+  if (newWorkerIdInput) {
+    newWorkerIdInput.value = "";
+  }
+  if (newWorkerPhoneInput) {
+    newWorkerPhoneInput.value = "";
+  }
+  if (newWorkerContractorInput) {
+    newWorkerContractorInput.value = fields.contractorName?.value?.trim() || "";
+  }
+  workerModal?.querySelectorAll('[data-clock-trigger][data-time-value]').forEach((button, index) => {
+    const value = index === 0 ? DEFAULT_WORKDAY_START : DEFAULT_WORKDAY_END;
+    button.dataset.timeValue = value;
+    button.textContent = value;
+  });
+}
+
+function getWorkerModalPayload() {
+  const name = newWorkerNameInput?.value?.trim() || "";
+  const id = newWorkerIdInput?.value?.trim() || "";
+
+  if (!name || !id) {
+    return null;
+  }
+
+  const timeButtons = Array.from(workerModal?.querySelectorAll('[data-clock-trigger][data-time-value]') || []);
+  return sanitizeWorkerRecord({
+    name,
+    id,
+    phone: newWorkerPhoneInput?.value?.trim() || "",
+    contractor: newWorkerContractorInput?.value?.trim() || "",
+    role: "\u05E2\u05D5\u05D1\u05D3 \u05DB\u05DC\u05DC\u05D9",
+    defaultStartTime: timeButtons[0]?.dataset.timeValue || DEFAULT_WORKDAY_START,
+    defaultEndTime: timeButtons[1]?.dataset.timeValue || DEFAULT_WORKDAY_END,
+    siteName: getWorkerRegistrySiteName(),
+  });
+}
+
+async function uploadPendingWorkerModalDocuments(worker) {
+  const uploads = Array.from(pendingWorkerModalDocuments.entries());
+
+  for (const [documentType, entry] of uploads) {
+    if (!entry?.file) {
+      continue;
+    }
+
+    await uploadWorkerDocumentToCloud(worker, entry.file, documentType);
+  }
+}
+
+async function handleSaveWorkerModal() {
+  if (!getWorkerRegistrySiteName()) {
+    window.alert("\u05D9\u05E9 \u05DC\u05D1\u05D7\u05D5\u05E8 \u05E9\u05DD \u05D0\u05EA\u05E8 \u05DC\u05E4\u05E0\u05D9 \u05E9\u05DE\u05D9\u05E8\u05EA \u05E2\u05D5\u05D1\u05D3 \u05D7\u05D3\u05E9.");
+    return;
+  }
+
+  const worker = getWorkerModalPayload();
+
+  if (!worker) {
+    window.alert("\u05D9\u05E9 \u05DC\u05DE\u05DC\u05D0 \u05DC\u05E4\u05D7\u05D5\u05EA \u05E9\u05DD \u05DE\u05DC\u05D0 \u05D5-\u05EA\"\u05D6.");
+    return;
+  }
+
+  const existingWorker = workerDatabase.find((entry) => entry.id === worker.id);
+
+  if (existingWorker) {
+    window.alert("\u05DB\u05D1\u05E8 \u05E7\u05D9\u05D9\u05DD \u05E2\u05D5\u05D1\u05D3 \u05D1\u05DE\u05D0\u05D2\u05E8 \u05E2\u05DD \u05EA\"\u05D6 \u05D6\u05D4.");
+    return;
+  }
+
+  const originalLabel = saveWorkerModalButton?.textContent || "";
+
+  if (saveWorkerModalButton) {
+    saveWorkerModalButton.disabled = true;
+    saveWorkerModalButton.textContent = "\u05E9\u05D5\u05DE\u05E8...";
+  }
+
+  try {
+    const currentWorkers = getStoredWorkersForCurrentSite().filter((entry) => entry.id !== worker.id);
+    currentWorkers.push(worker);
+    saveStoredWorkersForCurrentSite(currentWorkers);
+    mergeWorkerRecords(currentWorkers);
+    await saveWorkerToCloud(worker);
+    try {
+      await uploadPendingWorkerModalDocuments(worker);
+    } catch {
+      // Keep the new worker in the registry even if a document upload fails.
+    }
+    renderWorkerPicker();
+    resetWorkerModalDocuments();
+    resetWorkerModalForm();
+    closeWorkerModalPanel();
+  } catch {
+    window.alert("\u05E9\u05DE\u05D9\u05E8\u05EA \u05D4\u05E2\u05D5\u05D1\u05D3 \u05E0\u05DB\u05E9\u05DC\u05D4. \u05E0\u05E1\u05D4 \u05E9\u05D5\u05D1.");
+  } finally {
+    if (saveWorkerModalButton) {
+      saveWorkerModalButton.disabled = false;
+      saveWorkerModalButton.textContent = originalLabel;
+    }
+  }
 }
 
 document.querySelectorAll("[data-worker-toggle]").forEach(attachWorkerToggle);
@@ -1095,6 +1347,9 @@ openWorkerModal?.addEventListener("click", openWorkerModalPanel);
 closeWorkerModal?.addEventListener("click", closeWorkerModalPanel);
 
 closeWorkerModalFooter?.addEventListener("click", closeWorkerModalPanel);
+saveWorkerModalButton?.addEventListener("click", () => {
+  handleSaveWorkerModal();
+});
 
 workerModal?.addEventListener("click", (event) => {
   if (event.target === workerModal) {
@@ -1542,6 +1797,12 @@ function renderWorkerSuggestions(query) {
 
 workerSearch?.addEventListener("input", (event) => {
   renderWorkerSuggestions(event.target.value);
+});
+
+fields.siteName?.addEventListener("change", () => {
+  loadWorkerRegistryForCurrentSite().then(() => {
+    renderWorkerPicker();
+  });
 });
 
 function renderSelectedWorker(worker) {
@@ -2273,10 +2534,12 @@ function initializeTodayWorkers() {
   loadDailyWorkersForCurrentDate();
 }
 
-workerPickerTrigger?.addEventListener("click", () => {
+workerPickerTrigger?.addEventListener("click", async () => {
+  await loadWorkerRegistryForCurrentSite();
   renderWorkerPicker();
   workerSuggestions?.classList.toggle("is-open");
 });
 
+loadWorkerRegistryForCurrentSite();
 initializeTodayWorkers();
 

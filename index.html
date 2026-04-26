@@ -11,7 +11,7 @@
       href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=20260426-6" />
+    <link rel="stylesheet" href="styles.css?v=20260426-7" />
   </head>
   <body>
     <main class="app-shell">
@@ -552,10 +552,10 @@
         </div>
 
         <div class="field-grid">
-          <label class="field is-inline"><span>שם מלא</span><input type="text" placeholder="שם העובד החדש" /></label>
-          <label class="field is-inline"><span>ת"ז</span><input type="text" placeholder="מספר מזהה של העובד" /></label>
-          <label class="field is-inline"><span>טלפון</span><input type="text" placeholder="050-0000000" /></label>
-          <label class="field is-inline"><span>חברה / קבלן משנה</span><input type="text" placeholder="החברה או קבלן המשנה" /></label>
+          <label class="field is-inline"><span>שם מלא</span><input id="newWorkerName" type="text" placeholder="שם העובד החדש" /></label>
+          <label class="field is-inline"><span>ת"ז</span><input id="newWorkerId" type="text" placeholder="מספר מזהה של העובד" /></label>
+          <label class="field is-inline"><span>טלפון</span><input id="newWorkerPhone" type="text" placeholder="050-0000000" /></label>
+          <label class="field is-inline"><span>חברה / קבלן משנה</span><input id="newWorkerContractor" type="text" placeholder="החברה או קבלן המשנה" /></label>
           <div class="two-col-grid">
             <label class="field is-inline">
               <span>שעת התחלה ברירת מחדל</span>
@@ -628,7 +628,7 @@
         </div>
 
         <div class="action-grid">
-          <button class="primary-button action-fill" type="button">שמור עובד במאגר</button>
+          <button class="primary-button action-fill" id="saveWorkerModalButton" type="button">שמור עובד במאגר</button>
           <button class="ghost-button" id="closeWorkerModalFooter" type="button">ביטול</button>
         </div>
       </section>
@@ -707,6 +707,6 @@
     <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-storage-compat.js"></script>
-    <script src="app.js?v=20260426-6"></script>
+    <script src="app.js?v=20260426-7"></script>
   </body>
 </html>
