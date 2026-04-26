@@ -1057,43 +1057,6 @@ function openWorkerModalLocalDocument(row) {
   window.open(viewerPageUrl, "_blank", "noopener,noreferrer");
 }
 
-async function shareWorkerModalLocalDocument(row, button) {
-  const entry = getWorkerModalDocumentEntry(row);
-
-  if (!entry?.file || !button) {
-    return;
-  }
-
-  const originalLabel = button.textContent || "\u05E9\u05EA\u05E3";
-
-  try {
-    if (navigator.canShare?.({ files: [entry.file] })) {
-      await navigator.share({
-        files: [entry.file],
-        title: entry.file.name || entry.docType,
-        text: entry.docType,
-      });
-      return;
-    }
-
-    if (navigator.share) {
-      await navigator.share({
-        title: entry.file.name || entry.docType,
-        text: entry.docType,
-      });
-      return;
-    }
-
-    button.textContent = "\u05E9\u05D9\u05EA\u05D5\u05E3 \u05DC\u05D0 \u05D6\u05DE\u05D9\u05DF";
-  } catch {
-    button.textContent = "\u05E9\u05D9\u05EA\u05D5\u05E3 \u05E0\u05DB\u05E9\u05DC";
-  }
-
-  window.setTimeout(() => {
-    button.textContent = originalLabel;
-  }, 1800);
-}
-
 function resetWorkerModalDocuments() {
   pendingWorkerModalDocuments.clear();
   workerModalDocumentRows.forEach((row) => {
@@ -1141,17 +1104,12 @@ workerModal?.addEventListener("click", (event) => {
 
 workerModalDocumentRows.forEach((row) => {
   const cameraTrigger = row.querySelector('[data-worker-modal-doc-trigger="camera"]');
-  const galleryTrigger = row.querySelector('[data-worker-modal-doc-trigger="gallery"]');
   const cameraInput = row.querySelector('[data-worker-modal-doc-input="camera"]');
-  const galleryInput = row.querySelector('[data-worker-modal-doc-input="gallery"]');
   const viewButton = row.querySelector('[data-worker-modal-doc-action="view"]');
-  const shareButton = row.querySelector('[data-worker-modal-doc-action="share"]');
   const deleteButton = row.querySelector('[data-worker-modal-doc-action="delete"]');
 
   attachPressFeedback(cameraTrigger);
-  attachPressFeedback(galleryTrigger);
   attachPressFeedback(viewButton);
-  attachPressFeedback(shareButton);
   attachPressFeedback(deleteButton);
   setWorkerModalDocumentState(row);
 
@@ -1159,24 +1117,12 @@ workerModalDocumentRows.forEach((row) => {
     cameraInput?.click();
   });
 
-  galleryTrigger?.addEventListener("click", () => {
-    galleryInput?.click();
-  });
-
   cameraInput?.addEventListener("change", () => {
     setWorkerModalDocumentState(row, cameraInput.files?.[0] || null, "camera");
   });
 
-  galleryInput?.addEventListener("change", () => {
-    setWorkerModalDocumentState(row, galleryInput.files?.[0] || null, "gallery");
-  });
-
   viewButton?.addEventListener("click", () => {
     openWorkerModalLocalDocument(row);
-  });
-
-  shareButton?.addEventListener("click", async () => {
-    await shareWorkerModalLocalDocument(row, shareButton);
   });
 
   deleteButton?.addEventListener("click", () => {

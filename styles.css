@@ -1195,55 +1195,18 @@ input {
   margin: 0;
 }
 
-.worker-doc-inline-actions {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, auto));
-  align-items: center;
-  gap: 6px;
-  grid-column: 1 / -1;
-  justify-content: start;
-}
-
-.worker-doc-inline-button {
-  min-height: 30px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 0.74rem;
-}
-
-.worker-doc-inline-button.is-view {
-  border-color: rgba(132, 210, 255, 0.34);
-  color: #d7f2ff;
-  background: rgba(80, 146, 198, 0.16);
-}
-
-.worker-doc-inline-button.is-share {
-  border-color: rgba(239, 176, 82, 0.34);
-  color: #ffe8ba;
-  background: rgba(216, 148, 51, 0.14);
-}
-
-.worker-doc-inline-button.is-delete {
-  border-color: rgba(255, 110, 110, 0.34);
-  color: #ffb9b9;
-  background: rgba(180, 57, 57, 0.14);
-}
-
-.worker-doc-inline-button:disabled {
-  opacity: 0.42;
-}
-
 .worker-doc-copy [data-worker-modal-doc-meta]:empty {
   display: none;
 }
 
 .worker-doc-actions {
-  min-width: 152px;
+  min-width: 0;
+  width: 100%;
 }
 
 .worker-doc-action-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
   width: 100%;
 }
@@ -1252,6 +1215,28 @@ input {
   padding: 7px 10px;
   border-radius: 999px;
   font-size: 0.82rem;
+}
+
+.doc-open-button.is-capture {
+  border-color: rgba(239, 176, 82, 0.34);
+  color: #ffe8ba;
+  background: rgba(216, 148, 51, 0.14);
+}
+
+.doc-open-button.is-view {
+  border-color: rgba(132, 210, 255, 0.34);
+  color: #d7f2ff;
+  background: rgba(80, 146, 198, 0.16);
+}
+
+.doc-open-button.is-delete {
+  border-color: rgba(255, 110, 110, 0.34);
+  color: #ffb9b9;
+  background: rgba(180, 57, 57, 0.14);
+}
+
+.doc-open-button:disabled {
+  opacity: 0.42;
 }
 
 .clock-options {
@@ -1459,18 +1444,10 @@ input {
     grid-template-columns: 1fr;
   }
 
-  .worker-doc-title-row {
-    grid-template-columns: 1fr auto;
-  }
-
   .worker-doc-actions {
     width: 100%;
     min-width: 0;
     justify-items: stretch;
-  }
-
-  .worker-doc-inline-actions {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .toolbar .mobile-screen-index {
