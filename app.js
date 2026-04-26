@@ -51,6 +51,9 @@ const workerSuggestions = document.getElementById("workerSuggestions");
 const selectedWorkerPanel = document.getElementById("selectedWorkerPanel");
 const workerList = document.querySelector(".worker-list");
 const workerCountValue = document.getElementById("workerCountValue");
+const workerRoleSummary = document.getElementById("workerRoleSummary");
+const workerContractorSummary = document.getElementById("workerContractorSummary");
+const workerReadinessSummary = document.getElementById("workerReadinessSummary");
 const workDateDisplay = document.getElementById("workDateDisplay");
 const clockModal = document.getElementById("clockModal");
 const clockValue = document.getElementById("clockValue");
@@ -2019,6 +2022,61 @@ function calculateHours(startTime, endTime) {
 function updateWorkerCount() {
   if (workerCountValue) {
     workerCountValue.textContent = String(workerList?.querySelectorAll(".worker-card").length ?? 0);
+  }
+  updateWorkerInsights();
+}
+
+function updateWorkerInsights() {
+  const cards = Array.from(workerList?.querySelectorAll(".worker-card[data-worker-id]") ?? []);
+
+  if (!cards.length) {
+    if (workerRoleSummary) {
+      workerRoleSummary.textContent = "\u05D0\u05D9\u05DF \u05E2\u05D5\u05D1\u05D3\u05D9\u05DD \u05E0\u05D1\u05D7\u05E8\u05D9\u05DD";
+    }
+    if (workerContractorSummary) {
+      workerContractorSummary.textContent = "\u05D0\u05D9\u05DF \u05E7\u05D1\u05DC\u05E0\u05D9 \u05DE\u05E9\u05E0\u05D4 \u05E4\u05E2\u05D9\u05DC\u05D9\u05DD";
+    }
+    if (workerReadinessSummary) {
+      workerReadinessSummary.textContent = "\u05DC\u05DC\u05D0 \u05D4\u05E2\u05E8\u05D5\u05EA \u05DB\u05E9\u05D9\u05E8\u05D5\u05EA";
+    }
+    return;
+  }
+
+  const roleCounts = new Map();
+  const contractorSet = new Set();
+  let pendingDocCount = 0;
+
+  cards.forEach((card) => {
+    const role = card.querySelector("[data-worker-role]")?.value?.trim() || "\u05D0\u05D7\u05E8\u05D9\u05DD";
+    const contractor = card.querySelector("[data-worker-contractor]")?.value?.trim() || "";
+    const docStatus = card.querySelector(".doc-row .status-chip:nth-child(2)")?.textContent?.trim() || "";
+
+    roleCounts.set(role, (roleCounts.get(role) || 0) + 1);
+    if (contractor) {
+      contractorSet.add(contractor);
+    }
+    if (docStatus && docStatus !== "\u05EA\u05E7\u05D9\u05DF" && docStatus !== "\u05D1\u05D0\u05EA\u05E8 \u05D4\u05D9\u05D5\u05DD" && docStatus !== "\u05E0\u05D5\u05E1\u05E3 \u05D4\u05D9\u05D5\u05DD") {
+      pendingDocCount += 1;
+    }
+  });
+
+  if (workerRoleSummary) {
+    workerRoleSummary.textContent = Array.from(roleCounts.entries())
+      .sort((left, right) => left[0].localeCompare(right[0], "he"))
+      .map(([role, count]) => `${role} ${count}`)
+      .join(", ");
+  }
+
+  if (workerContractorSummary) {
+    workerContractorSummary.textContent = contractorSet.size
+      ? Array.from(contractorSet).sort((left, right) => left.localeCompare(right, "he")).join(", ")
+      : "\u05D0\u05D9\u05DF \u05E7\u05D1\u05DC\u05E0\u05D9 \u05DE\u05E9\u05E0\u05D4 \u05E4\u05E2\u05D9\u05DC\u05D9\u05DD";
+  }
+
+  if (workerReadinessSummary) {
+    workerReadinessSummary.textContent = pendingDocCount
+      ? `${pendingDocCount} \u05E2\u05D5\u05D1\u05D3\u05D9\u05DD \u05D3\u05D5\u05E8\u05E9\u05D9\u05DD \u05D1\u05D3\u05D9\u05E7\u05EA \u05DE\u05E1\u05DE\u05DB\u05D9\u05DD`
+      : "\u05DC\u05DC\u05D0 \u05D4\u05E2\u05E8\u05D5\u05EA \u05DB\u05E9\u05D9\u05E8\u05D5\u05EA";
   }
 }
 
