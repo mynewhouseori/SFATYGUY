@@ -25,6 +25,8 @@ let workerDocumentRefreshToken = 0;
 let dailyWorkforceLoadToken = 0;
 let dailyWorkersSaveTimeout = null;
 let workerRegistryLoadToken = 0;
+let workerRegistrySaveTimeout = null;
+let pendingWorkerRegistrySync = null;
 const workerDocumentUrlCache = new Map();
 const pendingWorkerModalDocuments = new Map();
 
@@ -263,6 +265,7 @@ function sanitizeWorkerRecord(record) {
       String(record?.contractor || "").trim() ||
       fields.contractorName?.value?.trim() ||
       "\u05DC\u05DC\u05D0 \u05E7\u05D1\u05DC\u05DF",
+    note: String(record?.note || "").trim(),
     status: "\u05D1\u05DE\u05D0\u05D2\u05E8",
     defaultStartTime: String(record?.defaultStartTime || DEFAULT_WORKDAY_START).trim() || DEFAULT_WORKDAY_START,
     defaultEndTime: String(record?.defaultEndTime || DEFAULT_WORKDAY_END).trim() || DEFAULT_WORKDAY_END,
@@ -426,6 +429,74 @@ async function deleteWorkerFromRegistry(workerId) {
   }
 
   return true;
+}
+
+function scheduleWorkerRegistryCloudSync(worker) {
+  pendingWorkerRegistrySync = worker;
+
+  if (workerRegistrySaveTimeout) {
+    window.clearTimeout(workerRegistrySaveTimeout);
+  }
+
+  workerRegistrySaveTimeout = window.setTimeout(async () => {
+    const workerToSync = pendingWorkerRegistrySync;
+    pendingWorkerRegistrySync = null;
+
+    if (!workerToSync) {
+      return;
+    }
+
+    try {
+      await saveWorkerToCloud(workerToSync);
+    } catch {
+      // Keep the local worker registry state even if cloud sync is temporarily unavailable.
+    }
+  }, 300);
+}
+
+function updateWorkerRegistryDefaults(workerId, updates = {}) {
+  const normalizedWorkerId = String(workerId || "").trim();
+
+  if (!normalizedWorkerId || !getWorkerRegistrySiteName()) {
+    return null;
+  }
+
+  const existingWorker = workerDatabase.find((entry) => entry.id === normalizedWorkerId);
+
+  if (!existingWorker) {
+    return null;
+  }
+
+  const sanitizedUpdates = {
+    role: String(updates.role ?? existingWorker.role ?? "").trim() || "\u05E2\u05D5\u05D1\u05D3 \u05DB\u05DC\u05DC\u05D9",
+    contractor:
+      String(updates.contractor ?? existingWorker.contractor ?? "").trim() ||
+      fields.contractorName?.value?.trim() ||
+      "\u05DC\u05DC\u05D0 \u05E7\u05D1\u05DC\u05DF",
+    note: String(updates.note ?? existingWorker.note ?? "").trim(),
+    defaultStartTime: String(updates.defaultStartTime ?? existingWorker.defaultStartTime ?? DEFAULT_WORKDAY_START).trim() || DEFAULT_WORKDAY_START,
+    defaultEndTime: String(updates.defaultEndTime ?? existingWorker.defaultEndTime ?? DEFAULT_WORKDAY_END).trim() || DEFAULT_WORKDAY_END,
+  };
+
+  const currentWorkers = getStoredWorkersForCurrentSite().filter((entry) => entry.id !== normalizedWorkerId);
+  const nextWorker = sanitizeWorkerRecord({
+    ...existingWorker,
+    ...sanitizedUpdates,
+    siteName: getWorkerRegistrySiteName(),
+  });
+
+  if (!nextWorker) {
+    return null;
+  }
+
+  const removedWorkerIds = getRemovedWorkerIdsForCurrentSite();
+  removedWorkerIds.delete(normalizedWorkerId);
+  currentWorkers.push(nextWorker);
+  saveStoredWorkersForCurrentSite(currentWorkers);
+  saveRemovedWorkerIdsForCurrentSite(Array.from(removedWorkerIds));
+  mergeWorkerRecords(currentWorkers, removedWorkerIds);
+  scheduleWorkerRegistryCloudSync(nextWorker);
+  return nextWorker;
 }
 
 function getCurrentDateStorageKey() {
@@ -2352,7 +2423,7 @@ function createWorkerCard(worker, options = {}) {
   const startTime = options.startTime || DEFAULT_WORKDAY_START;
   const endTime = options.endTime || DEFAULT_WORKDAY_END;
   const area = options.area || "\u05DC\u05D1\u05D7\u05D9\u05E8\u05D4";
-  const note = options.note || "\u05DC\u05DC\u05D0 \u05D4\u05E2\u05E8\u05D4";
+  const note = options.note || worker.note || "\u05DC\u05DC\u05D0 \u05D4\u05E2\u05E8\u05D4";
   const role = options.role || worker.role;
   const contractor = options.contractor || worker.contractor;
   const briefing = options.briefing || "\u05DC\u05D1\u05D9\u05E6\u05D5\u05E2";
@@ -2430,7 +2501,7 @@ function getWorkerCardOptions(card, worker) {
       startTime: DEFAULT_WORKDAY_START,
       endTime: DEFAULT_WORKDAY_END,
       area: "\u05DC\u05D1\u05D7\u05D9\u05E8\u05D4",
-      note: "\u05DC\u05DC\u05D0 \u05D4\u05E2\u05E8\u05D4",
+      note: worker.note || "\u05DC\u05DC\u05D0 \u05D4\u05E2\u05E8\u05D4",
       role: worker.role,
       contractor: worker.contractor,
       briefing: "\u05DC\u05D1\u05D9\u05E6\u05D5\u05E2",
@@ -2540,6 +2611,8 @@ function attachWorkerCardControls(card) {
   const rangeText = card.querySelector("[data-worker-range]");
   const roleInput = card.querySelector("[data-worker-role]");
   const contractorInput = card.querySelector("[data-worker-contractor]");
+  const noteInput = card.querySelector("[data-worker-note]");
+  const workerId = card.dataset.workerId || "";
   const headDescription = toggleButton?.querySelector("p");
 
   attachWorkerToggle(toggleButton);
@@ -2567,6 +2640,27 @@ function attachWorkerCardControls(card) {
     .forEach((input) => {
       input.addEventListener("input", saveCurrentDailyWorkers);
       input.addEventListener("change", saveCurrentDailyWorkers);
+    });
+
+  const persistWorkerDefaults = () => {
+    if (!workerId) {
+      return;
+    }
+
+    updateWorkerRegistryDefaults(workerId, {
+      defaultStartTime: startInput?.value || DEFAULT_WORKDAY_START,
+      defaultEndTime: endInput?.value || DEFAULT_WORKDAY_END,
+      role: roleInput?.value || "",
+      contractor: contractorInput?.value || "",
+      note: noteInput?.value || "",
+    });
+  };
+
+  [startInput, endInput, roleInput, contractorInput, noteInput]
+    .filter(Boolean)
+    .forEach((input) => {
+      input.addEventListener("input", persistWorkerDefaults);
+      input.addEventListener("change", persistWorkerDefaults);
     });
   syncCardSummary();
 }
@@ -2625,10 +2719,10 @@ function renderSelectedWorkerPreview(worker) {
   selectedWorkerPanel.innerHTML = "";
 
   const previewCard = createWorkerCard(worker, {
-    startTime: DEFAULT_WORKDAY_START,
-    endTime: DEFAULT_WORKDAY_END,
+    startTime: worker.defaultStartTime || DEFAULT_WORKDAY_START,
+    endTime: worker.defaultEndTime || DEFAULT_WORKDAY_END,
     area: "\u05DC\u05D1\u05D7\u05D9\u05E8\u05D4",
-    note: "\u05E0\u05D9\u05EA\u05DF \u05DC\u05E2\u05D3\u05DB\u05DF \u05DC\u05E4\u05E0\u05D9 \u05D4\u05D5\u05E1\u05E4\u05D4",
+    note: worker.note || "\u05DC\u05DC\u05D0 \u05D4\u05E2\u05E8\u05D4",
     briefing: "\u05DC\u05D1\u05D9\u05E6\u05D5\u05E2",
     docStatus: "\u05E0\u05D1\u05D3\u05E7 \u05D1\u05DE\u05D0\u05D2\u05E8",
     statusLabel: "\u05EA\u05E6\u05D5\u05D2\u05D4 \u05DC\u05E4\u05E0\u05D9 \u05D4\u05D5\u05E1\u05E4\u05D4",
@@ -2718,10 +2812,10 @@ function renderWorkerPicker() {
         const worker = workerDatabase.find((entry) => entry.id === checkbox.value);
         if (worker) {
           addWorkerToToday(worker, {
-            startTime: DEFAULT_WORKDAY_START,
-            endTime: DEFAULT_WORKDAY_END,
+            startTime: worker.defaultStartTime || DEFAULT_WORKDAY_START,
+            endTime: worker.defaultEndTime || DEFAULT_WORKDAY_END,
             area: "\u05DC\u05D1\u05D7\u05D9\u05E8\u05D4",
-            note: "\u05D4\u05D5\u05E1\u05E3 \u05D1\u05E1\u05D9\u05DE\u05D5\u05DF \u05DE\u05D4\u05D0\u05EA\u05E8",
+            note: worker.note || "\u05DC\u05DC\u05D0 \u05D4\u05E2\u05E8\u05D4",
             briefing: "\u05DC\u05D1\u05D9\u05E6\u05D5\u05E2",
             docStatus: "\u05E0\u05D1\u05D3\u05E7 \u05D1\u05DE\u05D0\u05D2\u05E8",
             statusLabel: "\u05E0\u05D5\u05E1\u05E3 \u05D4\u05D9\u05D5\u05DD",
@@ -2793,7 +2887,7 @@ async function loadDailyWorkersForCurrentDate() {
         startTime: entry.startTime,
         endTime: entry.endTime,
         area: entry.area,
-        note: entry.note,
+        note: entry.note || worker.note || "\u05DC\u05DC\u05D0 \u05D4\u05E2\u05E8\u05D4",
         role: entry.role,
         contractor: entry.contractor,
         briefing: "\u05DC\u05D1\u05D9\u05E6\u05D5\u05E2",
