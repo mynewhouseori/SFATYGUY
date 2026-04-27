@@ -238,6 +238,12 @@ function getWorkerRegistrySiteName() {
   return fields.siteName?.value?.trim() || "";
 }
 
+function getWorkerRegistryEntryForCurrentSite() {
+  const siteName = getWorkerRegistrySiteName();
+  const store = loadWorkerRegistryStore();
+  return siteName ? store[siteName] || {} : {};
+}
+
 function sanitizeWorkerRecord(record) {
   const name = String(record?.name || "").trim();
   const id = String(record?.id || "").trim();
@@ -263,7 +269,7 @@ function sanitizeWorkerRecord(record) {
   };
 }
 
-function mergeWorkerRecords(records = []) {
+function mergeWorkerRecords(records = [], removedWorkerIds = getRemovedWorkerIdsForCurrentSite()) {
   const byId = new Map();
   [...seedWorkerDatabase, ...records]
     .map(sanitizeWorkerRecord)
@@ -274,13 +280,17 @@ function mergeWorkerRecords(records = []) {
     });
 
   workerDatabase.length = 0;
-  workerDatabase.push(...Array.from(byId.values()));
+  workerDatabase.push(...Array.from(byId.values()).filter((worker) => !removedWorkerIds.has(worker.id)));
 }
 
 function getStoredWorkersForCurrentSite() {
-  const siteName = getWorkerRegistrySiteName();
-  const store = loadWorkerRegistryStore();
-  return Array.isArray(store[siteName]?.workers) ? store[siteName].workers : [];
+  const entry = getWorkerRegistryEntryForCurrentSite();
+  return Array.isArray(entry.workers) ? entry.workers : [];
+}
+
+function getRemovedWorkerIdsForCurrentSite() {
+  const entry = getWorkerRegistryEntryForCurrentSite();
+  return new Set(Array.isArray(entry.removedWorkerIds) ? entry.removedWorkerIds : []);
 }
 
 function saveStoredWorkersForCurrentSite(workers) {
@@ -291,7 +301,25 @@ function saveStoredWorkersForCurrentSite(workers) {
   }
 
   const store = loadWorkerRegistryStore();
-  store[siteName] = { workers };
+  store[siteName] = {
+    workers,
+    removedWorkerIds: Array.from(getRemovedWorkerIdsForCurrentSite()),
+  };
+  saveWorkerRegistryStore(store);
+}
+
+function saveRemovedWorkerIdsForCurrentSite(removedWorkerIds) {
+  const siteName = getWorkerRegistrySiteName();
+
+  if (!siteName) {
+    return;
+  }
+
+  const store = loadWorkerRegistryStore();
+  store[siteName] = {
+    workers: getStoredWorkersForCurrentSite(),
+    removedWorkerIds: Array.from(new Set(removedWorkerIds)).sort((left, right) => left.localeCompare(right, "he")),
+  };
   saveWorkerRegistryStore(store);
 }
 
@@ -314,6 +342,18 @@ async function saveWorkerToCloud(worker) {
   }
 
   await firestore.collection(WORKER_REGISTRY_COLLECTION).doc(buildWorkerRegistryDocumentId(payload.id, siteName)).set(payload);
+  return true;
+}
+
+async function deleteWorkerFromCloud(workerId) {
+  const firestore = getFirebaseFirestore();
+  const siteName = getWorkerRegistrySiteName();
+
+  if (!firestore || !siteName || !workerId) {
+    return false;
+  }
+
+  await firestore.collection(WORKER_REGISTRY_COLLECTION).doc(buildWorkerRegistryDocumentId(workerId, siteName)).delete();
   return true;
 }
 
@@ -356,6 +396,34 @@ async function loadWorkerRegistryForCurrentSite() {
   }
 
   mergeWorkerRecords(workers);
+}
+
+async function deleteWorkerFromRegistry(workerId) {
+  const normalizedWorkerId = String(workerId || "").trim();
+
+  if (!normalizedWorkerId || !getWorkerRegistrySiteName()) {
+    return false;
+  }
+
+  const remainingWorkers = getStoredWorkersForCurrentSite().filter((entry) => entry.id !== normalizedWorkerId);
+  const removedWorkerIds = getRemovedWorkerIdsForCurrentSite();
+  removedWorkerIds.add(normalizedWorkerId);
+
+  saveStoredWorkersForCurrentSite(remainingWorkers);
+  saveRemovedWorkerIdsForCurrentSite(Array.from(removedWorkerIds));
+  mergeWorkerRecords(remainingWorkers, removedWorkerIds);
+  selectedWorkerIds.delete(normalizedWorkerId);
+  removeWorkerFromToday(normalizedWorkerId);
+  clearSelectedWorkerPanel();
+  renderWorkerPicker();
+
+  try {
+    await deleteWorkerFromCloud(normalizedWorkerId);
+  } catch {
+    window.alert("העובד נמחק מהמכשיר, אבל הסנכרון לענן נכשל זמנית.");
+  }
+
+  return true;
 }
 
 function getCurrentDateStorageKey() {
@@ -1310,9 +1378,12 @@ async function handleSaveWorkerModal() {
 
   try {
     const currentWorkers = getStoredWorkersForCurrentSite().filter((entry) => entry.id !== worker.id);
+    const removedWorkerIds = getRemovedWorkerIdsForCurrentSite();
+    removedWorkerIds.delete(worker.id);
     currentWorkers.push(worker);
     saveStoredWorkersForCurrentSite(currentWorkers);
-    mergeWorkerRecords(currentWorkers);
+    saveRemovedWorkerIdsForCurrentSite(Array.from(removedWorkerIds));
+    mergeWorkerRecords(currentWorkers, removedWorkerIds);
     await saveWorkerToCloud(worker);
     try {
       await uploadPendingWorkerModalDocuments(worker);
@@ -2282,6 +2353,7 @@ function renderSelectedWorkerEditor(worker, sourceCard) {
   actions.className = "selected-worker-actions";
   actions.innerHTML = `
     <button class="ghost-button action-button" type="button" data-close-selected-worker>\u05E1\u05D2\u05D5\u05E8</button>
+    <button class="ghost-button action-button danger-action-button" type="button" data-delete-worker-registry>\u05DE\u05D7\u05E7 \u05DE\u05D4\u05DE\u05D0\u05D2\u05E8</button>
   `;
   editorCard.querySelector(".worker-body")?.append(actions);
   selectedWorkerPanel.append(editorCard);
@@ -2300,8 +2372,21 @@ function renderSelectedWorkerEditor(worker, sourceCard) {
   });
 
   const closeButton = selectedWorkerPanel.querySelector("[data-close-selected-worker]");
+  const deleteButton = selectedWorkerPanel.querySelector("[data-delete-worker-registry]");
   attachPressFeedback(closeButton);
+  attachPressFeedback(deleteButton);
   closeButton?.addEventListener("click", clearSelectedWorkerPanel);
+  deleteButton?.addEventListener("click", async () => {
+    const confirmed = window.confirm(`למחוק את ${worker.name} ממאגר העובדים של האתר הזה?`);
+
+    if (!confirmed) {
+      return;
+    }
+
+    deleteButton.disabled = true;
+    deleteButton.textContent = "מוחק...";
+    await deleteWorkerFromRegistry(worker.id);
+  });
   return true;
 }
 

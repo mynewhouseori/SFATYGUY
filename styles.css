@@ -879,6 +879,24 @@ input {
   text-align: center;
 }
 
+.selected-worker-actions .danger-action-button {
+  color: #ffd7cf;
+  border-color: rgba(255, 127, 95, 0.42);
+  background: rgba(120, 36, 24, 0.24);
+}
+
+.selected-worker-actions .danger-action-button:hover {
+  background: rgba(148, 42, 28, 0.34);
+  border-color: rgba(255, 127, 95, 0.58);
+}
+
+.selected-worker-actions .danger-action-button:active,
+.selected-worker-actions .danger-action-button.is-pressed {
+  background: rgba(180, 52, 34, 0.38);
+  border-color: rgba(255, 144, 113, 0.72);
+  box-shadow: 0 10px 24px rgba(92, 24, 14, 0.2);
+}
+
 .selected-worker-actions .scan-doc-button:active,
 .selected-worker-actions .scan-doc-button.is-pressed {
   background: linear-gradient(135deg, rgba(209, 138, 58, 0.34), rgba(140, 84, 32, 0.28));
