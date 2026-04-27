@@ -1596,6 +1596,15 @@ function openClockPicker(trigger) {
   document.body.style.overflow = "hidden";
 }
 
+function bindClockTrigger(trigger) {
+  if (!trigger || trigger.dataset.clockBound === "true") {
+    return;
+  }
+
+  trigger.dataset.clockBound = "true";
+  trigger.addEventListener("click", () => openClockPicker(trigger));
+}
+
 function closeClockPicker() {
   clockModal?.classList.remove("is-open");
   document.body.style.overflow = "";
@@ -1615,9 +1624,7 @@ if (clockMinutes) {
     .join("");
 }
 
-clockTriggers.forEach((trigger) => {
-  trigger.addEventListener("click", () => openClockPicker(trigger));
-});
+clockTriggers.forEach(bindClockTrigger);
 
 clockHours?.querySelectorAll("[data-hour]").forEach((button) => {
   button.addEventListener("click", () => {
@@ -1638,6 +1645,8 @@ clockSave?.addEventListener("click", () => {
     const value = `${selectedClockHour}:${selectedClockMinute}`;
     activeClockTrigger.dataset.timeValue = value;
     activeClockTrigger.textContent = value;
+    activeClockTrigger.dispatchEvent(new Event("input", { bubbles: true }));
+    activeClockTrigger.dispatchEvent(new Event("change", { bubbles: true }));
   }
 
   closeClockPicker();
@@ -2448,11 +2457,11 @@ function createWorkerCard(worker, options = {}) {
       <div class="worker-grid worker-edit-grid">
         <label class="worker-edit-field">
           <span>\u05E9\u05E2\u05EA \u05D4\u05EA\u05D7\u05DC\u05D4</span>
-          <input type="time" value="${startTime}" data-worker-start />
+          <button class="time-display-button worker-time-button" type="button" data-clock-trigger data-time-value="${startTime}" data-worker-start>${startTime}</button>
         </label>
         <label class="worker-edit-field">
           <span>\u05E9\u05E2\u05EA \u05E1\u05D9\u05D5\u05DD</span>
-          <input type="time" value="${endTime}" data-worker-end />
+          <button class="time-display-button worker-time-button" type="button" data-clock-trigger data-time-value="${endTime}" data-worker-end>${endTime}</button>
         </label>
         <label class="worker-edit-field">
           <span>\u05E1\u05D4\"\u05DB \u05E9\u05E2\u05D5\u05EA</span>
@@ -2511,8 +2520,14 @@ function getWorkerCardOptions(card, worker) {
   }
 
   return {
-    startTime: card.querySelector("[data-worker-start]")?.value || DEFAULT_WORKDAY_START,
-    endTime: card.querySelector("[data-worker-end]")?.value || DEFAULT_WORKDAY_END,
+    startTime:
+      card.querySelector("[data-worker-start]")?.dataset.timeValue ||
+      card.querySelector("[data-worker-start]")?.value ||
+      DEFAULT_WORKDAY_START,
+    endTime:
+      card.querySelector("[data-worker-end]")?.dataset.timeValue ||
+      card.querySelector("[data-worker-end]")?.value ||
+      DEFAULT_WORKDAY_END,
     area: card.querySelector("[data-worker-area]")?.value || "\u05DC\u05D1\u05D7\u05D9\u05E8\u05D4",
     note: card.querySelector("[data-worker-note]")?.value || "\u05DC\u05DC\u05D0 \u05D4\u05E2\u05E8\u05D4",
     role: card.querySelector("[data-worker-role]")?.value || worker.role,
@@ -2525,6 +2540,36 @@ function getWorkerCardOptions(card, worker) {
   };
 }
 
+function getWorkerFieldValue(field) {
+  if (!field) {
+    return "";
+  }
+
+  if ("value" in field && typeof field.value === "string") {
+    return field.value;
+  }
+
+  return field.dataset.timeValue || field.textContent || "";
+}
+
+function setWorkerFieldValue(field, value) {
+  if (!field) {
+    return;
+  }
+
+  if ("value" in field && typeof field.value === "string") {
+    field.value = value;
+  }
+
+  if (field.dataset) {
+    field.dataset.timeValue = value;
+  }
+
+  if (field.matches?.("[data-clock-trigger]")) {
+    field.textContent = value;
+  }
+}
+
 function mirrorWorkerFieldValue(sourceCard, targetCard, selector) {
   const sourceField = sourceCard?.querySelector(selector);
   const targetField = targetCard?.querySelector(selector);
@@ -2533,7 +2578,7 @@ function mirrorWorkerFieldValue(sourceCard, targetCard, selector) {
     return;
   }
 
-  targetField.value = sourceField.value;
+  setWorkerFieldValue(targetField, getWorkerFieldValue(sourceField));
   targetField.dispatchEvent(new Event("input", { bubbles: true }));
   targetField.dispatchEvent(new Event("change", { bubbles: true }));
 }
@@ -2616,10 +2661,12 @@ function attachWorkerCardControls(card) {
   const headDescription = toggleButton?.querySelector("p");
 
   attachWorkerToggle(toggleButton);
+  bindClockTrigger(startInput);
+  bindClockTrigger(endInput);
 
   function syncCardSummary() {
-    const startTime = startInput?.value || DEFAULT_WORKDAY_START;
-    const endTime = endInput?.value || DEFAULT_WORKDAY_END;
+    const startTime = getWorkerFieldValue(startInput) || DEFAULT_WORKDAY_START;
+    const endTime = getWorkerFieldValue(endInput) || DEFAULT_WORKDAY_END;
     if (rangeText) {
       rangeText.textContent = formatWorkRange(startTime, endTime);
     }
@@ -2648,8 +2695,8 @@ function attachWorkerCardControls(card) {
     }
 
     updateWorkerRegistryDefaults(workerId, {
-      defaultStartTime: startInput?.value || DEFAULT_WORKDAY_START,
-      defaultEndTime: endInput?.value || DEFAULT_WORKDAY_END,
+      defaultStartTime: getWorkerFieldValue(startInput) || DEFAULT_WORKDAY_START,
+      defaultEndTime: getWorkerFieldValue(endInput) || DEFAULT_WORKDAY_END,
       role: roleInput?.value || "",
       contractor: contractorInput?.value || "",
       note: noteInput?.value || "",

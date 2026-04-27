@@ -732,7 +732,8 @@ input {
   font-size: 0.9rem;
 }
 
-.worker-edit-field input {
+.worker-edit-field input,
+.worker-edit-field .worker-time-button {
   width: 100%;
   min-height: 44px;
   border: 1px solid rgba(255, 255, 255, 0.14);
@@ -744,6 +745,12 @@ input {
 
 .worker-edit-field input[readonly] {
   color: var(--text-soft);
+}
+
+.worker-edit-field .worker-time-button {
+  margin-top: 0;
+  justify-content: center;
+  font-weight: 700;
 }
 
 .worker-edit-field-wide {
