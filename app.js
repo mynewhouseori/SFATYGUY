@@ -2490,9 +2490,8 @@ function createWorkerCard(worker, options = {}) {
         <span>\u05DE\u05E7\u05D5\u05E8: \u05DE\u05D0\u05D2\u05E8 \u05E2\u05D5\u05D1\u05D3\u05D9\u05DD</span>
       </div>
       <div class="doc-row">
-        <span class="status-chip ok">\u05EA.\u05D6.</span>
+        <span class="status-chip muted">\u05EA.\u05D6. ${worker.id}</span>
         <span class="status-chip ${getStatusClass(docStatus)}" data-worker-doc-status>${docStatus}</span>
-        <span class="status-chip muted">${worker.id}</span>
       </div>
       <div class="worker-card-actions">
         <button class="ghost-button worker-docs-button" type="button" data-open-worker-docs>\u05DE\u05E1\u05DE\u05DB\u05D9\u05DD</button>
