@@ -1059,6 +1059,16 @@ input {
   padding-top: 6px;
 }
 
+.worker-card-actions {
+  padding-top: 12px;
+}
+
+.worker-docs-button {
+  width: 100%;
+  min-height: 48px;
+  font-weight: 700;
+}
+
 .status-chip {
   display: inline-flex;
   align-items: center;

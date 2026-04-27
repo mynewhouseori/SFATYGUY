@@ -1683,6 +1683,103 @@ function openWorkerDocs(worker, selectedDocId = "") {
   document.body.style.overflow = "hidden";
 }
 
+function getWorkerDocumentStatusSummary(worker) {
+  const savedCount = getSavedWorkerDocuments(worker).length;
+  const missingCount = Math.max(ALLOWED_WORKER_DOCUMENTS.length - savedCount, 0);
+
+  if (!missingCount) {
+    return "\u05EA\u05E7\u05D9\u05DF";
+  }
+
+  return `\u05D7\u05E1\u05E8\u05D9\u05DD ${missingCount} \u05DE\u05E1\u05DE\u05DB\u05D9\u05DD`;
+}
+
+function updateWorkerDocumentStatusDisplay(card, worker) {
+  if (!card || !worker) {
+    return;
+  }
+
+  const summary = getWorkerDocumentStatusSummary(worker);
+  const summaryText = card.querySelector("[data-worker-doc-summary]");
+  const statusChip = card.querySelector("[data-worker-doc-status]");
+
+  if (summaryText) {
+    summaryText.textContent = `\u05E1\u05D8\u05D8\u05D5\u05E1 \u05DE\u05E1\u05DE\u05DB\u05D9\u05DD: ${summary}`;
+  }
+
+  if (statusChip) {
+    statusChip.textContent = summary;
+    statusChip.className = `status-chip ${getStatusClass(summary)}`;
+  }
+}
+
+function attachWorkerDocumentControls(card, worker, linkedCards = []) {
+  if (!card || !worker) {
+    return;
+  }
+
+  const docsButton = card.querySelector("[data-open-worker-docs]");
+  const docFile = card.querySelector("[data-worker-doc-file]");
+  const cardsToRefresh = [card, ...linkedCards].filter(Boolean);
+
+  const refreshDocumentState = async (selectedDocId = "") => {
+    await syncWorkerDocumentsFromCloud(worker);
+    cardsToRefresh.forEach((entry) => updateWorkerDocumentStatusDisplay(entry, worker));
+
+    if (workerDocsModal?.classList.contains("is-open")) {
+      openWorkerDocs(worker, selectedDocId);
+    }
+  };
+
+  updateWorkerDocumentStatusDisplay(card, worker);
+  attachPressFeedback(docsButton);
+
+  docsButton?.addEventListener("click", async () => {
+    await refreshDocumentState();
+    openWorkerDocs(worker);
+  });
+
+  docFile?.addEventListener("change", async () => {
+    const file = docFile.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    const originalLabel = docsButton?.textContent || "\u05DE\u05E1\u05DE\u05DB\u05D9\u05DD";
+    const pendingDocType = selectedWorkerPanel?.dataset.pendingDocType?.trim();
+    const firstMissingDocument = getWorkerDocuments(worker).find((doc) => !doc.url)?.name;
+    const documentType = pendingDocType || firstMissingDocument || ALLOWED_WORKER_DOCUMENTS[0];
+
+    if (docsButton) {
+      docsButton.textContent = "\u05DE\u05E2\u05DC\u05D4 \u05DE\u05E1\u05DE\u05DA...";
+      docsButton.disabled = true;
+    }
+
+    try {
+      const result = await uploadWorkerDocumentToCloud(worker, file, documentType);
+
+      if (!result.ok) {
+        throw new Error(result.message || "\u05E9\u05DE\u05D9\u05E8\u05EA \u05D4\u05DE\u05E1\u05DE\u05DA \u05E0\u05DB\u05E9\u05DC\u05D4.");
+      }
+
+      if (selectedWorkerPanel) {
+        selectedWorkerPanel.dataset.pendingDocType = "";
+      }
+
+      await refreshDocumentState(result.record?.id || "");
+    } catch (error) {
+      window.alert(error?.message || "\u05E9\u05DE\u05D9\u05E8\u05EA \u05D4\u05DE\u05E1\u05DE\u05DA \u05E0\u05DB\u05E9\u05DC\u05D4.");
+    } finally {
+      docFile.value = "";
+      if (docsButton) {
+        docsButton.textContent = originalLabel;
+        docsButton.disabled = false;
+      }
+    }
+  });
+}
+
 function refreshWorkerDocumentSelect(worker, select, selectedValue = "") {
   if (!select) {
     return;
@@ -2269,14 +2366,18 @@ function createWorkerCard(worker, options = {}) {
       </div>
       <div class="worker-tags">
         <span>\u05EA\u05D3\u05E8\u05D9\u05DA: ${briefing}</span>
-        <span>\u05E1\u05D8\u05D8\u05D5\u05E1 \u05DE\u05E1\u05DE\u05DB\u05D9\u05DD: ${docStatus}</span>
+        <span data-worker-doc-summary>\u05E1\u05D8\u05D8\u05D5\u05E1 \u05DE\u05E1\u05DE\u05DB\u05D9\u05DD: ${docStatus}</span>
         <span>\u05DE\u05E7\u05D5\u05E8: \u05DE\u05D0\u05D2\u05E8 \u05E2\u05D5\u05D1\u05D3\u05D9\u05DD</span>
       </div>
       <div class="doc-row">
         <span class="status-chip ok">\u05EA.\u05D6.</span>
-        <span class="status-chip ${getStatusClass(docStatus)}">${docStatus}</span>
+        <span class="status-chip ${getStatusClass(docStatus)}" data-worker-doc-status>${docStatus}</span>
         <span class="status-chip muted">${worker.id}</span>
       </div>
+      <div class="worker-card-actions">
+        <button class="ghost-button worker-docs-button" type="button" data-open-worker-docs>\u05DE\u05E1\u05DE\u05DB\u05D9\u05DD</button>
+      </div>
+      <input class="sr-only" type="file" accept="image/*,.pdf" capture="environment" data-worker-doc-file />
     </div>
   `;
 
@@ -2348,6 +2449,7 @@ function renderSelectedWorkerEditor(worker, sourceCard) {
   const editorCard = createWorkerCard(worker, getWorkerCardOptions(sourceCard, worker));
   editorCard.classList.add("selected-worker-card", "is-open");
   attachWorkerCardControls(editorCard);
+  attachWorkerDocumentControls(editorCard, worker, [sourceCard]);
 
   const actions = document.createElement("div");
   actions.className = "selected-worker-actions";
@@ -2494,6 +2596,7 @@ function renderSelectedWorkerPreview(worker) {
 
   previewCard.classList.add("selected-worker-card");
   attachWorkerCardControls(previewCard);
+  attachWorkerDocumentControls(previewCard, worker);
 
   const actions = document.createElement("div");
   actions.className = "selected-worker-actions";
