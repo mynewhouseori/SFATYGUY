@@ -113,6 +113,8 @@ const reportWeekdayField = document.getElementById("reportWeekday");
 
 const views = Array.from(document.querySelectorAll(".screen-view"));
 const navButtons = Array.from(document.querySelectorAll("[data-nav-target]"));
+const DEFAULT_VIEW_ID = "loginView";
+let activeViewId = DEFAULT_VIEW_ID;
 
 function animateButton(button) {
   button.classList.add("is-pressed");
@@ -1144,14 +1146,46 @@ function updateReportDateDisplays() {
   }
 }
 
-function navigateTo(viewId) {
-  views.forEach((view) => {
-    view.classList.toggle("is-active", view.id === viewId);
-  });
-  screenPanel?.classList.toggle("is-login-active", viewId === "loginView");
+function isKnownView(viewId) {
+  return views.some((view) => view.id === viewId);
 }
 
-navigateTo("loginView");
+function navigateTo(viewId, options = {}) {
+  const targetViewId = isKnownView(viewId) ? viewId : DEFAULT_VIEW_ID;
+  const shouldReplace = Boolean(options.replace);
+  const shouldSkipHistory = Boolean(options.skipHistory);
+
+  views.forEach((view) => {
+    view.classList.toggle("is-active", view.id === targetViewId);
+  });
+  screenPanel?.classList.toggle("is-login-active", targetViewId === DEFAULT_VIEW_ID);
+  activeViewId = targetViewId;
+
+  if (!shouldSkipHistory && window.history?.replaceState) {
+    const state = { viewId: targetViewId };
+
+    if (shouldReplace) {
+      window.history.replaceState(state, "", window.location.href);
+    } else {
+      window.history.pushState(state, "", window.location.href);
+    }
+  }
+}
+
+navigateTo(DEFAULT_VIEW_ID, { replace: true });
+
+window.addEventListener("popstate", (event) => {
+  const targetViewId = event.state?.viewId;
+
+  if (targetViewId && targetViewId !== activeViewId) {
+    navigateTo(targetViewId, { skipHistory: true });
+    return;
+  }
+
+  if (!targetViewId && activeViewId !== DEFAULT_VIEW_ID) {
+    navigateTo(DEFAULT_VIEW_ID, { replace: true });
+  }
+});
 
 function resetErrorState() {
   formNote.classList.remove("is-error");
