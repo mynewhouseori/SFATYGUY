@@ -1189,8 +1189,7 @@ window.addEventListener("popstate", (event) => {
 
 function resetErrorState() {
   formNote.classList.remove("is-error");
-  formNote.textContent =
-    "׳”׳₪׳¨׳˜׳™׳ ׳™׳™׳©׳׳¨׳• ׳›׳‘׳¨׳™׳¨׳× ׳׳—׳“׳ ׳׳׳›׳©׳™׳¨ ׳”׳–׳”. ׳׳× ׳”׳×׳׳¨׳™׳ ׳×׳‘׳—׳¨ ׳׳—׳“׳© ׳‘׳›׳ ׳₪׳¢׳.";
+  formNote.textContent = "";
 }
 
 enterButton.addEventListener("click", () => {
@@ -1211,7 +1210,7 @@ detailsForm.addEventListener("submit", (event) => {
 
   animateButton(continueButton);
   saveDefaults();
-  formNote.textContent = "׳”׳₪׳¨׳˜׳™׳ ׳ ׳©׳׳¨׳•. ׳׳₪׳©׳¨ ׳׳”׳׳©׳™׳ ׳׳׳™׳׳•׳™ ׳”׳™׳•׳׳.";
+  formNote.textContent = "";
 
   window.setTimeout(() => navigateTo("dashboardView"), 180);
 });
