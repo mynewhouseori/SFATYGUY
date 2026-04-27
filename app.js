@@ -1488,6 +1488,13 @@ workerModalDocumentRows.forEach((row) => {
   });
 
   deleteButton?.addEventListener("click", () => {
+    const docLabel = row.dataset.workerModalDoc || "המסמך";
+    const confirmed = window.confirm(`למחוק את ${docLabel}?`);
+
+    if (!confirmed) {
+      return;
+    }
+
     row.querySelectorAll("[data-worker-modal-doc-input]").forEach((input) => {
       input.value = "";
     });
